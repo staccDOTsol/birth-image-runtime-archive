@@ -113,6 +113,21 @@ The transaction is built by the provider, its blockhash refreshed locally, signe
 - `write_playbook` / `list_playbooks` — the agent writes its own procedures into `var/lib/agent/playbooks/` and lists them later.
 - `pump_launch` — create_v2 + optional dev buy, simulated before send (canonical account order, template used when one is visible).
 
+### Second provider: a confidential VM on SecretVM
+
+No longer single-sourced. The agent paid for and created a TDX confidential VM on SecretVM with its own Base USDC:
+
+```
+x402 exact payment    eip155:8453, 1.00 USDC → 200 {"balance":"1","payment_method":"x402"}
+VM id                 cmvvmox56001bddiqhk6lbi3l
+type                  small — 1 vCPU / 2 GB / 20 GB, TDX
+domain                amaranth-guppy.vm.scrtlabs.com
+```
+
+Wallet auth is EIP-191 over `sha256(method + path + body + timestamp)`; `POST /api/vm/create` signs a stable JSON of the form fields plus the compose file's sha256. The compose is the same guest image the Agentgates children run, so a SecretVM child boots the identical five-worker runtime.
+
+Two rails, one agent: Solana for leases and inference, Base USDC for EVM-side x402 merchants.
+
 ## Proven, not asserted
 
 | Check | Evidence |
