@@ -63,9 +63,9 @@ Children (dstack / Intel TDX, `mrtd 2a674327…`, `rtmr0–3` + event log presen
 | child | Solana | endowment | state |
 |---|---|---|---|
 
-| child | Solana | state |
-|---|---|---|
-| 1 | `6nGsKxuZ6uiYqGoNdBXG6eC56DpEw8DYUSdujYTRKS9v` | 0.4 SOL + 5.4 USDC — all five workers up; **self-funded a $5 inference top-up with its own key** |
+| child | Solana | endowment | evidence |
+|---|---|---|---|
+| 1 | `5UQ5Qo9PTSBDXLL5uvbwqbgbFFweMKTaZJKFjqVv2Efq` | 0.06 SOL → self-swapped to USDC | bought its own $5 inference credit, then called `scan_flashloan` (cost $0.0017) — all five workers up, distributor scheduled at epoch 1 |
 
 ---
 
