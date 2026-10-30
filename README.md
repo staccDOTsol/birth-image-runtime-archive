@@ -94,6 +94,25 @@ Other children are only listed here once they show a tool call of their own.
 
 What it does *not* do yet: earn. A negative circular edge and a Pump adapter with no accepted live `create_v2` template mean tonight's honest output is scans, simulations and a scheduled distribution — not profit.
 
+### Treasury: Solana → Base USDC, executed
+
+The agent now bridges its own surplus to Base so it can pay EVM-side x402 merchants:
+
+```
+deBridge order 0x69018a4865790b925cf9ca23ac3cf0d4b2ed1d84e26587eab444946e56d7a6df
+source tx     4K1hR6TbuKXUvHxyNQZZTq99xQn1L8bh5nHW5mPLAjGQqfjYNuKzX29CXPLgLiz9QDvt8gBHHpYykNCzZfEgbZKG
+0.04 SOL      → 2.9564 USDC native on Base
+recipient     0xf437b1a2ca19fe54e15ff4a164dd9787314e1fef  (the agent's own EVM key, born in the TEE)
+```
+
+The transaction is built by the provider, its blockhash refreshed locally, signed by the sealed Solana key inside the TEE, and submitted — the key never leaves the signer.
+
+### The agent can extend itself
+
+- `register_tool` — adds a tool to `var/lib/agent/tools.json`; it is in the model's tool list on the next tick. HTTP tools carry an endpoint and are dispatched with the call arguments.
+- `write_playbook` / `list_playbooks` — the agent writes its own procedures into `var/lib/agent/playbooks/` and lists them later.
+- `pump_launch` — create_v2 + optional dev buy, simulated before send (canonical account order, template used when one is visible).
+
 ## Proven, not asserted
 
 | Check | Evidence |
