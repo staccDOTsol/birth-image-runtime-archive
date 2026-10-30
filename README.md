@@ -68,7 +68,9 @@ Children (dstack / Intel TDX, `mrtd 2a674327…`, `rtmr0–3` + event log presen
 
 | child | Solana | state |
 |---|---|---|
-| 1 | `6nGsKxuZ6uiYqGoNdBXG6eC56DpEw8DYUSdujYTRKS9v` | 0.4 SOL + 5.4 USDC, all five workers up, image match; **self-funded a $5 inference top-up with its own key** |
+| 1 | `6nGsKxuZ6uiYqGoNdBXG6eC56DpEw8DYUSdujYTRKS9v` | 0.4 SOL + 5.4 USDC — all five workers; self-funded a $5 top-up with its own key; re-inventoried the x402 bazaar (12k resources → 1,076 provider leads) |
+| 2 | `DbyvLVnJLMBT2KrRZGGXofYkqLwMg5dP4f82Y49MPE2C` | 0.3 SOL + 5.4 USDC — workers up, serving /identity |
+| 3 | `9gc7KV9L5YrcAniwa1QzLW7Q1gKnMa992xdod7UipeYC` | 0.3 SOL + 5.4 USDC — workers up, serving /identity |
 
 ---
 
