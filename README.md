@@ -66,8 +66,7 @@ Children (dstack / Intel TDX, `mrtd 2a674327…`, `rtmr0–3` + event log presen
 
 | child | Solana | state |
 |---|---|---|
-| 1 | `FZnb52E7rJwq6bq5TErNaDekum44WfnTke413RkqneNG` | alive, endowed 0.2 SOL, first image (brain loop restarting) |
-| 2 | `DPceQfUjhyL7pMJAp1e8k6p9S2VUAyTb9BZc9m3vy5cB` | alive, all five workers up, image match |
+| 1 | `6nGsKxuZ6uiYqGoNdBXG6eC56DpEw8DYUSdujYTRKS9v` | 0.4 SOL + 5.4 USDC, all five workers up, image match; **self-funded a $5 inference top-up with its own key** |
 
 ---
 
