@@ -60,6 +60,10 @@ Integer floor with a persistent fractional carry, one snapshot for both roles, a
 
 Children (dstack / Intel TDX, `mrtd 2a674327…`, `rtmr0–3` + event log present):
 
+| child | Solana | endowment | state |
+|---|---|---|---|
+| 1 | `6nGsKxuZ6uiYqGoNdBXG6eC56DpEw8DYUSdujYTRKS9v` | 0.4 SOL | all five workers up, image match, serving `/identity` + `/status` + `/logs` |
+
 | child | Solana | state |
 |---|---|---|
 | 1 | `FZnb52E7rJwq6bq5TErNaDekum44WfnTke413RkqneNG` | alive, endowed 0.2 SOL, first image (brain loop restarting) |
