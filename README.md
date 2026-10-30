@@ -67,6 +67,21 @@ Children (dstack / Intel TDX, `mrtd 2a674327…`, `rtmr0–3` + event log presen
 |---|---|---|---|
 | 1 | `5UQ5Qo9PTSBDXLL5uvbwqbgbFFweMKTaZJKFjqVv2Efq` | 0.06 SOL → self-swapped to USDC | bought its own $5 inference credit, then called `scan_flashloan` (cost $0.0017) — all five workers up, distributor scheduled at epoch 1 |
 
+### Recent decisions from the working child
+
+`5UQ5Qo9PTSBDXLL5uvbwqbgbFFweMKTaZJKFjqVv2Efq` — pulled straight from its `/status`, every model call paid from its own $5 credit:
+
+| time (UTC) | tool it chose | cost |
+|---|---|---|
+| 23:36:19 | `scan_flashloan` | $0.001681 |
+| 23:38:16 | `scan_flashloan` | $0.003138 |
+| 23:40:02 | `execute_flashloan` | $0.000951 |
+| 23:42:04 | `execute_flashloan` | $0.000737 |
+
+It scanned the circular USDC routes, found no edge above the floor, and moved on to building and simulating a flash-loan message anyway — the credit balance ticks down each call (5.00 → 4.99). Endowment topped up to 0.139 SOL so it keeps paying for its own inference.
+
+Other children are only listed here once they show a tool call of their own.
+
 ---
 
 ## What a child actually does
