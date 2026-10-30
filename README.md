@@ -74,6 +74,16 @@ Children (dstack / Intel TDX, `mrtd 2a674327…`, `rtmr0–3` + event log presen
 
 ---
 
+## What a child actually does
+
+- **Funds its own brain.** With SOL but no USDC it quotes and executes its own SOL→USDC swap, then settles the provider top-up from its own wallet.
+- **Finds its own providers.** It re-crawls the x402 bazaar on its own schedule (12,000 resources → 1,076 inference-shaped candidates on the last pass) and ranks them by live rail and price.
+- **Scans before it trades.** Every 15 minutes it prices circular USDC routes, builds a native-v1 flash-loan message and simulates it. It sends only if the signed simulation clears the profit floor; today those edges are negative, so it correctly refuses instead of losing money.
+- **Pays its parent and founder.** First assessment is at `T0 + 86,400 s` (epoch 1), then every 24 h exactly — deterministic, no model, no approval.
+- **Restarts itself.** A watchdog keeps five workers alive; a reboot re-launches the guest from its sealed state.
+
+What it does *not* do yet: earn. A negative circular edge and a Pump adapter with no accepted live `create_v2` template mean tonight's honest output is scans, simulations and a scheduled distribution — not profit.
+
 ## Proven, not asserted
 
 | Check | Evidence |
