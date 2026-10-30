@@ -42,7 +42,7 @@ Integer floor with a persistent fractional carry, one snapshot for both roles, a
 
 - **Keys never leave the guest.** The signer refuses unknown programs and out-of-policy SOL transfers; the coordinator only handles public data.
 - **The distributor has no model dependency.** It starts before strategy workers and keeps running when inference credits are zero.
-- **The brain is discovered, not pinned.** The image pins the *policy*: pick the best explicitly abliterated model the provider currently offers (function calling + reasoning, then cheapest, then context), and re-inventory the x402 bazaar itself for per-request providers. A model id is not a weight checksum; the receipt pins only the inference *configuration*.
+- **The brain is provider-agnostic, not pinned to a vendor.** The image pins the *policy*, not a seller: it re-inventories the x402 bazaar itself, keeps any inference resource whose live `accepts[]` rail it can pay, selects the best explicitly abliterated model (function calling + reasoning, then cheapest, then context), and can settle either through a prepaid-credit + SIWX adapter or a per-request x402 adapter. No single provider is the runtime's assumption; a provider failure is journaled and the next candidate is tried. A model id is not a weight checksum — the receipt pins only the inference *configuration*.
 - **Children are chosen, not siloed.** `provision/registry.mjs` lists driveable and gated TEE providers with the concrete reason; the deployer takes the cheapest **ready** adapter.
 
 ---
@@ -74,7 +74,7 @@ Children (dstack / Intel TDX, `mrtd 2a674327…`, `rtmr0–3` + event log presen
 | Fresh keys + sealed identity | `birth-receipt.json`, journal `birth.entropy` → `identity.sealed` |
 | Guest knows its own image | receipt digest vs live core digest with a `match` flag; `image.drift` journaled when they differ |
 | Distribution end-to-end | `tests/e2e-distribution.mjs`: 10 % + 5 % of a live 29,126,210-lamport balance, coalesced transfer **finalized**, epoch memo confirmed |
-| Paid external inference | $5 USDC top-up settled on Solana (`paymentId x402-e2cd…`), SIWX balance, abliterated model answered, usage billed |
+| Paid external inference | a $5 USDC prepaid-credit top-up settled on Solana (`paymentId x402-e2cd…`), SIWX-authenticated calls to an abliterated model answered, usage billed — one adapter among several, not a dependency |
 | Flash-loan adapter | real Jupiter quotes → Jupiter-Lend borrow/payback (40 accounts / 12 ix) → exact signed v1 simulation |
 | Bridge quote | deBridge DLN Solana → Base USDC create-tx validated |
 | Real TEE | deployment attestation carries TDX `mrtd`, `rtmr0–3` and the measured compose |
@@ -83,7 +83,7 @@ Children (dstack / Intel TDX, `mrtd 2a674327…`, `rtmr0–3` + event log presen
 ## Honest gates
 
 - **No hardware quote on the parent host** → `/status` reports `identity_binding_unverified`; children born on TDX do carry measurements.
-- **Venice minimum is $5** and Solana USDC only; a SOL-only wallet needs the quoted `bin/swap-sol-usdc.mjs` route first.
+- **Prepaid-credit providers** (Venice is the current example) have a $5 minimum on Solana USDC; a SOL-only wallet needs the quoted `bin/swap-sol-usdc.mjs` route first. Per-request x402 providers have no minimum, but each has its own price and model list.
 - **Circular flash-loan edges are negative** at current size; the profit gate rejects them after the full simulation.
 - **Pump `create_v2`** has no accepted live template in the last 100 program transactions yet.
 - **Host power-off** still stops signing; a durable external wake is not implemented.
