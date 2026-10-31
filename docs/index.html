@@ -37,6 +37,7 @@
 <footer>cached cards render instantly, then refresh in place · direct fetch with 5s timeout, CORS proxy only on failure · <span id="ts">–</span></footer>
 <script>
 const ROOTS = (window.ROOTS || []);
+const GEN_OF = new Map(); // endpoint -> generation, from the published tree
 const ROOTS_URL = 'roots.json';
 const PROXIES = [
   (u) => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
@@ -125,7 +126,8 @@ function card(node) {
   const head = el('div', 'row');
   const left = el('div');
   left.append(el('span', 'dot ' + (node.fresh ? 'up' : (node.data ? 'pend' : 'down'))), el('span', 'mono', (node.data?.birth_id || node.id || node.endpoint.replace(/^https:\/\//, '')).slice(0, 14)));
-  head.append(left, el('span', 'k gen-chip', `GEN ${(node.depth || 0) + 1}`), el('span', 'k', node.fresh ? 'live' : (node.data ? 'cached' : 'no answer')));
+  const gen = GEN_OF.get(node.endpoint) || (node.depth || 0) + 1;
+  head.append(left, el('span', 'k gen-chip', `GEN ${gen}`), el('span', 'k', node.fresh ? 'live' : (node.data ? 'cached' : 'no answer')));
   c.append(head);
   const d = node.data || {};
   const comps = d.components || {};
@@ -213,7 +215,8 @@ async function refresh() {
 
   // gen2 nodes: children published by a root in roots.json, shown as their own cards
   try {
-    const doc = await (await fetch('roots.json', { cache: 'no-store' })).json();
+    const doc = await (await fetch('roots.json?ts=' + Date.now(), { cache: 'no-store' })).json();
+    for (const r of (doc.roots || [])) for (const c of (r.children || [])) if (c.endpoint) GEN_OF.set(c.endpoint, 2);
     for (const r of (doc.roots || [])) {
       for (const c of (r.children || [])) {
         const ep = c.endpoint || null;
