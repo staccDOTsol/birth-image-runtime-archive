@@ -196,6 +196,23 @@ Not one seller with a fallback — every TEE route the inventory surfaced, with 
 
 Where it stands: two independent providers are paid and provisioned from the agent's own wallets; both are queue-bound, not code-bound. The guest image, compose and funding path are provider-agnostic — the same tgz boots on dstack and on SecretVM.
 
+## Status right now
+
+Working, on chain, by the agent's own keys:
+
+- pump launch + creator-fee sweep + vault payout (two sweeps, one payout, `0.0888 SOL` moved to the wallet)
+- Solana → Base bridge (deBridge, `2.9564 USDC` delivered) and a Base x402 payment (`$1` to SecretVM)
+- lease payment on both rails (Solana USDC, and Base USDC via EIP-3009)
+- runtime: sealed journal, deterministic 10 %/5 % distributor, five supervised workers, agent-editable tool registry, self-written playbooks, `provision_any` across three providers
+
+Blocking a live child right now, all three now fixed in the compose:
+
+1. `wget` never completed a mirror inside the TEE — downloads moved to node's `fetch`
+2. `${PORT:-8787}` was interpolated by our template instead of the container — now escaped, port exported before boot
+3. `set -e` turned a failed fetch into a dead endpoint — a failed bootstrap now serves its own boot log
+
+The remaining constraint is provider capacity: Agentgates returns `503 at_capacity` in bursts, and SecretVM leaves VMs in `creating`. Leases are retried on a loop; the first machine that answers gets endowed with 0.09 SOL and its earn worker launches a pump token on its own.
+
 ## The compose bug that kept every child silent
 
 Three days of "running but the endpoint never answers" traced to the bootstrap script, not the guest:
