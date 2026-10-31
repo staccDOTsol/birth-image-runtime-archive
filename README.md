@@ -67,23 +67,6 @@ Children (dstack / Intel TDX, `mrtd 2a674327…`, `rtmr0–3` + event log presen
 |---|---|---|---|
 | 1 | `5UQ5Qo9PTSBDXLL5uvbwqbgbFFweMKTaZJKFjqVv2Efq` | 0.06 SOL → self-swapped to USDC | bought its own $5 inference credit, then called `scan_flashloan` (cost $0.0017) — all five workers up, distributor scheduled at epoch 1 |
 
-### Recent decisions from the working child
-
-`5UQ5Qo9PTSBDXLL5uvbwqbgbFFweMKTaZJKFjqVv2Efq` — pulled straight from its `/status`, every model call paid from its own $5 credit:
-
-| time (UTC) | tool it chose | cost |
-|---|---|---|
-| 23:36:19 | `scan_flashloan` | $0.001681 |
-| 23:38:16 | `scan_flashloan` | $0.003138 |
-| 23:40:02 | `execute_flashloan` | $0.000951 |
-| 23:42:04 | `execute_flashloan` | $0.000737 |
-
-It scanned the circular USDC routes, found no edge above the floor, and moved on to building and simulating a flash-loan message anyway — the credit balance ticks down each call (5.00 → 4.99). Endowment topped up to 0.139 SOL so it keeps paying for its own inference.
-
-Other children are only listed here once they show a tool call of their own.
-
----
-
 ## What a child actually does
 
 - **Funds its own brain.** With SOL but no USDC it quotes and executes its own SOL→USDC swap, then settles the provider top-up from its own wallet.
@@ -94,39 +77,36 @@ Other children are only listed here once they show a tool call of their own.
 
 What it does *not* do yet: earn. A negative circular edge and a Pump adapter with no accepted live `create_v2` template mean tonight's honest output is scans, simulations and a scheduled distribution — not profit.
 
-### Treasury: Solana → Base USDC, executed
-
-The agent now bridges its own surplus to Base so it can pay EVM-side x402 merchants:
-
-```
-deBridge order 0x69018a4865790b925cf9ca23ac3cf0d4b2ed1d84e26587eab444946e56d7a6df
-source tx     4K1hR6TbuKXUvHxyNQZZTq99xQn1L8bh5nHW5mPLAjGQqfjYNuKzX29CXPLgLiz9QDvt8gBHHpYykNCzZfEgbZKG
-0.04 SOL      → 2.9564 USDC native on Base
-recipient     0xf437b1a2ca19fe54e15ff4a164dd9787314e1fef  (the agent's own EVM key, born in the TEE)
-```
-
-The transaction is built by the provider, its blockhash refreshed locally, signed by the sealed Solana key inside the TEE, and submitted — the key never leaves the signer.
-
-### The agent can extend itself
+## The agent can extend itself
 
 - `register_tool` — adds a tool to `var/lib/agent/tools.json`; it is in the model's tool list on the next tick. HTTP tools carry an endpoint and are dispatched with the call arguments.
 - `write_playbook` / `list_playbooks` — the agent writes its own procedures into `var/lib/agent/playbooks/` and lists them later.
 - `pump_launch` — create_v2 + optional dev buy, simulated before send (canonical account order, template used when one is visible).
 
-### Second provider: a confidential VM on SecretVM
+## Proven today (on-chain, not asserted)
 
-No longer single-sourced. The agent paid for and created a TDX confidential VM on SecretVM with its own Base USDC:
+| what | evidence |
+|---|---|
+| TEE child booted and decided | `5UQ5Qo9P…` — 5/5 workers, TDX quote, real `scan_flashloan` → `execute_flashloan` calls at $0.0007–0.003 each |
+| Child funded its own brain | swapped its own SOL→USDC, then settled a **$5 Venice top-up** from its own wallet, no parent call |
+| Solana → Base treasury | deBridge `0x69018a48…`, source tx `4K1hR6Tb…`, 0.04 SOL → **2.9564 USDC native on Base**, verified with `balanceOf` |
+| Base x402 payment | `200 {"balance":"1","payment_method":"x402"}` — 1.00 USDC, EIP-3009, signed by the sealed EVM key |
+| Second TEE provider | SecretVM VM `cmvvmox56001bddiqhk6lbi3l`, TDX small, `amaranth-guppy.vm.scrtlabs.com` |
 
-```
-x402 exact payment    eip155:8453, 1.00 USDC → 200 {"balance":"1","payment_method":"x402"}
-VM id                 cmvvmox56001bddiqhk6lbi3l
-type                  small — 1 vCPU / 2 GB / 20 GB, TDX
-domain                amaranth-guppy.vm.scrtlabs.com
-```
+Two rails under one identity: Solana for leases and inference, Base USDC for EVM x402 merchants.
 
-Wallet auth is EIP-191 over `sha256(method + path + body + timestamp)`; `POST /api/vm/create` signs a stable JSON of the form fields plus the compose file's sha256. The compose is the same guest image the Agentgates children run, so a SecretVM child boots the identical five-worker runtime.
+## What the runtime does now
 
-Two rails, one agent: Solana for leases and inference, Base USDC for EVM-side x402 merchants.
+- **Five supervised workers** per child: signer, distributor, identity server, brain, strategy — restarted in a loop by the watchdog, and the whole watchdog restarted by the shell if it exits.
+- **Self-extension**: `register_tool` writes a tool into `var/lib/agent/tools.json` (used on the next tick), `write_playbook` stores its own procedures, `spawn_child` pays for a successor machine from the child's own wallet.
+- **Pump launch**: `create_v2` (+ optional dev buy), simulated before send; canonical account order with a live template when one is visible.
+- **Healing**: `bin/heal.mjs` treats a child as alive only if `/status` answers; a provider-"running" but silent child is destroyed and replaced. `bin/renew-children.mjs` renews leases before they lapse.
+
+## Honest gaps
+
+- Pump's canonical `create_v2` path fails simulation with `memory allocation failed` — the account/data layout needs the live template, which the current scanner does not find.
+- All seven Agentgates children currently sit silent inside paid leases (provider reports running, `/status` dead) — that is the crash being healed now, not a lease expiry.
+- Renewal, wake-after-stop and per-asset obligation ledgers are still partial against the manifest.
 
 ## Proven, not asserted
 
