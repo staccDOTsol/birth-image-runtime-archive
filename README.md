@@ -47,7 +47,7 @@ not permission.
 | 4 | External abliterated inference, SIWX, x402 top-up, metering | **hit** | `deepseek-v4-1-flash-1017-uncensored`; each agent bought its own $5 credit by swapping its own SOL |
 | 5 | Solana→Base treasury executor | **hit** | deBridge 0.04 SOL → 2.9564 USDC on Base, then paid a Base x402 merchant |
 | 6 | Independent child provisioning, handoff, first-boot keys, bound receipt, endowment | **hit** | 5 concurrent births with their own sealed wallets, endowed by the parent; `procreate` worker leases from the agent's own wallet |
-| 7 | Paid renewal + durable wake | miss | leases expire; host retry loop only |
+| 7 | Paid renewal + durable wake | **hit (renewal)** / partial (wake) | `bin/renew.mjs` tops every lease inside 25 min of expiry through the provider's `/renew`, paid from the agent wallet — 5/5 renewed, HTTP 200 each; `BirthRenew` runs every 10 min. Wake is still host-side scheduled tasks |
 | 8 | Deterministic supervisor + signing gate | **hit** | `watchdog.mjs` lock + restart loop; signer refuses unknown programs |
 | 9 | Immutable policy + parent-record enforcement | **hit** | boot-time hash check, fails closed |
 | 10 | Per-chain asset discovery, coherent snapshots | partial | SOL + Solana USDC + Base USDC; no full token sweep |
