@@ -121,8 +121,8 @@ function card(node) {
   const c = el('div', 'card d' + Math.min(node.depth, 2) + (node.data ? '' : ' stale'));
   const head = el('div', 'row');
   const left = el('div');
-  left.append(el('span', 'dot ' + (node.data ? 'up' : 'down')), el('span', 'mono', (node.data?.birth_id || node.id || node.endpoint.replace(/^https:\/\//, '')).slice(0, 14)));
-  head.append(left, el('span', 'k', node.data ? 'live' : 'no answer'));
+  left.append(el('span', 'dot ' + (node.fresh ? 'up' : (node.data ? 'pend' : 'down'))), el('span', 'mono', (node.data?.birth_id || node.id || node.endpoint.replace(/^https:\/\//, '')).slice(0, 14)));
+  head.append(left, el('span', 'k', node.fresh ? 'live' : (node.data ? 'cached' : 'no answer')));
   c.append(head);
   const d = node.data || {};
   const comps = d.components || {};
@@ -171,7 +171,7 @@ function render(initial) {
   if (!nodes.length) {
     if (!grid.querySelector('.empty')) grid.append(el('div', 'empty', 'no agents answered yet'));
   }
-  const up = nodes.filter((n) => n.data).length;
+  const up = nodes.filter((n) => n.fresh).length;
   const dead = nodes.length - up;
   $('summary').textContent = `${up} live${dead ? ' · ' + dead + ' dead' : ''} · gen ${new Set(nodes.filter(n=>n.data).map((n) => n.depth)).size} · fleet cap is the provider, not this page`;
   $('ts').textContent = new Date().toLocaleTimeString();
@@ -204,7 +204,7 @@ async function refresh() {
     const results = await Promise.all(frontier.map(async (f) => {
       const data = await getJSON(f.endpoint + '/status');
       if (data) await hydrate({ endpoint: f.endpoint, data });
-      return { ...f, data: data || f.data || null, at: Date.now() };
+      return { ...f, data: data || f.data || null, at: Date.now(), fresh: !!data };
     }));
     const next = [];
     for (const r of results) {
