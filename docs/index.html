@@ -38,6 +38,7 @@
 <script>
 const ROOTS = (window.ROOTS || []);
 const GEN_OF = new Map(); // endpoint -> generation, from the published tree
+const ROOT_SET = new Set(); // endpoints published as roots (GEN 1); anything else is a child
 const ROOTS_URL = 'roots.json';
 const PROXIES = [
   (u) => 'https://r.jina.ai/' + u,                       // answers 200 where the rest time out
@@ -128,7 +129,7 @@ function card(node) {
   const left = el('div');
   const label = node.endpoint.startsWith('dep:') ? node.endpoint.slice(4, 14) : node.endpoint.replace(/^https:\/\//, '').slice(0, 14);
   left.append(el('span', 'dot ' + (node.fresh ? 'up' : (node.data ? 'pend' : 'down'))), el('span', 'mono', (node.data?.birth_id || node.id || label).slice(0, 14)));
-  const gen = GEN_OF.get(node.endpoint) || (node.depth || 0) + 1;
+  const gen = ROOT_SET.has(node.endpoint) ? 1 : Math.max(2, GEN_OF.get(node.endpoint) || (node.depth || 0) + 1);
   const state = node.dead ? 'no endpoint' : (node.fresh ? 'live' : (node.data ? 'cached' : 'no answer'));
   head.append(left, el('span', 'k gen-chip', `GEN ${gen}`), el('span', 'k', state));
   c.append(head);
@@ -193,8 +194,14 @@ function render(initial) {
 // Seeds are hard-coded so the page never depends on a republish: from any one agent the
 // crawler reaches every descendant through /status.children.
 const SEEDS = [
-  'http://45.77.98.201', 'http://140.82.12.62', 'http://45.77.107.102',
-  'http://64.176.217.6', 'http://45.77.217.220', 'http://64.176.202.160',
+  'http://140.82.12.62', 'http://64.176.217.6', 'http://45.77.217.220', 'http://64.176.202.160',
+  'http://140.82.3.59', 'http://144.202.2.16', 'http://167.172.145.123',
+  'http://140.82.12.62:8081', 'http://140.82.12.62:8082', 'http://140.82.12.62:8083',
+  'http://64.176.217.6:8081', 'http://64.176.217.6:8082', 'http://64.176.217.6:8083',
+  'http://45.77.217.220:8081', 'http://45.77.217.220:8082', 'http://45.77.217.220:8083',
+  'http://64.176.202.160:8081', 'http://64.176.202.160:8082', 'http://64.176.202.160:8083',
+  'http://140.82.3.59:8081', 'http://140.82.3.59:8082', 'http://140.82.3.59:8083',
+  'http://144.202.2.16:8081', 'http://144.202.2.16:8082', 'http://144.202.2.16:8083',
 ];
 
 async function loadRoots() {
@@ -219,6 +226,9 @@ async function refresh() {
   // gen2 nodes: children published by a root in roots.json, shown as their own cards
   try {
     const doc = await (await fetch('roots.json?ts=' + Date.now(), { cache: 'no-store' })).json();
+    for (const r of (doc.roots || [])) {
+      if (r.endpoint) ROOT_SET.add(r.endpoint);
+    }
     for (const r of (doc.roots || [])) {
       for (const c of (r.children || [])) {
         // A child is GEN 2 whether or not the provider ever booted it. Hiding the
