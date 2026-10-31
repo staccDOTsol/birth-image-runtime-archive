@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>birth-image · live fleet</title>
+<style>
+  :root{--fg:#e9e9ec;--dim:#8b8b93;--bg:#0b0b0d;--card:#141417;--line:#24242a;--ok:#4ade80;--bad:#f87171;--warn:#fbbf24}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+  header{padding:20px 22px 8px;display:flex;gap:16px;align-items:baseline;flex-wrap:wrap}
+  h1{font-size:15px;margin:0}
+  .sub{color:var(--dim);font-size:12px}
+  main{padding:8px 22px 40px;display:grid;gap:11px;grid-template-columns:repeat(auto-fill,minmax(290px,1fr))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px}
+  .card.d1{border-color:#2d2d36}
+  .card.d2{border-color:#37373f}
+  .row{display:flex;justify-content:space-between;gap:10px;margin:2px 0}
+  .k{color:var(--dim)}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px}
+  .up{background:var(--ok)}.down{background:var(--bad)}
+  .mono{word-break:break-all}
+  a{color:inherit}
+  .empty{color:var(--dim);padding:20px 0}
+  footer{padding:0 22px 26px;color:var(--dim);font-size:11px}
+</style>
+</head>
+<body>
+<header>
+  <h1>birth-image · live fleet</h1>
+  <span class="sub" id="summary">crawling…</span>
+</header>
+<main id="grid"></main>
+<footer>crawls each agent's <code>/status</code> and follows its <code>children[]</code>, so grandchildren appear on their own · refresh 15s · <span id="ts">–</span></footer>
+<script>
+const ROOTS = (window.ROOTS || [
+  'https://0b3b1be60e5fa643424f2308540c60fece6525b9-8787.dstack-pha-prod5.phala.network',
+  'https://a3f3859eb9e026433d3fa992130b64a75d1cd7f1-8787.dstack-pha-prod5.phala.network'
+]);
+const PROXY = (u) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u);
+const MAX_NODES = 64, MAX_DEPTH = 5;
+
+const $ = (id) => document.getElementById(id);
+const el = (t, c, txt) => { const n = document.createElement(t); if (c) n.className = c; if (txt != null) n.textContent = txt; return n; };
+const fmt = (v, d = 3) => v == null ? '—' : (typeof v === 'number' ? v.toFixed(d) : String(v));
+
+async function getJSON(url) {
+  try {
+    const r = await fetch(url, { cache: 'no-store' });
+    if (r.ok) return await r.json();
+  } catch {}
+  try {
+    const r = await fetch(PROXY(url), { cache: 'no-store' });
+    if (r.ok) return await r.json();
+  } catch {}
+  return null;
+}
+
+function card(node) {
+  const c = el('div', 'card d' + Math.min(node.depth, 2));
+  const head = el('div', 'row');
+  const left = el('div');
+  left.append(el('span', 'dot ' + (node.data ? 'up' : 'down')), el('span', 'mono', (node.data?.birth_id || node.id || '').slice(0, 12)));
+  head.append(left, el('span', 'k', node.data ? 'live' : 'unreachable'));
+  c.append(head);
+  const d = node.data || {};
+  const comps = d.components || {};
+  const on = Object.entries(comps).filter(([, v]) => v && v.pid).map(([k]) => k);
+  const rows = [
+    ['gen', node.depth],
+    ['wallet', d.solana || '—'],
+    ['credits', d.inference?.credits_usd == null ? '—' : '$' + fmt(d.inference.credits_usd, 2)],
+    ['self-fund', d.inference?.self_fund?.state || '—'],
+    ['workers', on.length ? on.join(' ') : '—'],
+    ['last', (d.last_decision?.tools || []).join(',') || '—'],
+  ];
+  for (const [k, v] of rows) { const r = el('div', 'row'); r.append(el('span', 'k', k), el('span', 'mono', String(v))); c.append(r); }
+  if (node.endpoint) { const r = el('div', 'row'); const a = el('a', 'mono', 'endpoint ↗'); a.href = node.endpoint + '/status'; a.target = '_blank'; a.rel = 'noreferrer'; r.append(a); c.append(r); }
+  return c;
+}
+
+async function crawl() {
+  const seen = new Set();
+  const queue = ROOTS.map((e) => ({ endpoint: e, depth: 0 }));
+  const nodes = [];
+  while (queue.length && nodes.length < MAX_NODES) {
+    const batch = queue.splice(0, 8);
+    const results = await Promise.all(batch.map(async (n) => ({ ...n, data: await getJSON(n.endpoint + '/status') })));
+    for (const n of results) {
+      if (seen.has(n.endpoint)) continue;
+      seen.add(n.endpoint);
+      nodes.push(n);
+      for (const ch of (n.data?.children || [])) {
+        if (ch.endpoint && !seen.has(ch.endpoint) && n.depth + 1 <= MAX_DEPTH) queue.push({ endpoint: ch.endpoint, depth: n.depth + 1, id: ch.deploymentId });
+      }
+    }
+  }
+  const grid = $('grid'); grid.replaceChildren();
+  nodes.sort((a, b) => a.depth - b.depth || (a.data ? 0 : 1) - (b.data ? 0 : 1));
+  nodes.forEach((n) => grid.append(card(n)));
+  if (!nodes.length) grid.append(el('div', 'empty', 'no agents answered'));
+  const up = nodes.filter((n) => n.data).length;
+  $('summary').textContent = `${up}/${nodes.length} live · generations ${new Set(nodes.map((n) => n.depth)).size}`;
+  $('ts').textContent = new Date().toLocaleTimeString();
+}
+crawl();
+setInterval(crawl, 15000);
+</script>
+</body>
+</html>
