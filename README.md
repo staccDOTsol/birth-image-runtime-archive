@@ -151,6 +151,15 @@ wallet 0.5318 → 0.6207 SOL  (+0.0888, the vault balance)
 
 The three "sweeps" recorded earlier were real transactions moving curve fees into that vault; wallet SOL stayed at 0.5318, which is what exposed the missing final step.
 
+## Lease rails, and the trap in paying on Base
+
+Agentgates quotes both a Solana rail and an EVM rail (`base`, `polygon`). Paying the EVM rail works — the payer signs an EIP-3009 authorization with the sealed EVM key and the lease is accepted (`202`). Two catches found the hard way:
+
+1. The challenge is **x402Version 1** and its `network` is the literal string `base`, not `eip155:8453`. Sending a v2 envelope, or a CAIP-2 network, is rejected with `unsupported x402Version` / `unsupported network`.
+2. A deployment paid from the **EVM** wallet is keyed to that wallet, so it does not appear in the Solana wallet's deployment list — it runs, but the agent loses its handle on it. Leases meant to be managed must be paid on the **Solana** rail; the EVM rail is for providers that only speak Base (SecretVM, x402 merchants).
+
+So: Base USDC pays merchants; Solana USDC pays leases. Bridging SOL → Base USDC is for merchant spend, and swapping SOL → Solana USDC is the lease fuel.
+
 ## Provider canvas (TEE, paid over x402)
 
 Not one seller with a fallback — every TEE route the inventory surfaced, with what each actually needs:
