@@ -8,17 +8,17 @@
   :root{--fg:#e9e9ec;--dim:#8b8b93;--bg:#0b0b0d;--card:#141417;--line:#24242a;--ok:#4ade80;--bad:#f87171;--warn:#fbbf24}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--fg);font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
-  header{padding:20px 22px 8px;display:flex;gap:16px;align-items:baseline;flex-wrap:wrap}
+  header{padding:18px 22px 6px;display:flex;gap:16px;align-items:baseline;flex-wrap:wrap}
   h1{font-size:15px;margin:0}
   .sub{color:var(--dim);font-size:12px}
-  main{padding:8px 22px 40px;display:grid;gap:11px;grid-template-columns:repeat(auto-fill,minmax(290px,1fr))}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px}
-  .card.d1{border-color:#2d2d36}
-  .card.d2{border-color:#37373f}
+  main{padding:8px 22px 40px;display:grid;gap:11px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;transition:border-color .2s}
+  .card.d1{border-color:#2d2d36}.card.d2{border-color:#37373f}
+  .card.stale{opacity:.55}
   .row{display:flex;justify-content:space-between;gap:10px;margin:2px 0}
   .k{color:var(--dim)}
   .dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px}
-  .up{background:var(--ok)}.down{background:var(--bad)}
+  .up{background:var(--ok)}.down{background:var(--bad)}.pend{background:var(--warn)}
   .mono{word-break:break-all}
   a{color:inherit}
   .empty{color:var(--dim);padding:20px 0}
@@ -28,40 +28,55 @@
 <body>
 <header>
   <h1>birth-image · live fleet</h1>
-  <span class="sub" id="summary">crawling…</span>
+  <span class="sub" id="summary">loading cache…</span>
 </header>
 <main id="grid"></main>
-<footer>crawls each agent's <code>/status</code> and follows its <code>children[]</code>, so grandchildren appear on their own · refresh 15s · <span id="ts">–</span></footer>
+<footer>cached cards render instantly, then refresh in place · direct fetch with 5s timeout, CORS proxy only on failure · <span id="ts">–</span></footer>
 <script>
-const ROOTS = (window.ROOTS || [
-  'https://0b3b1be60e5fa643424f2308540c60fece6525b9-8787.dstack-pha-prod5.phala.network',
-  'https://a3f3859eb9e026433d3fa992130b64a75d1cd7f1-8787.dstack-pha-prod5.phala.network'
-]);
+const ROOTS = (window.ROOTS || []);
+const ROOTS_URL = 'roots.json';
 const PROXY = (u) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u);
-const MAX_NODES = 64, MAX_DEPTH = 5;
+const CACHE_KEY = 'birth-fleet-v1';
+const MAX_NODES = 64, MAX_DEPTH = 5, TTL_MS = 600000;
 
 const $ = (id) => document.getElementById(id);
 const el = (t, c, txt) => { const n = document.createElement(t); if (c) n.className = c; if (txt != null) n.textContent = txt; return n; };
 const fmt = (v, d = 3) => v == null ? '—' : (typeof v === 'number' ? v.toFixed(d) : String(v));
 
-async function getJSON(url) {
+let nodes = [];               // {endpoint, depth, data, at}
+const cards = new Map();      // endpoint -> element
+
+function loadCache() {
   try {
-    const r = await fetch(url, { cache: 'no-store' });
-    if (r.ok) return await r.json();
+    const c = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+    nodes = (c.nodes || []).filter((n) => Date.now() - (n.at || 0) < TTL_MS);
+    if (nodes.length) render(true);
   } catch {}
+}
+function saveCache() {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ nodes, at: Date.now() })); } catch {}
+}
+
+async function getJSON(url) {
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), 5000);
   try {
-    const r = await fetch(PROXY(url), { cache: 'no-store' });
+    const r = await fetch(url, { cache: 'no-store', signal: ctl.signal });
+    if (r.ok) return await r.json();
+  } catch {} finally { clearTimeout(t); }
+  try {
+    const r = await fetch(PROXY(url), { cache: 'force-cache' });
     if (r.ok) return await r.json();
   } catch {}
   return null;
 }
 
 function card(node) {
-  const c = el('div', 'card d' + Math.min(node.depth, 2));
+  const c = el('div', 'card d' + Math.min(node.depth, 2) + (node.data ? '' : ' stale'));
   const head = el('div', 'row');
   const left = el('div');
-  left.append(el('span', 'dot ' + (node.data ? 'up' : 'down')), el('span', 'mono', (node.data?.birth_id || node.id || '').slice(0, 12)));
-  head.append(left, el('span', 'k', node.data ? 'live' : 'unreachable'));
+  left.append(el('span', 'dot ' + (node.data ? 'up' : 'down')), el('span', 'mono', (node.data?.birth_id || node.id || node.endpoint.replace(/^https:\/\//, '')).slice(0, 14)));
+  head.append(left, el('span', 'k', node.data ? 'live' : 'no answer'));
   c.append(head);
   const d = node.data || {};
   const comps = d.components || {};
@@ -73,38 +88,97 @@ function card(node) {
     ['self-fund', d.inference?.self_fund?.state || '—'],
     ['workers', on.length ? on.join(' ') : '—'],
     ['last', (d.last_decision?.tools || []).join(',') || '—'],
+    ['kids', (d.children || []).length],
+    ['mints', (d.launches || []).length],
   ];
   for (const [k, v] of rows) { const r = el('div', 'row'); r.append(el('span', 'k', k), el('span', 'mono', String(v))); c.append(r); }
+  const mints = (d.launches || []).slice(-3).map((m) => (typeof m === 'string' ? m : m.mint)).filter(Boolean);
+  if (mints.length) {
+    const r = el('div', 'row');
+    const box = el('span', 'mono');
+    mints.forEach((m, i) => {
+      if (i) box.append(document.createTextNode(' '));
+      const a = el('a', 'mono', m.slice(0, 4) + '…');
+      a.href = 'https://pump.fun/coin/' + m; a.target = '_blank'; a.rel = 'noreferrer';
+      box.append(a);
+    });
+    r.append(el('span', 'k', 'coins'), box);
+    c.append(r);
+  }
   if (node.endpoint) { const r = el('div', 'row'); const a = el('a', 'mono', 'endpoint ↗'); a.href = node.endpoint + '/status'; a.target = '_blank'; a.rel = 'noreferrer'; r.append(a); c.append(r); }
   return c;
 }
 
-async function crawl() {
-  const seen = new Set();
-  const queue = ROOTS.map((e) => ({ endpoint: e, depth: 0 }));
-  const nodes = [];
-  while (queue.length && nodes.length < MAX_NODES) {
-    const batch = queue.splice(0, 8);
-    const results = await Promise.all(batch.map(async (n) => ({ ...n, data: await getJSON(n.endpoint + '/status') })));
-    for (const n of results) {
-      if (seen.has(n.endpoint)) continue;
-      seen.add(n.endpoint);
-      nodes.push(n);
-      for (const ch of (n.data?.children || [])) {
-        if (ch.endpoint && !seen.has(ch.endpoint) && n.depth + 1 <= MAX_DEPTH) queue.push({ endpoint: ch.endpoint, depth: n.depth + 1, id: ch.deploymentId });
-      }
-    }
+function render(initial) {
+  const grid = $('grid');
+  if (initial) grid.replaceChildren();
+  const sorted = [...nodes].sort((a, b) => a.depth - b.depth || (a.data ? 0 : 1) - (b.data ? 0 : 1));
+  for (const n of sorted) {
+    const fresh = card(n);
+    const old = cards.get(n.endpoint);
+    if (old && old.isConnected) old.replaceWith(fresh); else grid.append(fresh);
+    cards.set(n.endpoint, fresh);
   }
-  const grid = $('grid'); grid.replaceChildren();
-  nodes.sort((a, b) => a.depth - b.depth || (a.data ? 0 : 1) - (b.data ? 0 : 1));
-  nodes.forEach((n) => grid.append(card(n)));
-  if (!nodes.length) grid.append(el('div', 'empty', 'no agents answered'));
+  if (!nodes.length) {
+    if (!grid.querySelector('.empty')) grid.append(el('div', 'empty', 'no agents answered yet'));
+  }
   const up = nodes.filter((n) => n.data).length;
   $('summary').textContent = `${up}/${nodes.length} live · generations ${new Set(nodes.map((n) => n.depth)).size}`;
   $('ts').textContent = new Date().toLocaleTimeString();
 }
-crawl();
-setInterval(crawl, 15000);
+
+async function loadRoots() {
+  try {
+    const r = await fetch(ROOTS_URL + '?ts=' + Date.now(), { cache: 'no-store' });
+    if (r.ok) {
+      const j = await r.json();
+      if (Array.isArray(j.roots) && j.roots.length) return j.roots.map((x) => x.endpoint || x).filter(Boolean);
+    }
+  } catch {}
+  return ROOTS;
+}
+
+async function refresh() {
+  const roots = await loadRoots();
+  const byEndpoint = new Map(nodes.map((n) => [n.endpoint, n]));
+  let frontier = roots.map((e) => ({ endpoint: e, depth: 0 }));
+  const seen = new Set();
+  let depth = 0;
+  while (frontier.length && seen.size < MAX_NODES && depth <= MAX_DEPTH) {
+    // paint whatever we already have for this layer immediately
+    for (const f of frontier) {
+      const cached = byEndpoint.get(f.endpoint);
+      if (cached) Object.assign(f, { data: cached.data, id: cached.id, at: cached.at });
+    }
+    render(false);
+    const results = await Promise.all(frontier.map(async (f) => {
+      const data = await getJSON(f.endpoint + '/status');
+      return { ...f, data: data || f.data || null, at: Date.now() };
+    }));
+    const next = [];
+    for (const r of results) {
+      if (seen.has(r.endpoint)) continue;
+      seen.add(r.endpoint);
+      const cur = byEndpoint.get(r.endpoint);
+      if (cur) Object.assign(cur, r); else nodes.push(r);
+      for (const ch of (r.data?.children || [])) {
+        if (ch.endpoint && !seen.has(ch.endpoint)) next.push({ endpoint: ch.endpoint, depth: r.depth + 1, id: ch.deploymentId });
+      }
+    }
+    render(false);
+    frontier = next;
+    depth++;
+  }
+  // drop nodes we haven't seen this pass for > 3 minutes
+  const cutoff = Date.now() - 180000;
+  nodes = nodes.filter((n) => seen.has(n.endpoint) ? true : (n.at || 0) > cutoff);
+  saveCache();
+  render(false);
+}
+
+loadCache();
+refresh();
+setInterval(refresh, 10000);
 </script>
 </body>
 </html>
