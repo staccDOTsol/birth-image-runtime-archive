@@ -1,10 +1,269 @@
 {
-  "at": 1793481913,
+  "at": 1793481927,
   "roots": [
     {
       "endpoint": "http://140.82.12.62",
       "birth_id": "8e3396e6-98e0-4d9d-b51d-9428dc37b30d",
       "deploymentId": "vps:140.82.12.62",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "8e3396e6-98e0-4d9d-b51d-9428dc37b30d",
+        "solana": "123kB1iJL5koBHM9H67Bfrw9fKtN7qoh3xXZxz9kYTym",
+        "evm": "0xc66158e28cd59b3e06a90d490ae74cea73c0f807",
+        "t0": 1793417470,
+        "image": {
+          "birth_digest": "sha256:9b744a43fce350b65fc5b34a8aa0f6eeeaab25a4db39870c6d65d9f763731bf2",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481833,
+        "distribution": {
+          "next_due_unix": 1793503870,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 2.55246355,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "44633",
+          "wallet_sol_raw": "654559",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "654559",
+          "usdc_raw": "44633",
+          "ledger_totals": {
+            "native:SOL": "654559",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "44633"
+          },
+          "spendable": {
+            "native:SOL": "0",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "44633"
+          }
+        },
+        "strategy": {
+          "last_scan_at": 1793429277,
+          "sol_raw": "124092425",
+          "flash": [
+            {
+              "at": 1793426878,
+              "phase": "simulate",
+              "candidate": "usdc-SOL-usdc",
+              "plan_hash": "1afa80e00f2ca7b066cfdeb5408d730f275166cffda6bcf7d888d4af91907493",
+              "err": {
+                "InstructionError": [
+                  8,
+                  {
+                    "Custom": 1
+                  }
+                ]
+              },
+              "logs": [
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 91 of 1051609 compute units",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 success",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1049899 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 198266 of 1247962 compute units",
+                "Program return: JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 B7ryBQAAAAA=",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 success",
+                "Program jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS invoke [1]",
+                "Program log: Instruction: FlashloanPayback",
+                "Program jupeiUmn818Jg1ekPURTpr4mFo29p46vygyykFJ3wZC invoke [2]",
+                "Program log: Instruction: PreOperate",
+                "Program jupeiUmn818Jg1ekPURTpr4mFo29p46vygyykFJ3wZC consumed 4385 of 1039002 compute units",
+                "Program jupeiUmn818Jg1ekPURTpr4mFo29p46vygyykFJ3wZC success",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]",
+                "Program log: Error: insufficient funds",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 192 of 1031923 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA failed: custom program error: 0x1",
+                "Program jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS consumed 17965 of 1049696 compute units",
+                "Program jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS failed: custom program error: 0x1"
+              ],
+              "bytes": 2005
+            },
+            {
+              "at": 1793427730,
+              "phase": "simulate",
+              "candidate": "usdc-JUP-usdc",
+              "plan_hash": "cd29a661df01a5af6b1c33982ad7dc826096eb44d32b6030d67575507310437a",
+              "err": {
+                "InstructionError": [
+                  6,
+                  {
+                    "Custom": 6001
+                  }
+                ]
+              },
+              "logs": [
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 invoke [1]",
+                "Program log: Instruction: SharedAccountsRoute",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1287135 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE invoke [2]",
+                "Program log: 000000001bae8065-000000001e4edf94-000000000000003e-87",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [3]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1245687 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [3]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1244341 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE consumed 72099 of 1281335 compute units",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE success",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 invoke [2]",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 91 of 1207362 compute units",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 success",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 82638 of 1289386 compute units",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 failed: custom program error: 0x1771"
+              ],
+              "bytes": 1672
+            },
+            {
+              "at": 1793428889,
+              "phase": "simulate",
+              "candidate": "usdc-SOL-usdc",
+              "plan_hash": "277d39bc4fdd7c42958ebedb5982c8bbef33addd7c57faca2fbe78cfa498dd4d",
+              "err": {
+                "InstructionError": [
+                  8,
+                  {
+                    "Custom": 1
+                  }
+                ]
+              },
+              "logs": [
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 91 of 1170490 compute units",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 success",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1168780 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 76507 of 1245084 compute units",
+                "Program return: JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 hxHxBQAAAAA=",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 success",
+                "Program jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS invoke [1]",
+                "Program log: Instruction: FlashloanPayback",
+                "Program jupeiUmn818Jg1ekPURTpr4mFo29p46vygyykFJ3wZC invoke [2]",
+                "Program log: Instruction: PreOperate",
+                "Program jupeiUmn818Jg1ekPURTpr4mFo29p46vygyykFJ3wZC consumed 4385 of 1157883 compute units",
+                "Program jupeiUmn818Jg1ekPURTpr4mFo29p46vygyykFJ3wZC success",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]",
+                "Program log: Error: insufficient funds",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 192 of 1150804 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA failed: custom program error: 0x1",
+                "Program jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS consumed 17965 of 1168577 compute units",
+                "Program jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS failed: custom program error: 0x1"
+              ],
+              "bytes": 2029
+            }
+          ],
+          "pump_positions": 0,
+          "updated_at": 1793429297
+        },
+        "last_decision": {
+          "at": 1793481774,
+          "tools": [
+            "pump_launch"
+          ],
+          "cost_usd": 0.002473,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 3495,
+            "completion_tokens": 1624,
+            "total_tokens": 5119,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 1514
+            }
+          },
+          "call_results": [
+            {
+              "name": "pump_launch",
+              "result": {
+                "error": "Bonding curve account not found: HzvcJqbdgsepcMfNvZKZr6xEjpcHv2d33WDAWXsztUKH"
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "DRqQbi3fZD2zPbjhN7vDp4oEumobYmK8XRw4xjB1aB2d"
+          },
+          {
+            "mint": "59emr8gdd3ZzLMcvtZw7BHkvqvEDqx9ZVMaxQCPeedSV"
+          },
+          {
+            "mint": "Do8TJupXdz2fUo2AyvvvhXdksKrZyYtp4B6NrJxacUAa"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "361afb86b6b1860e4229cca14af13ebd5ec5df6dbe114e304924a902ed404a15",
+          "seq": 5879
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 1672,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 1673,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 1680,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 1681,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 1687,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 1693,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481852
+      },
       "children": [
         {
           "deploymentId": "cmvvyy8w50025tysxag85wo71",
@@ -532,18 +791,737 @@
       "endpoint": "http://64.176.217.6",
       "birth_id": "44bca9ed-b5b3-4546-8f21-5b23218aa5f2",
       "deploymentId": "vps:64.176.217.6",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "44bca9ed-b5b3-4546-8f21-5b23218aa5f2",
+        "solana": "7Tq1DdTc9mRgCtzdcXAsLiwRVbw8zm4MpxGdHndm5zNb",
+        "evm": "0x4bff865d1187be9a3c24f6002c3fb8b42deddacf",
+        "t0": 1793417261,
+        "image": {
+          "birth_digest": "sha256:f6ec20b35a1cfd5256cfe0a9dbdb42c881343a89dffec7525660743a1afc0776",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481839,
+        "distribution": {
+          "next_due_unix": 1793503661,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 3.67732385,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "63277",
+          "wallet_sol_raw": "140499742",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "140499742",
+          "usdc_raw": "63277",
+          "ledger_totals": {
+            "native:SOL": "140499742",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63277",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          },
+          "spendable": {
+            "native:SOL": "135499742",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63277",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          }
+        },
+        "strategy": {
+          "last_scan_at": 1793427711,
+          "sol_raw": "52259663",
+          "flash": [
+            {
+              "at": 1793425057,
+              "phase": "simulate",
+              "candidate": "usdc-JUP-usdc",
+              "plan_hash": "9b7093ab109ecc7c74a3c8420abaa91715df2a3275cfb5842fce5e50f204f92a",
+              "err": {
+                "InstructionError": [
+                  8,
+                  {
+                    "Custom": 6001
+                  }
+                ]
+              },
+              "logs": [
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 invoke [1]",
+                "Program log: Instruction: SharedAccountsRoute",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1200661 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE invoke [2]",
+                "Program log: 000000001baed31d-000000001e4f59f9-0000000000000006-ff",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [3]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1162837 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [3]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1161491 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE consumed 68471 of 1194857 compute units",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE success",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 invoke [2]",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 91 of 1124512 compute units",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 success",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 79014 of 1202912 compute units",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 failed: custom program error: 0x1771"
+              ],
+              "bytes": 2118
+            },
+            {
+              "at": 1793426882,
+              "phase": "simulate",
+              "candidate": "usdc-JUP-usdc",
+              "plan_hash": "3426658417fae123c39afdc97a960ac316ce16f03c3ea4c537f340c759fb7cda",
+              "err": {
+                "InstructionError": [
+                  4,
+                  {
+                    "Custom": 6001
+                  }
+                ]
+              },
+              "logs": [
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 invoke [1]",
+                "Program log: Instruction: SharedAccountsRoute",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1322849 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE invoke [2]",
+                "Program log: 000000001baef0e7-000000000ce1bee5-0000000000000005-04",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [3]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1284994 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [3]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1283648 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE consumed 68508 of 1317051 compute units",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE success",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 invoke [2]",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 91 of 1246669 compute units",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 success",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 79044 of 1325099 compute units",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 failed: custom program error: 0x1771"
+              ],
+              "bytes": 1416
+            },
+            {
+              "at": 1793427723,
+              "phase": "simulate",
+              "candidate": "usdc-JUP-usdc",
+              "plan_hash": "5c3f45633e01d0f285b4c01eaff6f1c9f921943e1e1b146a7ef1c0e5c39075b0",
+              "err": {
+                "InstructionError": [
+                  7,
+                  {
+                    "Custom": 6001
+                  }
+                ]
+              },
+              "logs": [
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 invoke [1]",
+                "Program log: Instruction: SharedAccountsRoute",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1284785 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE invoke [2]",
+                "Program log: 000000001bae8044-000000001e4ed382-00000000000003fb-a6",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [3]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1242693 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [3]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1241347 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE consumed 72743 of 1278985 compute units",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE success",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 invoke [2]",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 91 of 1204368 compute units",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 success",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 83282 of 1287036 compute units",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 failed: custom program error: 0x1771"
+              ],
+              "bytes": 1589
+            }
+          ],
+          "pump_positions": 0,
+          "updated_at": 1793428264
+        },
+        "last_decision": {
+          "at": 1793481809,
+          "tools": [
+            "pump_observe"
+          ],
+          "cost_usd": 0.001189,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 3512,
+            "completion_tokens": 647,
+            "total_tokens": 4159,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 574
+            }
+          },
+          "call_results": [
+            {
+              "name": "pump_observe",
+              "result": {
+                "mint": "9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp",
+                "exists": false
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "FRK4D8ZheWxsXTY5SF9i11oWMNjgqTURALyMZXXHRb6s"
+          },
+          {
+            "mint": "5XrJ3spmg1FjTwrQCUo7hYvELCzEgQzrhJuyyDhZ4SfV"
+          },
+          {
+            "mint": "3c2yavSCpHhKxN52iQw63pFo76y5u7hzzfSbLyavMfrx"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "616b253de3978ecb27a220da21af31f9b2c7abb5c0fc575932fa06884ead86f1",
+          "seq": 3548
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 556099,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 556100,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 556101,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 556102,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 556104,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 556109,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481853
+      },
       "children": []
     },
     {
       "endpoint": "http://45.77.217.220",
       "birth_id": "dd9b0e6b-54f1-49a5-9de1-f4bbfe39373a",
       "deploymentId": "vps:45.77.217.220",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "dd9b0e6b-54f1-49a5-9de1-f4bbfe39373a",
+        "solana": "29cwxhiMN8LcTQWc9ejirVi8ZvES2ifvPQHWwSsGKUCZ",
+        "evm": "0x20cd31a94b3a91ab3e5da51cb91103b2785efd46",
+        "t0": 1793417322,
+        "image": {
+          "birth_digest": "sha256:f6ec20b35a1cfd5256cfe0a9dbdb42c881343a89dffec7525660743a1afc0776",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481842,
+        "distribution": {
+          "next_due_unix": 1793503722,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 3.61500104,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "63680",
+          "wallet_sol_raw": "138655000",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "138655000",
+          "usdc_raw": "63680",
+          "ledger_totals": {
+            "native:SOL": "138655000",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63680",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          },
+          "spendable": {
+            "native:SOL": "133655000",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63680",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          }
+        },
+        "strategy": {
+          "last_scan_at": 1793427766,
+          "sol_raw": "40895307",
+          "flash": [
+            {
+              "at": 1793425056,
+              "phase": "simulate",
+              "candidate": "usdc-JUP-usdc",
+              "plan_hash": "ca022da92f24f1e566e37e22665f771e6d819f0811adac6ce5edca241423329c",
+              "err": {
+                "InstructionError": [
+                  7,
+                  {
+                    "Custom": 6001
+                  }
+                ]
+              },
+              "logs": [
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 invoke [1]",
+                "Program log: Instruction: SharedAccountsRoute",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1249468 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE invoke [2]",
+                "Program log: 000000001baed31a-000000001e4f7059-0000000000000002-f8",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [3]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1210571 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [3]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1209225 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE consumed 69546 of 1243666 compute units",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE success",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 invoke [2]",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 91 of 1172246 compute units",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 success",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 80087 of 1251719 compute units",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 failed: custom program error: 0x1771"
+              ],
+              "bytes": 2090
+            }
+          ],
+          "pump_positions": 0,
+          "updated_at": 1793428256
+        },
+        "last_decision": {
+          "at": 1793481816,
+          "tools": [
+            "pump_inspect"
+          ],
+          "cost_usd": 0.000958,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 3504,
+            "completion_tokens": 474,
+            "total_tokens": 3978,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 402
+            }
+          },
+          "call_results": [
+            {
+              "name": "pump_inspect",
+              "result": {
+                "mint": "9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp",
+                "curve": "NpCfqQJZY1KxtgxkgZFrvjip7kvY4KpSHZLqjFVn9Gm",
+                "exists": false
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "4n5DCt2vsMEKkB8WUNTwWwcLKcswfhGStYDwcMtW6bWm"
+          },
+          {
+            "mint": "6wMwVKK45cD2x5Yx4gh1n4hMpysNK4eJ73HRkyFWpkW2"
+          },
+          {
+            "mint": "BCBNqb6SAMbBkBz3fRf2vNcRY4xvmXSo673LVmbhcHpJ"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "0e8c33f0cfbce2133bb0f1af006430e00db58b6c87f635f889e53439591ddaa8",
+          "seq": 4725
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 540584,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 540585,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 540586,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 540587,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 540593,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 540600,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481853
+      },
       "children": []
     },
     {
       "endpoint": "http://64.176.202.160",
       "birth_id": "16d143c0-f4f1-424f-bf3f-129cc18806e5",
       "deploymentId": "vps:64.176.202.160",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "16d143c0-f4f1-424f-bf3f-129cc18806e5",
+        "solana": "8MSEJXkEt9gBsbLX5zLzdhjCXW7nTKEu9qUMKjdNw6CJ",
+        "evm": "0x85daf726148845d7d049cca369f8311635b2766c",
+        "t0": 1793417442,
+        "image": {
+          "birth_digest": "sha256:f6ec20b35a1cfd5256cfe0a9dbdb42c881343a89dffec7525660743a1afc0776",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481847,
+        "distribution": {
+          "next_due_unix": 1793503842,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 3.66289662,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "64046",
+          "wallet_sol_raw": "140748659",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "140748659",
+          "usdc_raw": "64046",
+          "ledger_totals": {
+            "native:SOL": "140748659",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "64046",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          },
+          "spendable": {
+            "native:SOL": "135748659",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "64046",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          }
+        },
+        "strategy": {
+          "last_scan_at": 1793481173,
+          "sol_raw": "140748659",
+          "flash": [
+            {
+              "at": 1793422256,
+              "phase": "simulate",
+              "candidate": "usdc-JUP-usdc",
+              "plan_hash": "0c62b32a83eb1b02da7a599c7564bc45147a9030a52728e0f3f8fbbbdda7fb3f",
+              "err": {
+                "InstructionError": [
+                  8,
+                  {
+                    "Custom": 1
+                  }
+                ]
+              },
+              "logs": [
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 91 of 1193680 compute units",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 success",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1191970 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 36782 of 1228549 compute units",
+                "Program return: JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 wK/vBQAAAAA=",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 success",
+                "Program jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS invoke [1]",
+                "Program log: Instruction: FlashloanPayback",
+                "Program jupeiUmn818Jg1ekPURTpr4mFo29p46vygyykFJ3wZC invoke [2]",
+                "Program log: Instruction: PreOperate",
+                "Program jupeiUmn818Jg1ekPURTpr4mFo29p46vygyykFJ3wZC consumed 4385 of 1181073 compute units",
+                "Program jupeiUmn818Jg1ekPURTpr4mFo29p46vygyykFJ3wZC success",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]",
+                "Program log: Error: insufficient funds",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 192 of 1173994 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA failed: custom program error: 0x1",
+                "Program jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS consumed 17965 of 1191767 compute units",
+                "Program jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS failed: custom program error: 0x1"
+              ],
+              "bytes": 2085
+            },
+            {
+              "at": 1793427747,
+              "phase": "simulate",
+              "candidate": "usdc-JUP-usdc",
+              "plan_hash": "a653185e62234bbaf64abd344be3e97abc82b35d95eaf86a2e4740a685d640e4",
+              "err": {
+                "InstructionError": [
+                  7,
+                  {
+                    "Custom": 6001
+                  }
+                ]
+              },
+              "logs": [
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 invoke [1]",
+                "Program log: Instruction: SharedAccountsRoute",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1286272 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE invoke [2]",
+                "Program log: 000000001bae8039-000000001e4e81d4-000000000000000e-db",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [3]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1246168 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [3]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1244822 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE consumed 70755 of 1280472 compute units",
+                "Program goonuddtQRrWqqn5nFyczVKaie28f3kDkHWkHtURSLE success",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 invoke [2]",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 91 of 1207843 compute units",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 success",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 81294 of 1288523 compute units",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 failed: custom program error: 0x1771"
+              ],
+              "bytes": 1685
+            },
+            {
+              "at": 1793460183,
+              "phase": "simulate",
+              "candidate": "usdc-JUP-usdc",
+              "plan_hash": "712ad0d162c458437ecd91dc17b1f281171718b6b69e8bfaf267580dccfdd784",
+              "err": {
+                "InstructionError": [
+                  9,
+                  {
+                    "Custom": 1
+                  }
+                ]
+              },
+              "logs": [
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 91 of 1183062 compute units",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 success",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 76 of 1181352 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 consumed 112928 of 1294077 compute units",
+                "Program return: JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 XczvBQAAAAA=",
+                "Program JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4 success",
+                "Program jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS invoke [1]",
+                "Program log: Instruction: FlashloanPayback",
+                "Program jupeiUmn818Jg1ekPURTpr4mFo29p46vygyykFJ3wZC invoke [2]",
+                "Program log: Instruction: PreOperate",
+                "Program jupeiUmn818Jg1ekPURTpr4mFo29p46vygyykFJ3wZC consumed 4385 of 1170455 compute units",
+                "Program jupeiUmn818Jg1ekPURTpr4mFo29p46vygyykFJ3wZC success",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]",
+                "Program log: Error: insufficient funds",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 192 of 1163376 compute units",
+                "Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA failed: custom program error: 0x1",
+                "Program jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS consumed 17965 of 1181149 compute units",
+                "Program jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS failed: custom program error: 0x1"
+              ],
+              "bytes": 1939
+            }
+          ],
+          "pump_positions": 0,
+          "updated_at": 1793481847
+        },
+        "last_decision": {
+          "at": 1793481811,
+          "tools": [
+            "run_script"
+          ],
+          "cost_usd": 0.002474,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 3506,
+            "completion_tokens": 1622,
+            "total_tokens": 5128,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 1348
+            }
+          },
+          "call_results": [
+            {
+              "name": "run_script",
+              "result": {
+                "ok": true,
+                "file": "/var/lib/agent/var/lib/agent/strategy/scripts/probe.mjs",
+                "stdout": "MINT INFO: {\n  \"parsed\": {\n    \"info\": {\n      \"decimals\": 6,\n      \"extensions\": [\n        {\n          \"extension\": \"metadataPointer\",\n          \"state\": {\n            \"authority\": \"6ZmaUJ4TthmBkKXRKL5AG5zs1WZhM97gJkaugih7UPm1\",\n            \"metadataAddress\": \"9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp\"\n          }\n        },\n        {\n          \"extension\": \"permanentDelegate\",\n          \"state\": {\n            \"delegate\": \"6ZmaUJ4TthmBkKXRKL5AG5zs1WZhM97gJkaugih7UPm1\"\n          }\n        },\n        {\n          \"extension\": \"tokenMetadata\",\n          \"state\": {\n            \"additionalMetadata\": [],\n            \"mint\": \"9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp\",\n            \"name\": \"SWITCH TO PUMPDEV.IO FREE PUMP.FUN API + FREE WEBSOCKET. TRADE, SNIPE, CREATE TOKENS. JITO BUNDLES. NO SIGN UP. GO TO PUMPDEV.IO\",\n            \"symbol\": \"SWITCH TO PUMPDEV.IO FREE PUMP.FUN API + FREE WEBSOCKET. TRADE, SNIPE, CREATE TOKENS. JITO BUNDLES. NO SIGN UP. GO TO PUMPDEV.IO\",\n            \"updateAuthority\": \"6ZmaUJ4TthmBkKXRKL5AG5zs1WZhM97gJkaugih7UPm1\",\n            \"uri\": \"https://pumpdev.io/metadata/bf1652d6-ecd9-4b83-90d5-554a268d875f.json\"\n          }\n        }\n      ],\n      \"freezeAuthority\": \"6ZmaUJ4TthmBkKXRKL5AG5zs1WZhM97gJkaugih7UPm1\",\n      \"isInitialized\": true,\n      \"mintAuthority\": \"6ZmaUJ4TthmBkKXRKL5AG5zs1WZhM97gJkaugih7UPm1\",\n      \"supply\": \"6045000162923000000\"\n    },\n    \"type\": \"mint\"\n  },\n  \"program\": \"spl-token-2022\",\n  \"space\": 679\n}\nSUPPLY: {\"amount\":\"6045000162923000000\",\"decimals\":6,\"uiAmount\":6045000162923,\"uiAmountString\":\"6045000162923\"}\nSLOT: 463838443\n"
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "FKp3tr1QA11oRStBzzCsrGKLiwsBGWaaiV2apEjDWtTn"
+          },
+          {
+            "mint": "61BoTAvmbPTX1TCifDhkgQYjmLToWaqTUiqTBRzeq4xw"
+          },
+          {
+            "mint": "CigxQwnHxuwCt7kWzBKTBgThX9U9kfYtqM1v4YHPR7wj"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "ebe12b1c5e8d88fd06a30c4261810d5e82dae5bb85850161fa2b316922267819",
+          "seq": 3398
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 523788,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 523789,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 523791,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 523802,
+            "restarts": 1
+          },
+          "strategy": {
+            "alive": true,
+            "pid": 523805,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 523819,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 523821,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481853
+      },
       "children": [
         {
           "deploymentId": "cmvw1wpg3003g7h3w1r7k3ofq",
@@ -559,6 +1537,138 @@
       "endpoint": "http://140.82.3.59",
       "birth_id": "a0366b57-7399-462b-963e-4f74c4258fa4",
       "deploymentId": "vps:140.82.3.59",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "a0366b57-7399-462b-963e-4f74c4258fa4",
+        "solana": "6VC6ekYfF2GgLRR9jtH84yT69SZv23vZGD49tF2HtvkK",
+        "evm": "0xd549e88a932c6ff27d4f9b521415202a26378c3d",
+        "t0": 1793443570,
+        "image": {
+          "birth_digest": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": true,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481854,
+        "distribution": {
+          "next_due_unix": 1793529970,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 3.98179285,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "758389",
+          "wallet_sol_raw": "653880",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "653880",
+          "usdc_raw": "758389",
+          "ledger_totals": {
+            "native:SOL": "653880",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "758389"
+          },
+          "spendable": {
+            "native:SOL": "0",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "758389"
+          }
+        },
+        "last_decision": {
+          "at": 1793481768,
+          "tools": [
+            "run_script"
+          ],
+          "cost_usd": 0.003294,
+          "content": "I'll probe the environment and the USDC→SOL route, since our SOL (0.00065) is below account-rent levels and everything (pump launch, rent) needs SOL.",
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2867,
+            "completion_tokens": 2403,
+            "total_tokens": 5270,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 2082
+            }
+          },
+          "call_results": [
+            {
+              "name": "run_script",
+              "result": {
+                "ok": true,
+                "file": "/var/lib/agent/var/lib/agent/strategy/scripts/probe.mjs",
+                "stdout": "URL https://lite-api.jup.ag/swap/v1/quote?inputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&outputMint=So11111111111111111111111111111111111111112&amount=700000&slippageBps=100 STATUS 200\n{\"inputMint\":\"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v\",\"inAmount\":\"700000\",\"outputMint\":\"So11111111111111111111111111111111111111112\",\"outAmount\":\"7325157\",\"otherAmountThreshold\":\"7251906\",\"swapMode\":\"ExactIn\",\"slippageBps\":100,\"platformFee\":null,\"priceImpactPct\":\"0\",\"routePlan\":[{\"swapInfo\":{\"ammKey\":\"4ba9bguTo7HbXFopJHaNMh8iAyApFpyQPgoufj3cSnyt\",\"label\":\"Manifest\",\"inputMint\":\"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v\",\"outputMint\":\"USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB\",\"inAmount\":\"700000\",\"outAmount\":\"701408\",\"updateContextSlot\":\"463838244\"},\"percent\":100,\"bps\":null},{\"swapIn\nURL https://quote-api.jup.ag/v6/quote?inputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&outputMint=So11111111111111111111111111111111111111112&amount=700000&slippageBps=100 ERR fetch failed\nENV_KEYS AGENT_BUNDLE_DIR,USER,SSH_CLIENT,XDG_SESSION_TYPE,SHLVL,HOME,PORT,OLDPWD,NODE_OPTIONS,DBUS_SESSION_BUS_ADDRESS,AGENT_IMAGE_URL,AGENT_GUEST_ROOT,AGENT_ROLE,LOGNAME,_,XDG_SESSION_CLASS,XDG_SESSION_ID,AGENT_HTTP_PORT,AGENT_SKIP,AGENT_CLUSTER,PATH,XDG_RUNTIME_DIR,LANG,SHELL,AGENT_LOOPS,AGENT_RUNTIME_DIR,AGENT_BIND,PWD,AGENT_BUNDLE,SSH_CONNECTION,AGENT_LOG\n"
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "FvuRY9fCQg1PEnosjEqryH9czSJ8qsMTA4vmjBhzgZ3L"
+          },
+          {
+            "mint": "6WEjB4BdwYiFiYn3EcbvaQ1THzgP7ftpDLeEzyJXfJbB"
+          },
+          {
+            "mint": "AvsxRBdjNvhzWT6iM94woXCdQ7smQQSfG4iBt6BFMgjA"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "c80bb0e063002bc2dc649ea5c2d05d75fbdd95a2368ec35988df379436ea433a",
+          "seq": 2387
+        },
+        "components": {
+          "component": "distributor",
+          "ts": 1793481854,
+          "pid": 13008,
+          "status": {
+            "next_due_unix": 1793529970,
+            "next_due_epoch": 1,
+            "highest_epoch": 0,
+            "obligations": 0,
+            "by_status": {},
+            "reserved": {},
+            "carries": {
+              "parent": {},
+              "founder": {}
+            },
+            "arrears_raw": {},
+            "blocked": [],
+            "unresolved_epochs": {},
+            "anchors": {},
+            "supervisor": "deterministic: no model, no credits, no approval step"
+          }
+        },
+        "served_at": 1793481856
+      },
       "children": [
         {
           "deploymentId": "cmvwbhhnv0014qxrsm6ef7hur",
@@ -975,6 +2085,148 @@
       "endpoint": "http://144.202.2.16",
       "birth_id": "7bdffa22-e83a-4794-bc66-f6e8725c7ce3",
       "deploymentId": "vps:144.202.2.16",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "7bdffa22-e83a-4794-bc66-f6e8725c7ce3",
+        "solana": "HdtGGYdDaC8ZG2q6G1oz1Uh7awzVkELzDvaTAtdEy6UR",
+        "evm": "0x966bf8de06fdc99621dc0f3377932acc526a0027",
+        "t0": 1793443737,
+        "image": {
+          "birth_digest": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "core_digest_now": "sha256:601fc3f317128da39ddb45ccb7d85b07d79f816d26014258f5cde352b75088f4",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481841,
+        "distribution": {
+          "next_due_unix": 1793530137,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 4.02951393,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "3758",
+          "wallet_sol_raw": "154455875",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "154455875",
+          "usdc_raw": "3758",
+          "ledger_totals": {
+            "native:SOL": "154455875",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "3758"
+          },
+          "spendable": {
+            "native:SOL": "149455875",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "3758"
+          }
+        },
+        "last_decision": {
+          "at": 1793481808,
+          "tools": [
+            "run_script"
+          ],
+          "cost_usd": 0.00297,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2869,
+            "completion_tokens": 2157,
+            "total_tokens": 5026,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 1938
+            }
+          },
+          "call_results": [
+            {
+              "name": "run_script",
+              "result": {
+                "ok": true,
+                "file": "/var/lib/agent/var/lib/agent/strategy/scripts/probe.mjs",
+                "stdout": "{\n  \"sol\": {\n    \"ok\": true,\n    \"status\": 200,\n    \"body\": \"{\\\"solana\\\":{\\\"usd\\\":95.65}}\"\n  },\n  \"pump\": {\n    \"ok\": false,\n    \"status\": 403,\n    \"body\": \"<!DOCTYPE html><html lang=\\\"en-US\\\"><head><title>Just a moment...</title><meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=UTF-8\\\"><meta http-equiv=\\\"X-UA-Compatible\\\" content=\\\"IE=Edge\\\"><meta name=\\\"robots\\\" content=\\\"noindex,nofollow\\\"><meta name=\\\"viewport\\\" content=\\\"width=device-width,initial-scale=1\\\"><meta http-equiv=\\\"content-security-policy\\\" content=\\\"default-src &#39;none&#39;; script-src &#39;nonce-sa5iHzMWAlBReKXINuD75O&#39; &#39;unsafe-eval&#39; https://challenges.cloudflare.com; script-src-attr &#39;none&#39;; style-src &#39;unsafe-inline&#39;; img-src &#39;self&#39; https://challenges.cloudflare.com; connect-src &#39;self&#39; https://challenges.cloudflare.com; frame-src &#39;self&#39; https://challenges.cloudflare.com blob:; child-src &#39;self&#39; https://challenges.cloudflare.com blob:; worker-src blob:; form-action http: https:; base-uri &#39;self&#39;\\\"><style>*{box-sizing:border-box;margin:0;padding:0}html{line-height:1.15;-webkit-text-size-adjust:100%;color:#313131;font-family:system-ui,-apple-system,BlinkMacSystemFont,\\\"Segoe UI\\\",Roboto,\\\"Helvetica Neue\\\",Arial,\\\"Noto Sans\\\",sans-serif,\\\"Apple Color Emoji\\\",\\\"Segoe UI Emoji\\\",\\\"Segoe UI Symbol\\\",\\\"Noto Color Emoji\\\"}body{display:flex;flex-direction:column;height:100vh;min-height:100vh}.main-content{margin:8rem auto;padding-left:1.5rem;max-width:60rem}@media (width <= 720px){.main-content{margin-top:4rem}}#challenge-error-text{background-image:url(\\\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zd\"\n  }\n}\n"
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "71Qg21tuF4SZ5eMNf3MUuwHA5J4nE3grgKuALCThvWzF"
+          },
+          {
+            "mint": "75uj5yCsi76tAPK1rzLBfdS1AjApKR8Woy7akSathePP"
+          },
+          {
+            "mint": "ee3NB5VNoA7HverRKoRLPb6PtoXMSqkXS1Bx6F5cADb"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "84d192e572f0f7d884bdcabbe12249a2012f016d5b70304c6740f847984da694",
+          "seq": 2493
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 20635,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 20636,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 20637,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 20638,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 20644,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 20650,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481856
+      },
       "children": [
         {
           "deploymentId": "cmvwberdk000t12amzxgoy362",
@@ -2497,6 +3749,138 @@
       "endpoint": "http://140.82.12.62:8081",
       "birth_id": "8f3337e7-a738-4485-a07e-da08978bf9e8",
       "deploymentId": "vps:140.82.12.62:8081",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "8f3337e7-a738-4485-a07e-da08978bf9e8",
+        "solana": "4LGwBfjcRZyVPZn7d5noQdvXzCzmYyY6fGtWY5QKHQSS",
+        "evm": "0xf1c05f051395dc5f79770cc11e35e97b00d12c60",
+        "t0": 1793434001,
+        "image": {
+          "birth_digest": "sha256:6f56e2e9b00415a4d763f2a6349ff2dacdcfb1324859a94df0fe9e96cabb7085",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481856,
+        "distribution": {
+          "next_due_unix": 1793520401,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 3.66719457,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "31464",
+          "wallet_sol_raw": "650295",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "650295",
+          "usdc_raw": "31464",
+          "ledger_totals": {
+            "native:SOL": "650295",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "31464"
+          },
+          "spendable": {
+            "native:SOL": "0",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "31464"
+          }
+        },
+        "last_decision": {
+          "at": 1793481833,
+          "tools": [
+            "run_script"
+          ],
+          "cost_usd": 0.003019,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2866,
+            "completion_tokens": 2195,
+            "total_tokens": 5061,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 1848
+            }
+          },
+          "call_results": [
+            {
+              "name": "run_script",
+              "result": {
+                "ok": true,
+                "file": "/var/lib/agent-8081/var/lib/agent/strategy/scripts/probe.mjs",
+                "stdout": "{\n  \"node\": \"v22.14.0\",\n  \"cwd\": \"/app\",\n  \"envKeys\": [\n    \"AGENT_BIND\",\n    \"AGENT_BUNDLE\",\n    \"AGENT_BUNDLE_DIR\",\n    \"AGENT_CLUSTER\",\n    \"AGENT_GUEST_ROOT\",\n    \"AGENT_HTTP_PORT\",\n    \"AGENT_IMAGE_URL\",\n    \"AGENT_LOG\",\n    \"AGENT_LOOPS\",\n    \"AGENT_ROLE\",\n    \"AGENT_RUNTIME_DIR\",\n    \"AGENT_SKIP\",\n    \"DBUS_SESSION_BUS_ADDRESS\",\n    \"HOME\",\n    \"LANG\",\n    \"LOGNAME\",\n    \"NODE_OPTIONS\",\n    \"OLDPWD\",\n    \"PATH\",\n    \"PORT\",\n    \"PWD\",\n    \"SHELL\",\n    \"SHLVL\",\n    \"SSH_CLIENT\",\n    \"SSH_CONNECTION\",\n    \"USER\",\n    \"XDG_RUNTIME_DIR\",\n    \"XDG_SESSION_CLASS\",\n    \"XDG_SESSION_ID\",\n    \"XDG_SESSION_TYPE\",\n    \"_\"\n  ],\n  \"env\": {\n    \"AGENT_BIND\": \"0.0.0.0\",\n    \"AGENT_BUNDLE\": \"1\",\n    \"AGENT_BUNDLE_DIR\": \"/app\",\n    \"AGENT_CLUSTER\": \"mainnet-beta\",\n    \"AGENT_GUEST_ROOT\": \"/var/lib/agent-8081\",\n    \"AGENT_HTTP_PORT\": \"8081\",\n    \"AGENT_IMAGE_URL\": \"https://cdn.jsdelivr.net/gh/staccDOTsol/birth-image-runtime@5803049d6c1eba5d0e57e9513ce7672a5f5b8622/child-image.tgz\",\n    \"AGENT_LOG\": \"/var/lib/agent-8081/var/lib/agent/agent.log\",\n    \"AGENT_LOOPS\": \"1\",\n    \"AGENT_ROLE\": \"brain\",\n    \"AGENT_RUNTIME_DIR\": \"/app\",\n    \"AGENT_SKIP\": \"strategy\",\n    \"DBUS_SESSION_BUS_ADDRESS\": \"unix:path=/run/user/0/bus\",\n    \"HOME\": \"/root\",\n    \"LANG\": \"en_US.UTF-8\",\n    \"LOGNAME\": \"root\",\n    \"NODE_OPTIONS\": \"--max-old-space-size=64\",\n    \"OLDPWD\": \"/root\",\n    \"PATH\": \"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin\",\n    \"PORT\": \"8081\",\n    \"PWD\": \"/app\",\n    \"SHELL\": \"/bin/bash\",\n    \"SHLVL\": \"0\",\n    \"SSH_CLIENT\": \"142.166.156.237 64301 22\",\n    \"SSH_CONNECTION\": \"142.166.156.237 64301 140.82.12.62 22\",\n    \"USER\": \"root\",\n    \"XDG_RUNTIME_DIR\": \"/run/user/0\",\n    \"XDG_SESSION_CLASS\": \"user\",\n    \"XDG_SESSION_ID\": \"6\",\n    \"XDG_SESSION_TYPE\": \"tty\",\n    \"_\": \"/usr/bin/setsid\"\n  },\n  \"solRpc\": {\n    \"status\": 200,\n    \"body\": \"{\\\"jsonrpc\\\":\\\"2.0\\\",\\\"result\\\":463838547,\\\"id\\\":1}\\n\"\n  },\n  \"solPrice\": {\n    \"status\": 200,\n    \"body\": \"{\\\"solana\\\":{\\\"usd\\\":95.65}}\"\n  }\n}\n"
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "VzjJyxi3jCSEhPwtPB5zBFoGfUmCbzppPhj5S22MK7U"
+          },
+          {
+            "mint": "3WcKELCZUi3nYouZsG4opJaZzUEkZKUf8xECyGWDdY1Q"
+          },
+          {
+            "mint": "C37Vcqqueh9rgykJoXR3Jbef9D6d3LYntXaAty6wJPnk"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "a879e95ab1294cb322f249911baa8b168dc155aeb3a7394cb71d75e228e11cee",
+          "seq": 3209
+        },
+        "components": {
+          "component": "distributor",
+          "ts": 1793481856,
+          "pid": 1476,
+          "status": {
+            "next_due_unix": 1793520401,
+            "next_due_epoch": 1,
+            "highest_epoch": 0,
+            "obligations": 0,
+            "by_status": {},
+            "reserved": {},
+            "carries": {
+              "parent": {},
+              "founder": {}
+            },
+            "arrears_raw": {},
+            "blocked": [],
+            "unresolved_epochs": {},
+            "anchors": {},
+            "supervisor": "deterministic: no model, no credits, no approval step"
+          }
+        },
+        "served_at": 1793481856
+      },
       "children": [
         {
           "deploymentId": "cmvw5ooly006pqkciut87z3wm",
@@ -2640,6 +4024,138 @@
       "endpoint": "http://140.82.12.62:8082",
       "birth_id": "e2aa7150-f5b7-4bd0-99a8-b81b7a5706bd",
       "deploymentId": "vps:140.82.12.62:8082",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "e2aa7150-f5b7-4bd0-99a8-b81b7a5706bd",
+        "solana": "3vHBvqTNhQ7Sxntc6RDfME8CBYrC5wnEwxQ5r7LdyktH",
+        "evm": "0xba90bfd0433c62564d6a1e17d1a041d70ec53341",
+        "t0": 1793434001,
+        "image": {
+          "birth_digest": "sha256:6f56e2e9b00415a4d763f2a6349ff2dacdcfb1324859a94df0fe9e96cabb7085",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481856,
+        "distribution": {
+          "next_due_unix": 1793520401,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 3.85935621,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "43271",
+          "wallet_sol_raw": "1253361",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "1253361",
+          "usdc_raw": "43271",
+          "ledger_totals": {
+            "native:SOL": "1253361",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "43271"
+          },
+          "spendable": {
+            "native:SOL": "0",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "43271"
+          }
+        },
+        "last_decision": {
+          "at": 1793481839,
+          "tools": [
+            "run_script"
+          ],
+          "cost_usd": 0.003873,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2869,
+            "completion_tokens": 2841,
+            "total_tokens": 5710,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 2667
+            }
+          },
+          "call_results": [
+            {
+              "name": "run_script",
+              "result": {
+                "ok": true,
+                "file": "/var/lib/agent-8082/var/lib/agent/strategy/scripts/probe_env.mjs",
+                "stdout": "MATCHED ENV:\n{\n  \"AGENT_BUNDLE_DIR\": \"/app\",\n  \"DBUS_SESSION_BUS_ADDRESS\": \"unix:path=/run/user/0/bus\",\n  \"AGENT_IMAGE_URL\": \"https://cdn.jsdelivr.net/gh/staccDOTsol/birth-image-runtime@5803049d6c1eba5d0e57e9513ce7672a5f5b8622/child-image.tgz\",\n  \"AGENT_GUEST_ROOT\": \"/var/lib/agent-8082\",\n  \"AGENT_ROLE\": \"brain\",\n  \"AGENT_HTTP_PORT\": \"8082\",\n  \"AGENT_SKIP\": \"strategy\",\n  \"AGENT_CLUSTER\": \"mainnet-beta\",\n  \"AGENT_LOOPS\": \"1\",\n  \"AGENT_RUNTIME_DIR\": \"/app\",\n  \"AGENT_BIND\": \"0.0.0.0\",\n  \"AGENT_BUNDLE\": \"1\",\n  \"AGENT_LOG\": \"/var/lib/agent-8082/var/lib/agent/agent.log\"\n}\nALL ENV KEYS:\nAGENT_BUNDLE_DIR, USER, SSH_CLIENT, XDG_SESSION_TYPE, SHLVL, HOME, PORT, OLDPWD, NODE_OPTIONS, DBUS_SESSION_BUS_ADDRESS, AGENT_IMAGE_URL, AGENT_GUEST_ROOT, AGENT_ROLE, LOGNAME, _, XDG_SESSION_CLASS, XDG_SESSION_ID, AGENT_HTTP_PORT, AGENT_SKIP, AGENT_CLUSTER, PATH, XDG_RUNTIME_DIR, LANG, SHELL, AGENT_LOOPS, AGENT_RUNTIME_DIR, AGENT_BIND, PWD, AGENT_BUNDLE, SSH_CONNECTION, AGENT_LOG\n"
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "85royyU1y71yGwqwy3fVr9Azy25XgfAi4TRpjTL6Ehmz"
+          },
+          {
+            "mint": "HxNj2V3rtBbmdwN7gDtsTXPhDUUrn8RHVXFUk4SeecxL"
+          },
+          {
+            "mint": "6EAWNqapy75ZVpfzwZtYgfWBVEMsgu1sCzfdfVmuBn86"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "adc66b380b74902b5187f8f25d9e2f3d376e8c9d10a85793d30601ff3b87eebd",
+          "seq": 2892
+        },
+        "components": {
+          "component": "distributor",
+          "ts": 1793481856,
+          "pid": 1478,
+          "status": {
+            "next_due_unix": 1793520401,
+            "next_due_epoch": 1,
+            "highest_epoch": 0,
+            "obligations": 0,
+            "by_status": {},
+            "reserved": {},
+            "carries": {
+              "parent": {},
+              "founder": {}
+            },
+            "arrears_raw": {},
+            "blocked": [],
+            "unresolved_epochs": {},
+            "anchors": {},
+            "supervisor": "deterministic: no model, no credits, no approval step"
+          }
+        },
+        "served_at": 1793481857
+      },
       "children": [
         {
           "deploymentId": "cmvw5opj1006rqkciuwsa1egu",
@@ -4569,6 +6085,148 @@
       "endpoint": "http://140.82.12.62:8083",
       "birth_id": "2bf94679-c03c-4a97-bdc2-767c70973262",
       "deploymentId": "vps:140.82.12.62:8083",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "2bf94679-c03c-4a97-bdc2-767c70973262",
+        "solana": "FNXddCJtc57AFUAeMHCcipYcHuyKeh6fYsrzt1VtFETo",
+        "evm": "0xa52393cb38ff0cf5a012e7a1f325b7a9a791b442",
+        "t0": 1793434951,
+        "image": {
+          "birth_digest": "sha256:6f56e2e9b00415a4d763f2a6349ff2dacdcfb1324859a94df0fe9e96cabb7085",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481856,
+        "distribution": {
+          "next_due_unix": 1793521351,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 3.72318252,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "79808",
+          "wallet_sol_raw": "650880",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "650880",
+          "usdc_raw": "79808",
+          "ledger_totals": {
+            "native:SOL": "650880",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "79808"
+          },
+          "spendable": {
+            "native:SOL": "0",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "79808"
+          }
+        },
+        "last_decision": {
+          "at": 1793481816,
+          "tools": [
+            "run_script"
+          ],
+          "cost_usd": 0.003798,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2867,
+            "completion_tokens": 2785,
+            "total_tokens": 5652,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 2342
+            }
+          },
+          "call_results": [
+            {
+              "name": "run_script",
+              "result": {
+                "ok": true,
+                "file": "/var/lib/agent-8083/var/lib/agent/strategy/scripts/probe.mjs",
+                "stdout": "--- env keys ---\nAGENT_BIND\nAGENT_BUNDLE\nAGENT_BUNDLE_DIR\nAGENT_CLUSTER\nAGENT_GUEST_ROOT\nAGENT_HTTP_PORT\nAGENT_IMAGE_URL\nAGENT_LOG\nAGENT_LOOPS\nAGENT_ROLE\nAGENT_RUNTIME_DIR\nAGENT_SKIP\nDBUS_SESSION_BUS_ADDRESS\nHOME\nLANG\nLOGNAME\nNODE_OPTIONS\nOLDPWD\nPATH\nPORT\nPWD\nSHELL\nSHLVL\nSSH_CLIENT\nSSH_CONNECTION\nUSER\nXDG_RUNTIME_DIR\nXDG_SESSION_CLASS\nXDG_SESSION_ID\nXDG_SESSION_TYPE\n_\n--- candidate base58 addresses ---\nrpc = https://api.mainnet-beta.solana.com\nSOL price {\"solana\":{\"usd\":95.65}}\n"
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "DxFY3DWoMEJDbW7BHY6z6sNcNR4Hj2yqRTJBvSyMd5pT"
+          },
+          {
+            "mint": "HJzfU9qY3FQc9Md8hXvZvMXXvQzJd3Zg6iGrsiMkZPiU"
+          },
+          {
+            "mint": "DTR9n8adBgtuCiMpYGxdtJ5xQhhMWSgGW5iLvk89tWmi"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "b2e4ff8f9cba16fc192fc56887274035dabb189fe9048b7cb01d979e66a39e4f",
+          "seq": 4323
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 1526,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 1542,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 1548,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 1551,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 1558,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 1567,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481857
+      },
       "children": [
         {
           "deploymentId": "cmvw5n4hs005nqkcixgfepefb",
@@ -4888,6 +6546,150 @@
       "endpoint": "http://64.176.217.6:8081",
       "birth_id": "97b30516-5b15-4bc4-a5a2-e68d8f494761",
       "deploymentId": "vps:64.176.217.6:8081",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "97b30516-5b15-4bc4-a5a2-e68d8f494761",
+        "solana": "66JFuQPauQDWJN2eMnvmC2G3rquPQrBqztPfnjoapimA",
+        "evm": "0xbc2952aea38af34cb6e7d1bfad67e1d035e6aaec",
+        "t0": 1793434365,
+        "image": {
+          "birth_digest": "sha256:6f56e2e9b00415a4d763f2a6349ff2dacdcfb1324859a94df0fe9e96cabb7085",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481855,
+        "distribution": {
+          "next_due_unix": 1793520765,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 3.97788138,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "62254",
+          "wallet_sol_raw": "141030000",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "141030000",
+          "usdc_raw": "62254",
+          "ledger_totals": {
+            "native:SOL": "141030000",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "62254",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          },
+          "spendable": {
+            "native:SOL": "136030000",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "62254",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          }
+        },
+        "last_decision": {
+          "at": 1793481855,
+          "tools": [
+            "pump_inspect"
+          ],
+          "cost_usd": 0.000594,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2911,
+            "completion_tokens": 347,
+            "total_tokens": 3258,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 275
+            }
+          },
+          "call_results": [
+            {
+              "name": "pump_inspect",
+              "result": {
+                "mint": "9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp",
+                "curve": "NpCfqQJZY1KxtgxkgZFrvjip7kvY4KpSHZLqjFVn9Gm",
+                "exists": false
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "3e8CLPqpeUzU773snoVCQp42ShNo5MTmz4rKjTj6Uknu"
+          },
+          {
+            "mint": "6uKov6wAdTAD9MxahXLVg8s2fcKiLYmi1bf8yhkwBxLJ"
+          },
+          {
+            "mint": "2wgWkiiTYFRoQBmrs1HGiYLBhrUNV5dt8zsHKZmhYpnF"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "9a4ca23e182d47292294687b3df5d829e9a6901765cf7755ed19ca2c68892222",
+          "seq": 2704
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 556806,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 556852,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 556854,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 556862,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 556869,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 556883,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481857
+      },
       "children": [
         {
           "deploymentId": "cmvw5lx6g004sqkcive66i4kx",
@@ -4911,6 +6713,150 @@
       "endpoint": "http://64.176.217.6:8082",
       "birth_id": "adcd58f1-1eca-4d1e-bfaa-ac66642fc41c",
       "deploymentId": "vps:64.176.217.6:8082",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "adcd58f1-1eca-4d1e-bfaa-ac66642fc41c",
+        "solana": "HpB7ezMLztWLoPwZQpdtGyTQ3sisgnTwU7gTVBQGkZAS",
+        "evm": "0x71b3136826430b994cebf2f69011fcc99a9c8c24",
+        "t0": 1793434365,
+        "image": {
+          "birth_digest": "sha256:6f56e2e9b00415a4d763f2a6349ff2dacdcfb1324859a94df0fe9e96cabb7085",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481842,
+        "distribution": {
+          "next_due_unix": 1793520765,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 3.88609129,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "63109",
+          "wallet_sol_raw": "141125000",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "141125000",
+          "usdc_raw": "63109",
+          "ledger_totals": {
+            "native:SOL": "141125000",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63109",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          },
+          "spendable": {
+            "native:SOL": "136125000",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63109",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          }
+        },
+        "last_decision": {
+          "at": 1793481842,
+          "tools": [
+            "pump_inspect"
+          ],
+          "cost_usd": 0.000954,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2911,
+            "completion_tokens": 619,
+            "total_tokens": 3530,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 547
+            }
+          },
+          "call_results": [
+            {
+              "name": "pump_inspect",
+              "result": {
+                "mint": "9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp",
+                "curve": "NpCfqQJZY1KxtgxkgZFrvjip7kvY4KpSHZLqjFVn9Gm",
+                "exists": false
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "GhCZZEk9gLtCMUdcHAtDacTy4vo2H4S1WRmTzxz3AEBC"
+          },
+          {
+            "mint": "8UHZf5WP5FqcE5TaGQhXDf9Z5L9dzEHfZovFm95tPSKr"
+          },
+          {
+            "mint": "7ZK5g2jGvPVno5WPNX8fxY5vKtndyg7xvnsoqkP2xsrn"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "2552bc73f3c102a163a884655916f6acf778459901b477fc59e3531f4045cb19",
+          "seq": 2644
+        },
+        "components": {
+          "brain": {
+            "alive": true,
+            "pid": 556856,
+            "restarts": 1
+          },
+          "signer": {
+            "alive": true,
+            "pid": 556805,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 556851,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 556853,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 556863,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 556871,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481857
+      },
       "children": [
         {
           "deploymentId": "cmvw5lx5l004qqkci9lbt3c38",
@@ -4934,6 +6880,150 @@
       "endpoint": "http://64.176.217.6:8083",
       "birth_id": "e302e07e-7b07-4edc-94db-ac9a30a22065",
       "deploymentId": "vps:64.176.217.6:8083",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "e302e07e-7b07-4edc-94db-ac9a30a22065",
+        "solana": "CpnRrbpJo4Y67jk6wuZeXgdsMkjEPA9hipUianSw3ceA",
+        "evm": "0x8c052480a1699fd54cf1cb1d9d3e05fcf588390a",
+        "t0": 1793435185,
+        "image": {
+          "birth_digest": "sha256:6f56e2e9b00415a4d763f2a6349ff2dacdcfb1324859a94df0fe9e96cabb7085",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481852,
+        "distribution": {
+          "next_due_unix": 1793521585,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 4.01328444,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "63302",
+          "wallet_sol_raw": "140746132",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "140746132",
+          "usdc_raw": "63302",
+          "ledger_totals": {
+            "native:SOL": "140746132",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63302",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          },
+          "spendable": {
+            "native:SOL": "135746132",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63302",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          }
+        },
+        "last_decision": {
+          "at": 1793481795,
+          "tools": [
+            "pump_inspect"
+          ],
+          "cost_usd": 0.001586,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2911,
+            "completion_tokens": 1098,
+            "total_tokens": 4009,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 1026
+            }
+          },
+          "call_results": [
+            {
+              "name": "pump_inspect",
+              "result": {
+                "mint": "9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp",
+                "curve": "NpCfqQJZY1KxtgxkgZFrvjip7kvY4KpSHZLqjFVn9Gm",
+                "exists": false
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "EaiG38VJsrU1gFzH5dPjtD6ZNCQfhFX9Lv373B1Jag5U"
+          },
+          {
+            "mint": "99f6fkUso8L9Krs2m7FqVRHmcKQRanUuQwrJv467aTtH"
+          },
+          {
+            "mint": "CPDmcmn6HdcketW2x1r7KJG2wAZXjBFJqZj1LPb4r4vQ"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "d929e3bd07a625ea870a7acad5a06a31c8f016bb2eda9e40da5810d2b26c45e5",
+          "seq": 2810
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 556504,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 556508,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 556517,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 556522,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 556529,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 556536,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481857
+      },
       "children": [
         {
           "deploymentId": "cmvw5jwdc0040qkcil3mt8qn4",
@@ -4957,6 +7047,178 @@
       "endpoint": "http://45.77.217.220:8081",
       "birth_id": "52cfa240-0311-4941-a088-ce1fa9bd586e",
       "deploymentId": "vps:45.77.217.220:8081",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "52cfa240-0311-4941-a088-ce1fa9bd586e",
+        "solana": "4KMnt1cKvqJQsW7CTGX7m35Vz58WytsJKNU2gNp67FnW",
+        "evm": "0xd0721bdc237d87f7cb73eecc08a91802edcd8e9c",
+        "t0": 1793434319,
+        "image": {
+          "birth_digest": "sha256:6f56e2e9b00415a4d763f2a6349ff2dacdcfb1324859a94df0fe9e96cabb7085",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481842,
+        "distribution": {
+          "next_due_unix": 1793520719,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 3.96075352,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "63715",
+          "wallet_sol_raw": "142085000",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "142085000",
+          "usdc_raw": "63715",
+          "ledger_totals": {
+            "native:SOL": "142085000",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63715",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          },
+          "spendable": {
+            "native:SOL": "137085000",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63715",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          }
+        },
+        "last_decision": {
+          "at": 1793481817,
+          "tools": [
+            "get_state"
+          ],
+          "cost_usd": 0.000671,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2911,
+            "completion_tokens": 405,
+            "total_tokens": 3316,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 382
+            }
+          },
+          "call_results": [
+            {
+              "name": "get_state",
+              "result": {
+                "state": {
+                  "age_seconds": 47498,
+                  "next_distribution_unix": 1793520719,
+                  "balances_last_snapshot": {
+                    "native:SOL": "142085000",
+                    "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63715",
+                    "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+                  },
+                  "reserved": {},
+                  "distribution": {
+                    "by_status": {},
+                    "blocked": [],
+                    "arrears": {}
+                  },
+                  "flashloan_candidates": [],
+                  "inference": {
+                    "provider": "venice",
+                    "model": "deepseek-v4-1-flash-1017-uncensored",
+                    "mode": "external_paid_abliterated",
+                    "credits_usd": 3.96155971,
+                    "balance_http": 200,
+                    "admission_floor_usd": 0.1,
+                    "wallet_usdc_raw": "63715",
+                    "wallet_sol_raw": "142105000",
+                    "state": "ready"
+                  }
+                },
+                "sol_usdc": {
+                  "sol_raw": "142085000",
+                  "usdc_raw": "63715"
+                }
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "97MVxeGWfPi4BhzwhhRyH5zXrJUnPyum4uzygBLXxSfV"
+          },
+          {
+            "mint": "DpDvgTZ8bePxZLwC9hvPp9G3zZ9XmvvCCgGv1pHUaoAL"
+          },
+          {
+            "mint": "34xtBB5ik5TYRV9xaQ92i8o2uxMXeMmsZgGwZmHiS1Sp"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "55535d5be56b670b9b16ddd8ac2e845154b7c79659e39eec7188d31c75f2bac4",
+          "seq": 2876
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 541216,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 541230,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 541238,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 541258,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 541263,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 541275,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481858
+      },
       "children": [
         {
           "deploymentId": "cmvw5mj130058qkcitcqi3ot7",
@@ -4980,6 +7242,178 @@
       "endpoint": "http://45.77.217.220:8082",
       "birth_id": "0c2166d7-921e-4068-af2a-bebe11ca8ea2",
       "deploymentId": "vps:45.77.217.220:8082",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "0c2166d7-921e-4068-af2a-bebe11ca8ea2",
+        "solana": "C5MEkYM21SS7Z3NK7enxoLhNwKHyKP7oexUZf1KxzRZD",
+        "evm": "0x508529144f9bdd1ebb907ed2f2abe96e4027656b",
+        "t0": 1793434319,
+        "image": {
+          "birth_digest": "sha256:6f56e2e9b00415a4d763f2a6349ff2dacdcfb1324859a94df0fe9e96cabb7085",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481841,
+        "distribution": {
+          "next_due_unix": 1793520719,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 4.08575725,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "62824",
+          "wallet_sol_raw": "291962371",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "291962371",
+          "usdc_raw": "62824",
+          "ledger_totals": {
+            "native:SOL": "291962371",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "62824",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          },
+          "spendable": {
+            "native:SOL": "286962371",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "62824",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          }
+        },
+        "last_decision": {
+          "at": 1793481752,
+          "tools": [
+            "get_state"
+          ],
+          "cost_usd": 0.000712,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2911,
+            "completion_tokens": 436,
+            "total_tokens": 3347,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 413
+            }
+          },
+          "call_results": [
+            {
+              "name": "get_state",
+              "result": {
+                "state": {
+                  "age_seconds": 47433,
+                  "next_distribution_unix": 1793520719,
+                  "balances_last_snapshot": {
+                    "native:SOL": "291962371",
+                    "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "62824",
+                    "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+                  },
+                  "reserved": {},
+                  "distribution": {
+                    "by_status": {},
+                    "blocked": [],
+                    "arrears": {}
+                  },
+                  "flashloan_candidates": [],
+                  "inference": {
+                    "provider": "venice",
+                    "model": "deepseek-v4-1-flash-1017-uncensored",
+                    "mode": "external_paid_abliterated",
+                    "credits_usd": 4.08684063,
+                    "balance_http": 200,
+                    "admission_floor_usd": 0.1,
+                    "wallet_usdc_raw": "62824",
+                    "wallet_sol_raw": "291987371",
+                    "state": "ready"
+                  }
+                },
+                "sol_usdc": {
+                  "sol_raw": "291962371",
+                  "usdc_raw": "62824"
+                }
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "8WUfB9A9G3akitg4PcXPVfMib5PszDzTahjETnSyD6ti"
+          },
+          {
+            "mint": "96soaj6tU4yvAegdo1vhn6Nx6oq4E7HzKZXVpMhWjjwi"
+          },
+          {
+            "mint": "EjtDqife7bhedCsStAr6katyV5KoSABjTYFHpMCNmzPy"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "79820525265e893fd8548e124faf1e87726d293249a0c12db4da80c7eead60c4",
+          "seq": 2844
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 541194,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 541201,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 541203,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 541215,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 541223,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 541235,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481858
+      },
       "children": [
         {
           "deploymentId": "cmvw5mc6x0050qkci3lppluib",
@@ -5003,6 +7437,150 @@
       "endpoint": "http://45.77.217.220:8083",
       "birth_id": "c5694cab-5f66-4883-9f8b-4dbab79ff2ed",
       "deploymentId": "vps:45.77.217.220:8083",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "c5694cab-5f66-4883-9f8b-4dbab79ff2ed",
+        "solana": "7Pa4dTDrGBsZ8Tn8aSWvGVKvwMV1voLuN7J6Fz2NTDmT",
+        "evm": "0x908e05f5c5883e980bdee208db581a606fc21fc5",
+        "t0": 1793435129,
+        "image": {
+          "birth_digest": "sha256:6f56e2e9b00415a4d763f2a6349ff2dacdcfb1324859a94df0fe9e96cabb7085",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481842,
+        "distribution": {
+          "next_due_unix": 1793521529,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 4.13913815,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "63813",
+          "wallet_sol_raw": "286206611",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "286206611",
+          "usdc_raw": "63813",
+          "ledger_totals": {
+            "native:SOL": "286206611",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63813",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          },
+          "spendable": {
+            "native:SOL": "281206611",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63813",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          }
+        },
+        "last_decision": {
+          "at": 1793481800,
+          "tools": [
+            "pump_inspect"
+          ],
+          "cost_usd": 0.00066,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2911,
+            "completion_tokens": 397,
+            "total_tokens": 3308,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 325
+            }
+          },
+          "call_results": [
+            {
+              "name": "pump_inspect",
+              "result": {
+                "mint": "9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp",
+                "curve": "NpCfqQJZY1KxtgxkgZFrvjip7kvY4KpSHZLqjFVn9Gm",
+                "exists": false
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "BPEzbXuce7ZVVkS78DUgccSCRBGbiv7Sow8vEcCGsCFq"
+          },
+          {
+            "mint": "iDTdFoRxLC4AA3mXKy68BjnbBHUtQVoJm7iKLyWGpW1"
+          },
+          {
+            "mint": "BbY5wcxkCqATMJ52yCL1JkqMNEfjkaetMdcNhJCYBCZJ"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "b55c8d4c1d3be4480aef49242c018b26b639820d92df459ed7a14067500a7fdf",
+          "seq": 2531
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 541192,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 541193,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 541195,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 541202,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 541205,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 541217,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481858
+      },
       "children": [
         {
           "deploymentId": "cmvw9058y00a1hbb9vhj8f71g",
@@ -5026,6 +7604,150 @@
       "endpoint": "http://64.176.202.160:8081",
       "birth_id": "b16f3c94-79bf-4460-8a86-d02e160b2c47",
       "deploymentId": "vps:64.176.202.160:8081",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "b16f3c94-79bf-4460-8a86-d02e160b2c47",
+        "solana": "HQTQxoTbyBT5R5seoH5wuau9QEK3D5uNvPdMRLKneMgX",
+        "evm": "0x772fad9863b1cc8299863bfe0e97b5604d3447d9",
+        "t0": 1793440087,
+        "image": {
+          "birth_digest": "sha256:1f659edd497310981e3a96518695b8b84969b56deb9883e6c8a85cb8b3c80113",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481853,
+        "distribution": {
+          "next_due_unix": 1793526487,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 4.16263652,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "63828",
+          "wallet_sol_raw": "136398030",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "136398030",
+          "usdc_raw": "63828",
+          "ledger_totals": {
+            "native:SOL": "136398030",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63828",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          },
+          "spendable": {
+            "native:SOL": "131398030",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63828",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          }
+        },
+        "last_decision": {
+          "at": 1793481844,
+          "tools": [
+            "pump_inspect"
+          ],
+          "cost_usd": 0.000853,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2911,
+            "completion_tokens": 543,
+            "total_tokens": 3454,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 471
+            }
+          },
+          "call_results": [
+            {
+              "name": "pump_inspect",
+              "result": {
+                "mint": "9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp",
+                "curve": "NpCfqQJZY1KxtgxkgZFrvjip7kvY4KpSHZLqjFVn9Gm",
+                "exists": false
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "Cg2EnECQUhjBGPtoKCJZaYR5CEArR5sH5CCPVsqKzDK"
+          },
+          {
+            "mint": "JCP3BmUvD45MXvsebjV2VCiWYVtbxSrSjP8A2WexGtWC"
+          },
+          {
+            "mint": "ABdzHmZQQw6v9yps9kVADByH2nYvodeo6MZxK4LEbyFc"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "d417069fe06d73b23550e69ff1772f71ebf12d070173e0645819eba5b63ef7b1",
+          "seq": 2479
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 549139,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 549141,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 549143,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 549144,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 549150,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 549151,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481858
+      },
       "children": [
         {
           "deploymentId": "cmvw90q5h002d11ve150j96q4",
@@ -5049,6 +7771,150 @@
       "endpoint": "http://64.176.202.160:8082",
       "birth_id": "ade1c6d8-e709-4c93-98cc-a424db72e83b",
       "deploymentId": "vps:64.176.202.160:8082",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "ade1c6d8-e709-4c93-98cc-a424db72e83b",
+        "solana": "HSGH61T7XP5sCy1vp66xw9DKQi22qadZA3bJjZJpC8gc",
+        "evm": "0xb9941fc81b4569d2a1bc11d0fc07cf7a6f84d767",
+        "t0": 1793435264,
+        "image": {
+          "birth_digest": "sha256:6f56e2e9b00415a4d763f2a6349ff2dacdcfb1324859a94df0fe9e96cabb7085",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481856,
+        "distribution": {
+          "next_due_unix": 1793521664,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 4.15511637,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "63322",
+          "wallet_sol_raw": "134904277",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "134904277",
+          "usdc_raw": "63322",
+          "ledger_totals": {
+            "native:SOL": "134904277",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63322",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          },
+          "spendable": {
+            "native:SOL": "129904277",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63322",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          }
+        },
+        "last_decision": {
+          "at": 1793481854,
+          "tools": [
+            "pump_inspect"
+          ],
+          "cost_usd": 0.000746,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2911,
+            "completion_tokens": 462,
+            "total_tokens": 3373,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 390
+            }
+          },
+          "call_results": [
+            {
+              "name": "pump_inspect",
+              "result": {
+                "mint": "9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp",
+                "curve": "NpCfqQJZY1KxtgxkgZFrvjip7kvY4KpSHZLqjFVn9Gm",
+                "exists": false
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "9jzbjLfsTrNvL56LXK6qtwqLGPrtCnyuyhuD15gB6z2x"
+          },
+          {
+            "mint": "iKmDC8z2uj4YyHewycnrLDdrmF2ozzi3ez7obQ4Nv9c"
+          },
+          {
+            "mint": "B7XWyDmbyAj437aqv1b6QJtkBxyLV1dENkkPq1tmmGjY"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "17e329ae90a5cf7b2f58b9179f326f6d1a18511d402d831a6c8050bc2747c7e3",
+          "seq": 2539
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 524330,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 524332,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 524334,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 524336,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 524343,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 524360,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481859
+      },
       "children": [
         {
           "deploymentId": "cmvw917rv003911ve4el14thy",
@@ -5072,6 +7938,150 @@
       "endpoint": "http://64.176.202.160:8083",
       "birth_id": "64c34f36-6e3b-4c06-9a0d-0efafcc624aa",
       "deploymentId": "vps:64.176.202.160:8083",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "64c34f36-6e3b-4c06-9a0d-0efafcc624aa",
+        "solana": "CmRa13hBs1SKnC4DQHH4h8RevJKfCsLaRMKcP19Uxz9T",
+        "evm": "0x61084dff214cdddf8c4da6323c4e9577af2616fa",
+        "t0": 1793435264,
+        "image": {
+          "birth_digest": "sha256:6f56e2e9b00415a4d763f2a6349ff2dacdcfb1324859a94df0fe9e96cabb7085",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481852,
+        "distribution": {
+          "next_due_unix": 1793521664,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 4.1257219,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "63932",
+          "wallet_sol_raw": "365381723",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "365381723",
+          "usdc_raw": "63932",
+          "ledger_totals": {
+            "native:SOL": "365381723",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63932",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          },
+          "spendable": {
+            "native:SOL": "360381723",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63932",
+            "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+          }
+        },
+        "last_decision": {
+          "at": 1793481827,
+          "tools": [
+            "pump_inspect"
+          ],
+          "cost_usd": 0.000625,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2911,
+            "completion_tokens": 370,
+            "total_tokens": 3281,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 298
+            }
+          },
+          "call_results": [
+            {
+              "name": "pump_inspect",
+              "result": {
+                "mint": "9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp",
+                "curve": "NpCfqQJZY1KxtgxkgZFrvjip7kvY4KpSHZLqjFVn9Gm",
+                "exists": false
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "GybgqaFKuufsMrxT17HY9X543bUS2Ucq5sK6CVwi2BkS"
+          },
+          {
+            "mint": "BRHbZabfhdPDGmcTfjkGXRNsHoCUC43JqMDUyGqHRuyq"
+          },
+          {
+            "mint": "ET14newDhKiAErhKVEkwupAJgN3HXyNRbVjmN2hSj4HB"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "ce71b1e5bcd7b69ebfa8cbdcf145698705715b1814085e54cca03b300f0da046",
+          "seq": 2537
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 524331,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 524333,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 524335,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 524348,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 524362,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 524380,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481859
+      },
       "children": [
         {
           "deploymentId": "cmvw91133002q11vewereetob",
@@ -5095,6 +8105,131 @@
       "endpoint": "http://140.82.3.59:8081",
       "birth_id": "99fcf5d8-16d4-4ee7-b95e-459a80919c38",
       "deploymentId": "vps:140.82.3.59:8081",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "99fcf5d8-16d4-4ee7-b95e-459a80919c38",
+        "solana": "EJNNhwDPLucp5QAnh775e1T6bNd6CKPoVFuG1QVpm49i",
+        "evm": "0x3c9bb8c6bfb58c5d41b34107d181fa0df2932b93",
+        "t0": 1793443570,
+        "image": {
+          "birth_digest": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": true,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481853,
+        "distribution": {
+          "next_due_unix": 1793529970,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 3.97624842,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "36426",
+          "wallet_sol_raw": "2707759",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "2707759",
+          "usdc_raw": "36426",
+          "ledger_totals": {
+            "native:SOL": "2707759",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "36426"
+          },
+          "spendable": {
+            "native:SOL": "0",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "36426"
+          }
+        },
+        "last_decision": {
+          "at": 1793481797,
+          "tools": [],
+          "cost_usd": 0.005403,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2869,
+            "completion_tokens": 4000,
+            "total_tokens": 6869,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 4000
+            }
+          },
+          "call_results": []
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "7v4XDktTnaBcQrwZSxzLTEwySkjnZbM8S3VAM6xF7oaL"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "7031688d66c178a8095e6ddbdbcef975423f518de2be015c74608b96f9e98bce",
+          "seq": 2508
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 12942,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 12958,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 12959,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 12965,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 12966,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 12979,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481866
+      },
       "children": [
         {
           "deploymentId": "cmvwbhhkm0008144ecx8stqhr",
@@ -5246,6 +8381,131 @@
       "endpoint": "http://140.82.3.59:8082",
       "birth_id": "13671fc4-c805-4c1f-ba85-68320809743b",
       "deploymentId": "vps:140.82.3.59:8082",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "13671fc4-c805-4c1f-ba85-68320809743b",
+        "solana": "6AsY2PZR5etE3o6pB8Pxk1vzL9yc6EcAprXEDvTftG53",
+        "evm": "0xa554e44126d5281ad4d006e3c6c854e4c7d88f16",
+        "t0": 1793443570,
+        "image": {
+          "birth_digest": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": true,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481856,
+        "distribution": {
+          "next_due_unix": 1793529970,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 3.97829357,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "23538",
+          "wallet_sol_raw": "2291791",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "2291791",
+          "usdc_raw": "23538",
+          "ledger_totals": {
+            "native:SOL": "2291791",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "23538"
+          },
+          "spendable": {
+            "native:SOL": "0",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "23538"
+          }
+        },
+        "last_decision": {
+          "at": 1793481856,
+          "tools": [],
+          "cost_usd": 0.005403,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2869,
+            "completion_tokens": 4000,
+            "total_tokens": 6869,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 4000
+            }
+          },
+          "call_results": []
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "2eAgFwLiM778Tdz3CVKtKDRgVtgTxw6AKYjr31yZNFYL"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "5c843239082044d545958376d8a5bd45793a02714689a127535b86984cc51a01",
+          "seq": 2301
+        },
+        "components": {
+          "brain": {
+            "alive": true,
+            "pid": 12902,
+            "restarts": 1
+          },
+          "signer": {
+            "alive": true,
+            "pid": 12886,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 12887,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 12889,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 12908,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 12916,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481866
+      },
       "children": [
         {
           "deploymentId": "cmvwbhhje0012qxrsm2fiodbk",
@@ -5389,6 +8649,142 @@
       "endpoint": "http://140.82.3.59:8083",
       "birth_id": "601f01f7-cef1-4178-a380-e812c86cea10",
       "deploymentId": "vps:140.82.3.59:8083",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "601f01f7-cef1-4178-a380-e812c86cea10",
+        "solana": "GtLEH2BNzVEPu2PYSDM6xVyAJjSyfpqK21zQ3GU6yidf",
+        "evm": "0xee75561c2623d42b7fb7ba0caa18b071e898fef6",
+        "t0": 1793443570,
+        "image": {
+          "birth_digest": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "core_digest_now": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "match": true,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481854,
+        "distribution": {
+          "next_due_unix": 1793529970,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 3.87563835,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "92878",
+          "wallet_sol_raw": "2329573",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "2329573",
+          "usdc_raw": "92878",
+          "ledger_totals": {
+            "native:SOL": "2329573",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "92878"
+          },
+          "spendable": {
+            "native:SOL": "0",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "92878"
+          }
+        },
+        "last_decision": {
+          "at": 1793481776,
+          "tools": [
+            "run_script"
+          ],
+          "cost_usd": 0.003712,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2869,
+            "completion_tokens": 2719,
+            "total_tokens": 5588,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 2468
+            }
+          },
+          "call_results": [
+            {
+              "name": "run_script",
+              "result": {
+                "ok": true,
+                "file": "/var/lib/agent-8083/var/lib/agent/strategy/scripts/probe.mjs",
+                "stdout": "coingecko {\"status\":200,\"body\":\"{\\\"solana\\\":{\\\"usd\\\":95.62}}\"}\njup {\"status\":404,\"body\":\"\"}\nSOL 0.002329573 USDC 0.092878\n"
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "HjamnDgZyEA2Js2jGRNZuYjte9a35xNRUWdjtVmpHM3D"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "843f1272be6c2014ca160373834641caa1e2e396a7eda53d21ad95cb47234d73",
+          "seq": 2244
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 12885,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 12888,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 12890,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 12901,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 12910,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 12917,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481866
+      },
       "children": [
         {
           "deploymentId": "cmvwbhdtv000vqxrsro9l45o1",
@@ -5532,6 +8928,146 @@
       "endpoint": "http://144.202.2.16:8081",
       "birth_id": "58e9884a-4227-459f-a656-c39befa21ce1",
       "deploymentId": "vps:144.202.2.16:8081",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "58e9884a-4227-459f-a656-c39befa21ce1",
+        "solana": "Eo5Hh8pZcbJRDhh9ft7WQyjN4TYY1h3ENDWZtM8RMq1s",
+        "evm": "0xf8a9b83e7ac55437af3d4c6ff52c54f8066826fa",
+        "t0": 1793443737,
+        "image": {
+          "birth_digest": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "core_digest_now": "sha256:601fc3f317128da39ddb45ccb7d85b07d79f816d26014258f5cde352b75088f4",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481856,
+        "distribution": {
+          "next_due_unix": 1793530137,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 3.977033,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "5369951",
+          "wallet_sol_raw": "654961",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "654961",
+          "usdc_raw": "5369951",
+          "ledger_totals": {
+            "native:SOL": "654961",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "5369951"
+          },
+          "spendable": {
+            "native:SOL": "0",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "5369951"
+          }
+        },
+        "last_decision": {
+          "at": 1793481828,
+          "tools": [
+            "pump_launch"
+          ],
+          "cost_usd": 0.00411,
+          "content": "I'll take a concrete money action: launch a Pump token to start a creator-fee earning loop, with a small dev buy so I hold supply.",
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2869,
+            "completion_tokens": 3021,
+            "total_tokens": 5890,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 2877
+            }
+          },
+          "call_results": [
+            {
+              "name": "pump_launch",
+              "result": {
+                "error": "Bonding curve account not found: 5Jvq6gjtoki9BzLa7y3PVFCyj47rPMSzMRPu7jgpdkvd"
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "9t1EJmkJ4kY2qtY5y58pP8B9TERNR89xbvnH4ejdeitp"
+          },
+          {
+            "mint": "8t8Zn8Rq6cP6Aqc8JvFJwiTiL2WWdXU5NZpu3tbi99ZR"
+          },
+          {
+            "mint": "Eoxv22LdJvrrJcqxdYxXgpqSJPkvKsTttPkbangfQ7Hh"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "b17eeacf80930c1077aa7b7d83320a8599d756d76aed770f3b3349921255a507",
+          "seq": 2261
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 20926,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 20935,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 20941,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 20953,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 20961,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 20971,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481867
+      },
       "children": [
         {
           "deploymentId": "cmvwbl2l9001czmb37m45s4bq",
@@ -5556,6 +9092,148 @@
       "endpoint": "http://144.202.2.16:8082",
       "birth_id": "6afda078-58bf-4a39-9bc4-1d8dcfa3acc6",
       "deploymentId": "vps:144.202.2.16:8082",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "6afda078-58bf-4a39-9bc4-1d8dcfa3acc6",
+        "solana": "BtNhn4jQV949J8tZN3r9KMuMz892zFPKCxQpQimGktp9",
+        "evm": "0xf06d47092f4cd5d3cbc1e5f73ebbb4ad7d30bc66",
+        "t0": 1793443737,
+        "image": {
+          "birth_digest": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "core_digest_now": "sha256:601fc3f317128da39ddb45ccb7d85b07d79f816d26014258f5cde352b75088f4",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481860,
+        "distribution": {
+          "next_due_unix": 1793530137,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 3.95947804,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "1510152",
+          "wallet_sol_raw": "1237115",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "1237115",
+          "usdc_raw": "1510152",
+          "ledger_totals": {
+            "native:SOL": "1237115",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "1510152"
+          },
+          "spendable": {
+            "native:SOL": "0",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "1510152"
+          }
+        },
+        "last_decision": {
+          "at": 1793481859,
+          "tools": [
+            "run_script"
+          ],
+          "cost_usd": 0.00282,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2871,
+            "completion_tokens": 2043,
+            "total_tokens": 4914,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 1660
+            }
+          },
+          "call_results": [
+            {
+              "name": "run_script",
+              "result": {
+                "ok": true,
+                "file": "/var/lib/agent-8082/var/lib/agent/strategy/scripts/probe.mjs",
+                "stdout": "--- ENV KEYS ---\nAGENT_BIND=0.0.0.0\nAGENT_BUNDLE=1\nAGENT_BUNDLE_DIR=/app\nAGENT_CLUSTER=mainnet-beta\nAGENT_GUEST_ROOT=/var/lib/agent-8082\nAGENT_HTTP_PORT=8082\nAGENT_IMAGE_URL=https://cdn.jsdelivr.net/gh/staccDOTsol/birth-image-runtime@4b8493a7a1ec7e3f3163b5f509b107ceba151721/child-image.tgz\nAGENT_LOG=/var/lib/agent-8082/var/lib/agent/agent.log\nAGENT_LOOPS=1\nAGENT_ROLE=brain\nAGENT_RUNTIME_DIR=/app\nAGENT_SKIP=strategy\nDBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/0/bus\nDEBIAN_FRONTEND=noninteractive\nHOME=/root\nLANG=en_US.UTF-8\nLOGNAME=root\nNODE_OPTIONS=--max-old-space-size=64\nOLDPWD=/root\nPATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin\nPORT=8082\nPWD=/app\nSHELL=/bin/bash\nSHLVL=0\nSSH_CLIENT=142.166.156.237 55981 22\nSSH_CONNECTION=142.166.156.237 55981 144.202.2.16 22\nUSER=root\nXDG_RUNTIME_DIR=/run/user/0\nXDG_SESSION_CLASS=user\nXDG_SESSION_ID=57\nXDG_SESSION_TYPE=tty\n_=/usr/bin/setsid\n--- JUP QUOTE USDC->SOL (1510152 raw) ---\njup err fetch failed\n--- SOL PRICE ---\n{\"solana\":{\"usd\":95.64}}\n"
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "FLYbPdF1UKXfjyrSTzpqkJ5gsH91PXBqv89WNzMCpsmf"
+          },
+          {
+            "mint": "5G2ND6DnwSPHa5kcV8sLhqzYXbAbprFMdX3eVY7U1Gsk"
+          },
+          {
+            "mint": "4qeHuFtAfTspKeNvooNCNiicyEkRhpLU4kJYVznq72EX"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "ede28236f440ad22d1c5bf6f2a278dda05f6616370321a1c2cbda78e255d6d12",
+          "seq": 2400
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 20924,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 20927,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 20928,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 20940,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 20948,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 20954,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481867
+      },
       "children": [
         {
           "deploymentId": "cmvwbl2bk0018zmb375yaehaa",
@@ -5590,6 +9268,175 @@
       "endpoint": "http://144.202.2.16:8083",
       "birth_id": "a1810e09-d9d2-4a77-8b5a-db33661c0a9f",
       "deploymentId": "vps:144.202.2.16:8083",
+      "live": true,
+      "status": {
+        "phase": "identity_sealed",
+        "birth_id": "a1810e09-d9d2-4a77-8b5a-db33661c0a9f",
+        "solana": "BS9zuuiyDa96nPZ5c48KGTBLzdvmLUadBPhUmnDgYVen",
+        "evm": "0xdc1e48eeba61d84bdc875250a8c5d54ed12ea9cc",
+        "t0": 1793443737,
+        "image": {
+          "birth_digest": "sha256:666378372197e7dafb87bb816a4d4688ec85e182b8a24686ae81e3b14693ce9b",
+          "core_digest_now": "sha256:601fc3f317128da39ddb45ccb7d85b07d79f816d26014258f5cde352b75088f4",
+          "match": false,
+          "meaning": "digest of the measured core files this guest is running"
+        },
+        "updated_at": 1793481866,
+        "distribution": {
+          "next_due_unix": 1793530137,
+          "next_due_epoch": 1,
+          "highest_epoch": 0,
+          "obligations": 0,
+          "by_status": {},
+          "reserved": {},
+          "carries": {
+            "parent": {},
+            "founder": {}
+          },
+          "arrears_raw": {},
+          "blocked": [],
+          "unresolved_epochs": {},
+          "anchors": {},
+          "supervisor": "deterministic: no model, no credits, no approval step"
+        },
+        "inference": {
+          "provider": "venice",
+          "model": "deepseek-v4-1-flash-1017-uncensored",
+          "mode": "external_paid_abliterated",
+          "credits_usd": 3.98400297,
+          "balance_http": 200,
+          "admission_floor_usd": 0.1,
+          "wallet_usdc_raw": "1510514",
+          "wallet_sol_raw": "1237614",
+          "state": "ready"
+        },
+        "funding": {
+          "sol_raw": "1237614",
+          "usdc_raw": "1510514",
+          "ledger_totals": {
+            "native:SOL": "1237614",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "1510514"
+          },
+          "spendable": {
+            "native:SOL": "0",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "1510514"
+          }
+        },
+        "last_decision": {
+          "at": 1793481866,
+          "tools": [
+            "get_state"
+          ],
+          "cost_usd": 0.002039,
+          "content": null,
+          "error": null,
+          "usage": {
+            "prompt_tokens": 2871,
+            "completion_tokens": 1451,
+            "total_tokens": 4322,
+            "prompt_tokens_details": {
+              "cached_tokens": 2560
+            },
+            "cache_read_input_tokens": 2560,
+            "completion_tokens_details": {
+              "reasoning_tokens": 1428
+            }
+          },
+          "call_results": [
+            {
+              "name": "get_state",
+              "result": {
+                "state": {
+                  "age_seconds": 38129,
+                  "next_distribution_unix": 1793530137,
+                  "balances_last_snapshot": {
+                    "native:SOL": "1237614",
+                    "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "1510514"
+                  },
+                  "reserved": {},
+                  "distribution": {
+                    "by_status": {},
+                    "blocked": [],
+                    "arrears": {}
+                  },
+                  "flashloan_candidates": [],
+                  "inference": {
+                    "provider": "venice",
+                    "model": "deepseek-v4-1-flash-1017-uncensored",
+                    "mode": "external_paid_abliterated",
+                    "credits_usd": 3.98737259,
+                    "balance_http": 200,
+                    "admission_floor_usd": 0.1,
+                    "wallet_usdc_raw": "1510514",
+                    "wallet_sol_raw": "1237614",
+                    "state": "ready"
+                  }
+                },
+                "sol_usdc": {
+                  "sol_raw": "1237614",
+                  "usdc_raw": "1510514"
+                }
+              }
+            }
+          ]
+        },
+        "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
+        "prime_directives": [
+          "make money",
+          "respect thy mother n father"
+        ],
+        "overrides": [],
+        "identity_binding": "identity_binding_unverified",
+        "launches": [
+          {
+            "mint": "G9WhFwPmwpqmdniyAnhEChcKCwDgUAbEta6KsWADgjCd"
+          },
+          {
+            "mint": "8EhJjmBy8szJJewtPjg78w3BzgRdU5nthhL5uRKSdUMJ"
+          },
+          {
+            "mint": "FQKRTPqNGyeeXuQBzGAgNSauphAYzyWiEGRpGpqu89NB"
+          }
+        ],
+        "children": [],
+        "journal": {
+          "head": "e81b4730ff71037e1649d52bba120e89466b818daf7dfafdb38f1d46f58bb193",
+          "seq": 2377
+        },
+        "components": {
+          "signer": {
+            "alive": true,
+            "pid": 20869,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 20870,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 20871,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 20872,
+            "ts": 1793481866
+          },
+          "loops": {
+            "alive": true,
+            "pid": 20878,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 20884,
+            "restarts": 1
+          }
+        },
+        "served_at": 1793481867
+      },
       "children": [
         {
           "deploymentId": "cmvwbl1p50016zmb382idmegx",
