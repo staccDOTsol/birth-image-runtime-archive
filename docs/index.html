@@ -161,7 +161,11 @@ function card(node) {
 function render(initial) {
   const grid = $('grid');
   if (initial) grid.replaceChildren();
-  const sorted = [...nodes].sort((a, b) => a.depth - b.depth || (a.data ? 0 : 1) - (b.data ? 0 : 1));
+  const sorted = [...nodes].sort((a, b) =>
+    (b.fresh ? 1 : 0) - (a.fresh ? 1 : 0) ||
+    ((b.data?.last_decision?.at || 0) - (a.data?.last_decision?.at || 0)) ||
+    (a.depth - b.depth) ||
+    ((b.at || 0) - (a.at || 0)));
   for (const n of sorted) {
     const fresh = card(n);
     const old = cards.get(n.endpoint);
