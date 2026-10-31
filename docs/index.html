@@ -202,6 +202,17 @@ async function refresh() {
   for (const e of roots) if (!nodes.find((n) => n.endpoint === e)) nodes.push({ endpoint: e, depth: 0, data: null, at: 0 });
   render(false);
 
+  // gen2 nodes: children published by a root in roots.json, shown as their own cards
+  try {
+    const doc = await (await fetch('roots.json', { cache: 'no-store' })).json();
+    for (const r of (doc.roots || [])) {
+      for (const c of (r.children || [])) {
+        const ep = c.endpoint || null;
+        if (!ep || nodes.find((n) => n.endpoint === ep)) continue;
+        nodes.push({ endpoint: ep, depth: 1, data: null, at: 0, gen2: true, parent: r.endpoint, born_at: c.created_at || null, birth_id: c.birth_id || null });
+      }
+    }
+  } catch {}
   const byEndpoint = new Map(nodes.map((n) => [n.endpoint, n]));
   let frontier = roots.map((e) => ({ endpoint: e, depth: 0 }));
   const seen = new Set();
