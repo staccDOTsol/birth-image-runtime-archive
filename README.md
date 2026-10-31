@@ -129,6 +129,19 @@ Both sweeps simulated clean before sending (`sweep_creator_fee` + the coin's bon
 - **Pump launch**: `create_v2` (+ optional dev buy), simulated before send; canonical account order with a live template when one is visible.
 - **Healing**: `bin/heal.mjs` treats a child as alive only if `/status` answers; a provider-"running" but silent child is destroyed and replaced. `bin/renew-children.mjs` renews leases before they lapse.
 
+### The earning loop closes
+
+Curve fees → creator vault → wallet, all signed by the agent:
+
+```
+sweep_creator_fee   moves the coin's accrued fees off the curve into the creator vault
+collect_creator_fee  pays the vault out to the creator account
+tx 3ZLAE21Ac6A84wkC3tAEZmZcvJ4tHsdY8RiFTmJVmfRTHxr4S5b5QXDHykxyNqXmE59w3ULfcERHMsXye38GXa2e
+wallet 0.5318 → 0.6207 SOL  (+0.0888, the vault balance)
+```
+
+`collect_creator_fee` is built from the pump IDL directly: discriminator `[20,22,86,123,198,28,219,132]`, accounts `creator, creator_vault (PDA "creator-vault"+creator), system_program, event_authority, program`, no args. The payout is now part of `pump_collect` and of the `BirthEarn` task, so any child that launches a coin can sweep and cash out without a human.
+
 ### Where the creator fees sit
 
 `sweep_creator_fee` moved the coin's accrued fees off the curve into the agent's **creator vault** — `88,849,314` lamports (0.0888 SOL) and still accruing. That is a real balance, but it is not yet spendable SOL:
