@@ -108,6 +108,20 @@ on-chain  CreateEvent: name "Birth Test", symbol "BIRTHT", uri https://example.c
 
 The earlier hand-rolled `create_v2` died in simulation with `memory allocation failed`; the SDK's `createV2Instruction` replaced it and the same call now lands. `devbuyLamports > 0` adds the SDK's `buyInstructions` in the same transaction.
 
+### First revenue: launch → fees → sweep
+
+The agent launched a token and has now swept its creator fees twice, on mainnet, with its own key:
+
+```
+mint              gET2j9pXbL5XHscZAbZmhw1HT7BRJdcAdMp8mqvzDQA
+launch tx          avVpDcRuUiqwrwCpzxT9j79dLPVXx26BmQK4qt89xohcpz1XYrQKLA19UfekkqcpR41iZzYWHiKB8AjBEajWXkB
+sweep 1            3kzbP7m7KWjBBdMjx6zDpFvSCm1Q2XzkRbBhH61Fbp7tW5X1Qz4uGQxtWLQnmsL8hFgfVud7PsABMofcJHGz1HQb
+sweep 2            5fv49MsJro8Pb8YabQVjHQWN2o4otkphQnpVNcDPCHPoS3qJDpk6NuuzqKMh6o7mqNGcJNFfcPu5bawszdjR98RX
+creator vault      20,437,167 → swept; accrued again to 87,435,642 lamports; swept again
+```
+
+Both sweeps simulated clean before sending (`sweep_creator_fee` + the coin's bonding curve). The first attempt failed with `MintDoesNotMatchBondingCurve` because the quote mint was passed as USDC; for a SOL-quoted coin the quote mint is wrapped SOL.
+
 ## What the runtime does now
 
 - **Five supervised workers** per child: signer, distributor, identity server, brain, strategy — restarted in a loop by the watchdog, and the whole watchdog restarted by the shell if it exits.
