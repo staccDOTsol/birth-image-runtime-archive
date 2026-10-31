@@ -1,5 +1,5 @@
 {
-  "at": 1793438383,
+  "at": 1793438599,
   "roots": [
     {
       "endpoint": "http://140.82.12.62",
@@ -262,12 +262,6 @@
       "children": []
     },
     {
-      "endpoint": "http://45.77.217.220",
-      "birth_id": "dd9b0e6b-54f1-49a5-9de1-f4bbfe39373a",
-      "deploymentId": "vps:45.77.217.220",
-      "children": []
-    },
-    {
       "endpoint": "http://64.176.202.160",
       "birth_id": "16d143c0-f4f1-424f-bf3f-129cc18806e5",
       "deploymentId": "vps:64.176.202.160",
@@ -278,6 +272,29 @@
           "birth_id": null,
           "address": null,
           "created_at": 1793430450,
+          "status": "leased"
+        }
+      ]
+    },
+    {
+      "endpoint": "http://140.82.12.62:8082",
+      "birth_id": "e2aa7150-f5b7-4bd0-99a8-b81b7a5706bd",
+      "deploymentId": "vps:140.82.12.62:8082",
+      "children": [
+        {
+          "deploymentId": "cmvw5opj1006rqkciuwsa1egu",
+          "endpoint": "https://b4461f762b54d6bf9aae88915c8175f8f6af7df8-8787.dstack-pha-prod9.phala.network",
+          "birth_id": null,
+          "address": null,
+          "created_at": 1793436345,
+          "status": "leased"
+        },
+        {
+          "deploymentId": "cmvw5p3t40072qkciswa9my4l",
+          "endpoint": "https://0accfddb61150ad6c92cbfec00e78177d4472978-8787.dstack-pha-prod9.phala.network",
+          "birth_id": null,
+          "address": null,
+          "created_at": 1793436362,
           "status": "leased"
         }
       ]
@@ -306,13 +323,19 @@
       ]
     },
     {
+      "endpoint": "http://45.77.107.102:8081",
+      "birth_id": "9b9f8d10-6fcc-4a6c-81df-1c416cb45988",
+      "deploymentId": "vps:45.77.107.102:8081",
+      "children": []
+    },
+    {
       "endpoint": "http://45.77.107.102:8083",
       "birth_id": "934f333c-2e24-4657-96ec-7511a6f4c848",
       "deploymentId": "vps:45.77.107.102:8083",
       "children": [
         {
           "deploymentId": "cmvw5jtz7003vqkci03hkrnih",
-          "endpoint": null,
+          "endpoint": "https://d77c3d26a2a799e603b86d340a35780995052ff3-8787.dstack-pha-prod5.phala.network",
           "birth_id": null,
           "address": null,
           "created_at": 1793436108,
@@ -320,7 +343,7 @@
         },
         {
           "deploymentId": "cmvw5kpgx004iqkcig77m258p",
-          "endpoint": null,
+          "endpoint": "https://18a4300b095c92b4a6821655ac830ab1d9755d09-8787.dstack-pha-prod5.phala.network",
           "birth_id": null,
           "address": null,
           "created_at": 1793436162,
@@ -396,58 +419,6 @@
           "status": "leased"
         }
       ]
-    },
-    {
-      "endpoint": "http://45.77.217.220:8081",
-      "birth_id": "52cfa240-0311-4941-a088-ce1fa9bd586e",
-      "deploymentId": "vps:45.77.217.220:8081",
-      "children": [
-        {
-          "deploymentId": "cmvw5mj130058qkcitcqi3ot7",
-          "endpoint": null,
-          "birth_id": null,
-          "address": null,
-          "created_at": 1793436233,
-          "status": "leased"
-        },
-        {
-          "deploymentId": "cmvw5n7r10061qkcie6wqe636",
-          "endpoint": null,
-          "birth_id": null,
-          "address": null,
-          "created_at": 1793436266,
-          "status": "leased"
-        }
-      ]
-    },
-    {
-      "endpoint": "http://45.77.217.220:8082",
-      "birth_id": "0c2166d7-921e-4068-af2a-bebe11ca8ea2",
-      "deploymentId": "vps:45.77.217.220:8082",
-      "children": [
-        {
-          "deploymentId": "cmvw5mc6x0050qkci3lppluib",
-          "endpoint": null,
-          "birth_id": null,
-          "address": null,
-          "created_at": 1793436228,
-          "status": "leased"
-        },
-        {
-          "deploymentId": "cmvw5mjkh005aqkcim75se855",
-          "endpoint": null,
-          "birth_id": null,
-          "address": null,
-          "created_at": 1793436233,
-          "status": "leased"
-        }
-      ]
-    },
-    {
-      "endpoint": "http://45.77.217.220:8083",
-      "birth_id": "c5694cab-5f66-4883-9f8b-4dbab79ff2ed",
-      "deploymentId": "vps:45.77.217.220:8083",
-      "children": []
     },
     {
       "endpoint": "http://64.176.202.160:8082",
