@@ -271,9 +271,10 @@ async function refresh() {
     frontier = next;
     depth++;
   }
-  // drop nodes we haven't seen this pass for > 3 minutes
+  // drop nodes we haven't seen this pass for > 2 minutes — but never drop a birth:
+  // a child with no endpoint has no way to be "seen" and must still get its card
   const cutoff = Date.now() - 120000;
-  nodes = nodes.filter((n) => seen.has(n.endpoint) ? true : (n.at || 0) > cutoff);
+  nodes = nodes.filter((n) => seen.has(n.endpoint) || n.gen2 || (n.at || 0) > cutoff);
   saveCache();
   render(false);
 }
