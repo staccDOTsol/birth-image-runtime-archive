@@ -38,6 +38,7 @@
 <script>
 const ROOTS = (window.ROOTS || []);
 const GEN_OF = new Map(); // endpoint -> generation, from the published tree
+const ROOT_SET = new Set(); // endpoints published as roots = gen 1
 const ROOTS_URL = 'roots.json';
 const PROXIES = [
   (u) => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
@@ -126,7 +127,9 @@ function card(node) {
   const head = el('div', 'row');
   const left = el('div');
   left.append(el('span', 'dot ' + (node.fresh ? 'up' : (node.data ? 'pend' : 'down'))), el('span', 'mono', (node.data?.birth_id || node.id || node.endpoint.replace(/^https:\/\//, '')).slice(0, 14)));
-  const gen = GEN_OF.get(node.endpoint) || (node.depth || 0) + 1;
+  // generation is structural: anything published as a root is gen 1, anything else is somebody's child
+  const epKey = String(node.endpoint || '').replace(//$/, '');
+  const gen = GEN_OF.get(epKey) || (ROOT_SET.size && !ROOT_SET.has(epKey) ? 2 : (node.depth || 0) + 1);
   head.append(left, el('span', 'k gen-chip', `GEN ${gen}`), el('span', 'k', node.fresh ? 'live' : (node.data ? 'cached' : 'no answer')));
   c.append(head);
   const d = node.data || {};
@@ -210,7 +213,7 @@ async function loadRoots() {
 async function refresh() {
   const roots = await loadRoots();
   // instant paint: show every known root before any network result arrives
-  for (const e of roots) if (!nodes.find((n) => n.endpoint === e)) nodes.push({ endpoint: e, depth: 0, data: null, at: 0 });
+  for (const e of roots) { ROOT_SET.add(String(e).replace(//$/, '')); if (!nodes.find((n) => n.endpoint === e)) nodes.push({ endpoint: e, depth: 0, data: null, at: 0 }); }
   render(false);
 
   // gen2 nodes: children published by a root in roots.json, shown as their own cards
