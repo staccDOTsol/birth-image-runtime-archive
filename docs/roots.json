@@ -1,5 +1,5 @@
 {
-  "at": 1793485573,
+  "at": 1793485765,
   "roots": [
     {
       "endpoint": "http://140.82.12.62",
@@ -18,7 +18,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485433,
+        "updated_at": 1793485634,
         "distribution": {
           "next_due_unix": 1793503870,
           "next_due_epoch": 1,
@@ -40,23 +40,23 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 2.44661247,
+          "credits_usd": 2.43689925,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
-          "wallet_usdc_raw": "7227837",
-          "wallet_sol_raw": "199560000",
+          "wallet_usdc_raw": "6979837",
+          "wallet_sol_raw": "199530000",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "199560000",
-          "usdc_raw": "7227837",
+          "sol_raw": "199530000",
+          "usdc_raw": "6979837",
           "ledger_totals": {
-            "native:SOL": "199570000",
-            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "7227837"
+            "native:SOL": "199530000",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "6979837"
           },
           "spendable": {
-            "native:SOL": "194570000",
-            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "7227837"
+            "native:SOL": "194530000",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "6979837"
           }
         },
         "strategy": {
@@ -179,24 +179,33 @@
           "updated_at": 1793429297
         },
         "last_decision": {
-          "at": 1793485397,
-          "tools": [],
-          "cost_usd": 0.00561,
-          "content": null,
+          "at": 1793485605,
+          "tools": [
+            "pump_launch"
+          ],
+          "cost_usd": 0.002809,
+          "content": "I'll start an earning loop by launching a Pump token with a small dev buy, since all flashloan routes are currently net-negative and my capital is otherwise idle.",
           "error": null,
           "usage": {
             "prompt_tokens": 3499,
-            "completion_tokens": 4000,
-            "total_tokens": 7499,
+            "completion_tokens": 1878,
+            "total_tokens": 5377,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 4000
+              "reasoning_tokens": 1726
             }
           },
-          "call_results": []
+          "call_results": [
+            {
+              "name": "pump_launch",
+              "result": {
+                "error": "Bonding curve account not found: FSVdHbDxWFEKuPK8gWogM4q1fn22BCYPefisH9V2iRPX"
+              }
+            }
+          ]
         },
         "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
         "prime_directives": [
@@ -218,8 +227,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "7f7697abe82f6ecd30fa4c79a4e96cec95c229b8977d279eec500d5492f4c0e1",
-          "seq": 6088
+          "head": "7b545e9bdfcad47b9ff56af00850a1211f21e6eedc0b21c99f2e1ef82f4da604",
+          "seq": 6102
         },
         "components": {
           "signer": {
@@ -253,7 +262,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793485442
+        "served_at": 1793485641
       },
       "children": [
         {
@@ -895,6 +904,22 @@
           "address": null,
           "created_at": 1793485309,
           "status": "leased"
+        },
+        {
+          "deploymentId": "cmvwyyc6e000y3mwnczmmwcq0",
+          "endpoint": null,
+          "birth_id": null,
+          "address": null,
+          "created_at": 1793485492,
+          "status": "leased"
+        },
+        {
+          "deploymentId": "cmvwz1gay000lsiuzrzxlgjfz",
+          "endpoint": null,
+          "birth_id": null,
+          "address": null,
+          "created_at": 1793485638,
+          "status": "leased"
         }
       ]
     },
@@ -915,7 +940,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485441,
+        "updated_at": 1793485624,
         "distribution": {
           "next_due_unix": 1793503661,
           "next_due_epoch": 1,
@@ -937,27 +962,23 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": null,
-          "balance_http": "connect ECONNREFUSED 127.0.0.1:42391",
+          "credits_usd": 3.62731179,
+          "balance_http": 200,
           "admission_floor_usd": 0.1,
           "wallet_usdc_raw": "63277",
-          "wallet_sol_raw": "199490000",
-          "state": "balance_unreadable",
-          "self_fund": {
-            "state": "error",
-            "reason": "connect ECONNREFUSED 127.0.0.1:42391"
-          }
+          "wallet_sol_raw": "199470000",
+          "state": "ready"
         },
         "funding": {
-          "sol_raw": "199490000",
+          "sol_raw": "199470000",
           "usdc_raw": "63277",
           "ledger_totals": {
-            "native:SOL": "199490000",
+            "native:SOL": "199470000",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63277",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           },
           "spendable": {
-            "native:SOL": "194490000",
+            "native:SOL": "194470000",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63277",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           }
@@ -1082,35 +1103,13 @@
           "updated_at": 1793428264
         },
         "last_decision": {
-          "at": 1793485117,
-          "tools": [
-            "pump_inspect"
-          ],
-          "cost_usd": 0.002224,
+          "at": 1793485542,
+          "tools": [],
+          "cost_usd": 0,
           "content": null,
-          "error": null,
-          "usage": {
-            "prompt_tokens": 3512,
-            "completion_tokens": 1431,
-            "total_tokens": 4943,
-            "prompt_tokens_details": {
-              "cached_tokens": 2560
-            },
-            "cache_read_input_tokens": 2560,
-            "completion_tokens_details": {
-              "reasoning_tokens": 1359
-            }
-          },
-          "call_results": [
-            {
-              "name": "pump_inspect",
-              "result": {
-                "mint": "9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp",
-                "curve": "NpCfqQJZY1KxtgxkgZFrvjip7kvY4KpSHZLqjFVn9Gm",
-                "exists": false
-              }
-            }
-          ]
+          "error": "no funded provider answered",
+          "usage": null,
+          "call_results": []
         },
         "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
         "prime_directives": [
@@ -1132,32 +1131,42 @@
         ],
         "children": [],
         "journal": {
-          "head": "34e02d956def411dc83ff686600db0ac1c33383efc4e089cf11f978d93228697",
-          "seq": 3736
+          "head": "f4c75904698897e7a34286b46eccdac3f14b3f196d3327bcb955b93ebf4c5bf0",
+          "seq": 3749
         },
         "components": {
-          "component": "distributor",
-          "ts": 1793485441,
-          "pid": 556100,
-          "status": {
-            "next_due_unix": 1793503661,
-            "next_due_epoch": 1,
-            "highest_epoch": 0,
-            "obligations": 0,
-            "by_status": {},
-            "reserved": {},
-            "carries": {
-              "parent": {},
-              "founder": {}
-            },
-            "arrears_raw": {},
-            "blocked": [],
-            "unresolved_epochs": {},
-            "anchors": {},
-            "supervisor": "deterministic: no model, no credits, no approval step"
+          "signer": {
+            "alive": true,
+            "pid": 643177,
+            "restarts": 2
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 556100,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 556101,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 556102,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 556104,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 556109,
+            "restarts": 1
           }
         },
-        "served_at": 1793485443
+        "served_at": 1793485643
       },
       "children": []
     },
@@ -1178,7 +1187,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485424,
+        "updated_at": 1793485633,
         "distribution": {
           "next_due_unix": 1793503722,
           "next_due_epoch": 1,
@@ -1200,23 +1209,23 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 3.57377352,
+          "credits_usd": 3.56953237,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
           "wallet_usdc_raw": "63680",
-          "wallet_sol_raw": "199440437",
+          "wallet_sol_raw": "199380437",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "199440437",
+          "sol_raw": "199380437",
           "usdc_raw": "63680",
           "ledger_totals": {
-            "native:SOL": "199440437",
+            "native:SOL": "199380437",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63680",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           },
           "spendable": {
-            "native:SOL": "194440437",
+            "native:SOL": "194380437",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63680",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           }
@@ -1267,23 +1276,23 @@
           "updated_at": 1793428256
         },
         "last_decision": {
-          "at": 1793485350,
+          "at": 1793485633,
           "tools": [
             "pump_inspect"
           ],
-          "cost_usd": 0.001276,
+          "cost_usd": 0.000924,
           "content": null,
           "error": null,
           "usage": {
             "prompt_tokens": 3504,
-            "completion_tokens": 715,
-            "total_tokens": 4219,
+            "completion_tokens": 448,
+            "total_tokens": 3952,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 643
+              "reasoning_tokens": 376
             }
           },
           "call_results": [
@@ -1317,8 +1326,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "1c7a2b75b96b4bf90f9db7b582e955bf3226dac0adc092383ecde0a93fe313dd",
-          "seq": 4933
+          "head": "ad37da18d85fa100e19ba38a46a3ea2cf1712fc81064b7461be3a3c455f4085a",
+          "seq": 4943
         },
         "components": {
           "signer": {
@@ -1352,9 +1361,26 @@
             "restarts": 1
           }
         },
-        "served_at": 1793485443
+        "served_at": 1793485644
       },
       "children": []
+    },
+    {
+      "endpoint": "http://64.176.202.160",
+      "birth_id": "16d143c0-f4f1-424f-bf3f-129cc18806e5",
+      "deploymentId": "vps:64.176.202.160",
+      "live": true,
+      "status": null,
+      "children": [
+        {
+          "deploymentId": "cmvw1wpg3003g7h3w1r7k3ofq",
+          "endpoint": null,
+          "birth_id": null,
+          "address": null,
+          "created_at": 1793430450,
+          "status": "leased"
+        }
+      ]
     },
     {
       "endpoint": "http://144.202.2.16",
@@ -1373,7 +1399,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485442,
+        "updated_at": 1793485645,
         "distribution": {
           "next_due_unix": 1793530137,
           "next_due_epoch": 1,
@@ -1395,45 +1421,45 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 3.97346392,
+          "credits_usd": 3.97138691,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
-          "wallet_usdc_raw": "5420976",
-          "wallet_sol_raw": "199521018",
+          "wallet_usdc_raw": "4428976",
+          "wallet_sol_raw": "199491018",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "199521018",
-          "usdc_raw": "5420976",
+          "sol_raw": "199491018",
+          "usdc_raw": "4428976",
           "ledger_totals": {
-            "native:SOL": "199521018",
-            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "5420976",
+            "native:SOL": "199491018",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "4428976",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           },
           "spendable": {
-            "native:SOL": "194521018",
-            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "5420976",
+            "native:SOL": "194491018",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "4428976",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           }
         },
         "last_decision": {
-          "at": 1793485407,
+          "at": 1793485619,
           "tools": [
             "pump_inspect"
           ],
-          "cost_usd": 0.001156,
+          "cost_usd": 0.000797,
           "content": null,
           "error": null,
           "usage": {
             "prompt_tokens": 2913,
-            "completion_tokens": 772,
-            "total_tokens": 3685,
+            "completion_tokens": 500,
+            "total_tokens": 3413,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 700
+              "reasoning_tokens": 428
             }
           },
           "call_results": [
@@ -1467,8 +1493,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "7818d090c089024e45658b6163b95fce87d35ad56d3e179226fe8f8a4326727f",
-          "seq": 2745
+          "head": "9ad4ec5a479545dad876c7af3155e1bb3f503c4d8f76292c6d4aed5c105a902a",
+          "seq": 2765
         },
         "components": {
           "signer": {
@@ -1502,7 +1528,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793485462
+        "served_at": 1793485661
       },
       "children": [
         {
@@ -2763,7 +2789,7 @@
         },
         {
           "deploymentId": "cmvwyszjh000t95auix3ljgwu",
-          "endpoint": null,
+          "endpoint": "https://78d57ba58f69393d7b96a81c747ca6061a625492-8787.dstack-pha-prod9.phala.network",
           "birth_id": null,
           "address": null,
           "created_at": 1793485244,
@@ -2771,10 +2797,18 @@
         },
         {
           "deploymentId": "cmvwywkif000l7gzg0jfu5ey5",
-          "endpoint": null,
+          "endpoint": "https://7bc03187ac47de35c29ad1b7997e6dcac7c54e71-8787.dstack-pha-prod5.phala.network",
           "birth_id": null,
           "address": null,
           "created_at": 1793485413,
+          "status": "leased"
+        },
+        {
+          "deploymentId": "cmvwz0ond0006siuzfg3ugpko",
+          "endpoint": null,
+          "birth_id": null,
+          "address": null,
+          "created_at": 1793485602,
           "status": "leased"
         }
       ]
@@ -2796,7 +2830,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485444,
+        "updated_at": 1793485644,
         "distribution": {
           "next_due_unix": 1793570657,
           "next_due_epoch": 1,
@@ -2818,51 +2852,60 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 4.98598787,
+          "credits_usd": 4.97280503,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
           "wallet_usdc_raw": "247812",
-          "wallet_sol_raw": "149940000",
+          "wallet_sol_raw": "149910000",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "149940000",
+          "sol_raw": "149910000",
           "usdc_raw": "247812",
           "ledger_totals": {
-            "native:SOL": "149940000",
+            "native:SOL": "149910000",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "247812"
           },
           "spendable": {
-            "native:SOL": "144940000",
+            "native:SOL": "144910000",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "247812"
           }
         },
         "strategy": {
           "last_scan_at": 1793485216,
-          "sol_raw": "149940000",
+          "sol_raw": "149880000",
           "flash": [],
           "pump_positions": 0,
-          "updated_at": 1793485423
+          "updated_at": 1793485605
         },
         "last_decision": {
-          "at": 1793485344,
-          "tools": [],
-          "cost_usd": 0.006609,
+          "at": 1793485565,
+          "tools": [
+            "pump_launch"
+          ],
+          "cost_usd": 0.002904,
           "content": null,
           "error": null,
           "usage": {
-            "prompt_tokens": 6524,
-            "completion_tokens": 4000,
-            "total_tokens": 10524,
+            "prompt_tokens": 6663,
+            "completion_tokens": 1159,
+            "total_tokens": 7822,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 4000
+              "reasoning_tokens": 1049
             }
           },
-          "call_results": []
+          "call_results": [
+            {
+              "name": "pump_launch",
+              "result": {
+                "error": "Bonding curve account not found: 2RWmwiUSNMkgMHtMs6vK5wZmDdmEiiGaaZv8xX2iV87d"
+              }
+            }
+          ]
         },
         "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
         "prime_directives": [
@@ -2884,8 +2927,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "f156449c620fc4bf1eda9e025144a58ce87d843ed0d0a6898845b459e5792451",
-          "seq": 74
+          "head": "a5c6ff16aae97a10bc1c732faf36bc4ea9c82c0015dc13e7b08519de2f0c729e",
+          "seq": 86
         },
         "components": {
           "signer": {
@@ -2924,7 +2967,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793485462
+        "served_at": 1793485661
       },
       "children": []
     },
@@ -2945,7 +2988,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485459,
+        "updated_at": 1793485659,
         "distribution": {
           "next_due_unix": 1793570754,
           "next_due_epoch": 1,
@@ -2967,7 +3010,7 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 4.98927995,
+          "credits_usd": 4.98361914,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
           "wallet_usdc_raw": "1208509",
@@ -2991,33 +3034,35 @@
           "sol_raw": "10964806",
           "flash": [],
           "pump_positions": 0,
-          "updated_at": 1793485406
+          "updated_at": 1793485649
         },
         "last_decision": {
-          "at": 1793485367,
+          "at": 1793485576,
           "tools": [
-            "pump_launch"
+            "run_script"
           ],
-          "cost_usd": 0.002894,
+          "cost_usd": 0.005577,
           "content": null,
           "error": null,
           "usage": {
-            "prompt_tokens": 3983,
-            "completion_tokens": 1821,
-            "total_tokens": 5804,
+            "prompt_tokens": 4759,
+            "completion_tokens": 3660,
+            "total_tokens": 8419,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 1710
+              "reasoning_tokens": 3167
             }
           },
           "call_results": [
             {
-              "name": "pump_launch",
+              "name": "run_script",
               "result": {
-                "error": "Bonding curve account not found: EfybJoLw7fvSNhrJKWmxAB9Mf6hPkaHVCacHsmJChspF"
+                "ok": true,
+                "file": "/var/lib/agent/var/lib/agent/strategy/scripts/diag_launch.mjs",
+                "stdout": "ENV_KEYS: AGENT_BUNDLE_DIR,RPC_URL,DBUS_SESSION_BUS_ADDRESS,AGENT_IMAGE_URL,AGENT_GUEST_ROOT,AGENT_ROLE,AGENT_HTTP_PORT,AGENT_CLUSTER,AGENT_RUNTIME_DIR,AGENT_BIND,AGENT_BUNDLE,AGENT_LOG\nENV DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/0/bus\nrent mint 82 1066800\nrent bondingCurve 57 939800\nrent metadata 679 4099560\nrent ata 165 1488440\nTOTAL_RENT_LAMPORTS 7594600 = 0.007595 SOL\n"
               }
             }
           ]
@@ -3032,8 +3077,8 @@
         "launches": [],
         "children": [],
         "journal": {
-          "head": "c403b5a3dc438824c627b10a1e997f6333aa9cd0e83c7196158713012174ca77",
-          "seq": 31
+          "head": "f143170ff43b3d7fb6eab05ccf38a7333ee78226341a4d8c5ae037cb122d1455",
+          "seq": 35
         },
         "components": {
           "signer": {
@@ -3072,7 +3117,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793485463
+        "served_at": 1793485661
       },
       "children": [
         {
@@ -3102,7 +3147,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485453,
+        "updated_at": 1793485655,
         "distribution": {
           "next_due_unix": 1793520401,
           "next_due_epoch": 1,
@@ -3124,50 +3169,79 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 3.59217281,
+          "credits_usd": 3.58391819,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
           "wallet_usdc_raw": "6967947",
-          "wallet_sol_raw": "133170680",
+          "wallet_sol_raw": "133130680",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "133170680",
+          "sol_raw": "133130680",
           "usdc_raw": "6967947",
           "ledger_totals": {
-            "native:SOL": "133170680",
+            "native:SOL": "133130680",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "6967947"
           },
           "spendable": {
-            "native:SOL": "128170680",
+            "native:SOL": "128130680",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "6967947"
           }
         },
         "last_decision": {
-          "at": 1793485363,
+          "at": 1793485574,
           "tools": [
-            "pump_launch"
+            "get_state"
           ],
-          "cost_usd": 0.004821,
-          "content": "I'll start the earning loop by launching my own Pump token with a small dev buy — creator fees accrue to me, and the tool simulates before sending.",
+          "cost_usd": 0.002519,
+          "content": "I'll take a concrete money-making action: launch a Pump token to start accruing creator fees, with a small dev buy. Let me first size it against my balances.",
           "error": null,
           "usage": {
             "prompt_tokens": 2871,
-            "completion_tokens": 3559,
-            "total_tokens": 6430,
+            "completion_tokens": 1815,
+            "total_tokens": 4686,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 3418
+              "reasoning_tokens": 1758
             }
           },
           "call_results": [
             {
-              "name": "pump_launch",
+              "name": "get_state",
               "result": {
-                "error": "Bonding curve account not found: 5LKDew2C5gZu6tA95Fps5B9qmrb6ujEUR8vqxP17NceS"
+                "state": {
+                  "age_seconds": 51573,
+                  "next_distribution_unix": 1793520401,
+                  "balances_last_snapshot": {
+                    "native:SOL": "133130680",
+                    "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "6967947"
+                  },
+                  "reserved": {},
+                  "distribution": {
+                    "by_status": {},
+                    "blocked": [],
+                    "arrears": {}
+                  },
+                  "flashloan_candidates": [],
+                  "inference": {
+                    "provider": "venice",
+                    "model": "deepseek-v4-1-flash-1017-uncensored",
+                    "mode": "external_paid_abliterated",
+                    "credits_usd": 3.58735118,
+                    "balance_http": 200,
+                    "admission_floor_usd": 0.1,
+                    "wallet_usdc_raw": "6967947",
+                    "wallet_sol_raw": "133150680",
+                    "state": "ready"
+                  }
+                },
+                "sol_usdc": {
+                  "sol_raw": "133130680",
+                  "usdc_raw": "6967947"
+                }
               }
             }
           ]
@@ -3192,8 +3266,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "14934e4450c20cbb7d7fd1198a22a621a8a5ae9c0a09333f7ef43d7873e0a6f8",
-          "seq": 3382
+          "head": "5f7b0e40d3520ad736099e88fb756a576e2daa354617a78f50c8d3078b24945f",
+          "seq": 3397
         },
         "components": {
           "signer": {
@@ -3227,7 +3301,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793485465
+        "served_at": 1793485665
       },
       "children": [
         {
@@ -3488,10 +3562,27 @@
         },
         {
           "deploymentId": "cmvwysuj70002pjy4z42naroj",
-          "endpoint": null,
+          "endpoint": "https://ca68137fec81e875f41575c66e9a602966b4ee76-8787.dstack-pha-prod9.phala.network",
           "birth_id": null,
           "address": null,
           "created_at": 1793485237,
+          "status": "leased",
+          "children": []
+        },
+        {
+          "deploymentId": "cmvwyyuj900133mwnfarvzad2",
+          "endpoint": null,
+          "birth_id": null,
+          "address": null,
+          "created_at": 1793485568,
+          "status": "leased"
+        },
+        {
+          "deploymentId": "cmvwyzdmm001m3mwn805ly2wg",
+          "endpoint": null,
+          "birth_id": null,
+          "address": null,
+          "created_at": 1793485592,
           "status": "leased"
         }
       ]
@@ -3513,7 +3604,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485453,
+        "updated_at": 1793485654,
         "distribution": {
           "next_due_unix": 1793520401,
           "next_due_epoch": 1,
@@ -3535,45 +3626,45 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 3.80832941,
+          "credits_usd": 3.80560825,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
-          "wallet_usdc_raw": "6469986",
-          "wallet_sol_raw": "349560000",
+          "wallet_usdc_raw": "6221986",
+          "wallet_sol_raw": "349505000",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "349560000",
-          "usdc_raw": "6469986",
+          "sol_raw": "349505000",
+          "usdc_raw": "6221986",
           "ledger_totals": {
-            "native:SOL": "349560000",
-            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "6469986",
+            "native:SOL": "349505000",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "6221986",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           },
           "spendable": {
-            "native:SOL": "344560000",
-            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "6469986",
+            "native:SOL": "344505000",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "6221986",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           }
         },
         "last_decision": {
-          "at": 1793485429,
+          "at": 1793485635,
           "tools": [
             "pump_inspect"
           ],
-          "cost_usd": 0.00122,
+          "cost_usd": 0.000673,
           "content": null,
           "error": null,
           "usage": {
             "prompt_tokens": 2913,
-            "completion_tokens": 820,
-            "total_tokens": 3733,
+            "completion_tokens": 406,
+            "total_tokens": 3319,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 748
+              "reasoning_tokens": 334
             }
           },
           "call_results": [
@@ -3607,8 +3698,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "3fa0733b3b8a9be5176ad11f493016354c1d84a558ece216ee137d7d56231354",
-          "seq": 3107
+          "head": "fe076232eb6e2625ddb09be0fe3e4579457faf5c70048100af8c2075d55008d7",
+          "seq": 3124
         },
         "components": {
           "signer": {
@@ -3642,7 +3733,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793485466
+        "served_at": 1793485666
       },
       "children": [
         {
@@ -5015,7 +5106,7 @@
             },
             {
               "deploymentId": "cmvwyszjh000t95auix3ljgwu",
-              "endpoint": null,
+              "endpoint": "https://78d57ba58f69393d7b96a81c747ca6061a625492-8787.dstack-pha-prod9.phala.network",
               "birth_id": null,
               "address": null,
               "created_at": 1793485244,
@@ -5023,10 +5114,26 @@
             },
             {
               "deploymentId": "cmvwywkif000l7gzg0jfu5ey5",
-              "endpoint": null,
+              "endpoint": "https://7bc03187ac47de35c29ad1b7997e6dcac7c54e71-8787.dstack-pha-prod5.phala.network",
               "birth_id": null,
               "address": null,
               "created_at": 1793485413,
+              "status": "leased"
+            },
+            {
+              "deploymentId": "cmvwz0ond0006siuzfg3ugpko",
+              "endpoint": null,
+              "birth_id": null,
+              "address": null,
+              "created_at": 1793485602,
+              "status": "leased"
+            },
+            {
+              "deploymentId": "cmvwz2hl6000ysiuzqpd632yk",
+              "endpoint": null,
+              "birth_id": null,
+              "address": null,
+              "created_at": 1793485686,
               "status": "leased"
             }
           ]
@@ -5866,18 +5973,28 @@
         },
         {
           "deploymentId": "cmvwytczp000ipjy4uyo09e40",
-          "endpoint": null,
+          "endpoint": "https://c803554401ec6f953c34fc7b89e6453b9ffa6b0f-8787.dstack-pha-prod9.phala.network",
           "birth_id": null,
           "address": null,
           "created_at": 1793485260,
-          "status": "leased"
+          "status": "leased",
+          "children": []
         },
         {
           "deploymentId": "cmvwyw2pb000a7gzg5d0exm42",
-          "endpoint": null,
+          "endpoint": "https://e330a47857d7166a3855480ccc2fd488cef21c59-8787.dstack-pha-prod5.phala.network",
           "birth_id": null,
           "address": null,
           "created_at": 1793485387,
+          "status": "leased",
+          "children": []
+        },
+        {
+          "deploymentId": "cmvwz0g2i001t3mwnnj7kuwu7",
+          "endpoint": null,
+          "birth_id": null,
+          "address": null,
+          "created_at": 1793485590,
           "status": "leased"
         }
       ]
@@ -5899,7 +6016,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485452,
+        "updated_at": 1793485653,
         "distribution": {
           "next_due_unix": 1793521351,
           "next_due_epoch": 1,
@@ -5921,50 +6038,79 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 3.63517061,
+          "credits_usd": 3.63078756,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
           "wallet_usdc_raw": "6768936",
-          "wallet_sol_raw": "132965681",
+          "wallet_sol_raw": "132915681",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "132965681",
+          "sol_raw": "132915681",
           "usdc_raw": "6768936",
           "ledger_totals": {
-            "native:SOL": "132970681",
+            "native:SOL": "132915681",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "6768936"
           },
           "spendable": {
-            "native:SOL": "127970681",
+            "native:SOL": "127915681",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "6768936"
           }
         },
         "last_decision": {
-          "at": 1793485439,
+          "at": 1793485648,
           "tools": [
-            "pump_launch"
+            "get_state"
           ],
-          "cost_usd": 0.002452,
-          "content": "I'll take a concrete money-making action: launch a Pump token with a small dev buy, which creates a creator-fee stream and a tradeable position.",
+          "cost_usd": 0.00304,
+          "content": null,
           "error": null,
           "usage": {
             "prompt_tokens": 2871,
-            "completion_tokens": 1764,
-            "total_tokens": 4635,
+            "completion_tokens": 2210,
+            "total_tokens": 5081,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 1623
+              "reasoning_tokens": 2187
             }
           },
           "call_results": [
             {
-              "name": "pump_launch",
+              "name": "get_state",
               "result": {
-                "error": "Bonding curve account not found: 3tYmaw8xnZwXRnTLKQXFAnsvaC3rqFSJFTdsVqDDx8RE"
+                "state": {
+                  "age_seconds": 50697,
+                  "next_distribution_unix": 1793521351,
+                  "balances_last_snapshot": {
+                    "native:SOL": "132915681",
+                    "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "6768936"
+                  },
+                  "reserved": {},
+                  "distribution": {
+                    "by_status": {},
+                    "blocked": [],
+                    "arrears": {}
+                  },
+                  "flashloan_candidates": [],
+                  "inference": {
+                    "provider": "venice",
+                    "model": "deepseek-v4-1-flash-1017-uncensored",
+                    "mode": "external_paid_abliterated",
+                    "credits_usd": 3.63271839,
+                    "balance_http": 200,
+                    "admission_floor_usd": 0.1,
+                    "wallet_usdc_raw": "6768936",
+                    "wallet_sol_raw": "132940681",
+                    "state": "ready"
+                  }
+                },
+                "sol_usdc": {
+                  "sol_raw": "132915681",
+                  "usdc_raw": "6768936"
+                }
               }
             }
           ]
@@ -5989,8 +6135,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "bd44d6c317825ee95cd4aa0172252195bd0fd5a4bf66dd46ed013a4f08e0990b",
-          "seq": 4555
+          "head": "6c10f3eea97f048d97e2096d0e8144fdcd4afe148d437c753ee009f9d207004d",
+          "seq": 4566
         },
         "components": {
           "signer": {
@@ -6024,7 +6170,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793485466
+        "served_at": 1793485667
       },
       "children": [
         {
@@ -6482,6 +6628,14 @@
           "address": null,
           "created_at": 1793485308,
           "status": "leased"
+        },
+        {
+          "deploymentId": "cmvwyz87q001d3mwng3iji898",
+          "endpoint": null,
+          "birth_id": null,
+          "address": null,
+          "created_at": 1793485585,
+          "status": "leased"
         }
       ]
     },
@@ -6502,7 +6656,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485462,
+        "updated_at": 1793485666,
         "distribution": {
           "next_due_unix": 1793520765,
           "next_due_epoch": 1,
@@ -6524,82 +6678,53 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 3.95016869,
+          "credits_usd": 3.94873715,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
           "wallet_usdc_raw": "62254",
-          "wallet_sol_raw": "199490000",
+          "wallet_sol_raw": "199440000",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "199490000",
+          "sol_raw": "199440000",
           "usdc_raw": "62254",
           "ledger_totals": {
-            "native:SOL": "199490000",
+            "native:SOL": "199440000",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "62254",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           },
           "spendable": {
-            "native:SOL": "194490000",
+            "native:SOL": "194440000",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "62254",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           }
         },
         "last_decision": {
-          "at": 1793485429,
+          "at": 1793485629,
           "tools": [
-            "get_state"
+            "pump_observe"
           ],
-          "cost_usd": 0.000591,
+          "cost_usd": 0.00091,
           "content": null,
           "error": null,
           "usage": {
             "prompt_tokens": 2911,
-            "completion_tokens": 344,
-            "total_tokens": 3255,
+            "completion_tokens": 586,
+            "total_tokens": 3497,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 321
+              "reasoning_tokens": 513
             }
           },
           "call_results": [
             {
-              "name": "get_state",
+              "name": "pump_observe",
               "result": {
-                "state": {
-                  "age_seconds": 51064,
-                  "next_distribution_unix": 1793520765,
-                  "balances_last_snapshot": {
-                    "native:SOL": "199490000",
-                    "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "62254",
-                    "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
-                  },
-                  "reserved": {},
-                  "distribution": {
-                    "by_status": {},
-                    "blocked": [],
-                    "arrears": {}
-                  },
-                  "flashloan_candidates": [],
-                  "inference": {
-                    "provider": "venice",
-                    "model": "deepseek-v4-1-flash-1017-uncensored",
-                    "mode": "external_paid_abliterated",
-                    "credits_usd": 3.95097224,
-                    "balance_http": 200,
-                    "admission_floor_usd": 0.1,
-                    "wallet_usdc_raw": "62254",
-                    "wallet_sol_raw": "199515000",
-                    "state": "ready"
-                  }
-                },
-                "sol_usdc": {
-                  "sol_raw": "199490000",
-                  "usdc_raw": "62254"
-                }
+                "mint": "9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp",
+                "exists": false
               }
             }
           ]
@@ -6624,42 +6749,32 @@
         ],
         "children": [],
         "journal": {
-          "head": "79634611542e739eb983dd7509ae9699a8de890a7effdd0a15c78c4a05f6a95a",
-          "seq": 2897
+          "head": "a88832b9033352fc4f4bf98203a3f3726b1aa5abb2b34f0f8a9052819794843f",
+          "seq": 2907
         },
         "components": {
-          "signer": {
-            "alive": true,
-            "pid": 556806,
-            "restarts": 1
-          },
-          "distribution": {
-            "alive": true,
-            "pid": 556852,
-            "restarts": 1
-          },
-          "identity": {
-            "alive": true,
-            "pid": 556854,
-            "restarts": 1
-          },
-          "brain": {
-            "alive": true,
-            "pid": 556862,
-            "restarts": 1
-          },
-          "loops": {
-            "alive": true,
-            "pid": 556869,
-            "restarts": 1
-          },
-          "procreate": {
-            "alive": true,
-            "pid": 556883,
-            "restarts": 1
+          "component": "distributor",
+          "ts": 1793485666,
+          "pid": 556852,
+          "status": {
+            "next_due_unix": 1793520765,
+            "next_due_epoch": 1,
+            "highest_epoch": 0,
+            "obligations": 0,
+            "by_status": {},
+            "reserved": {},
+            "carries": {
+              "parent": {},
+              "founder": {}
+            },
+            "arrears_raw": {},
+            "blocked": [],
+            "unresolved_epochs": {},
+            "anchors": {},
+            "supervisor": "deterministic: no model, no credits, no approval step"
           }
         },
-        "served_at": 1793485467
+        "served_at": 1793485669
       },
       "children": [
         {
@@ -6697,7 +6812,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485462,
+        "updated_at": 1793485666,
         "distribution": {
           "next_due_unix": 1793520765,
           "next_due_epoch": 1,
@@ -6719,54 +6834,82 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 3.85579769,
+          "credits_usd": 3.85388171,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
           "wallet_usdc_raw": "63109",
-          "wallet_sol_raw": "199515000",
+          "wallet_sol_raw": "199440000",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "199515000",
+          "sol_raw": "199440000",
           "usdc_raw": "63109",
           "ledger_totals": {
-            "native:SOL": "199515000",
+            "native:SOL": "199440000",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63109",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           },
           "spendable": {
-            "native:SOL": "194515000",
+            "native:SOL": "194440000",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63109",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           }
         },
         "last_decision": {
-          "at": 1793485431,
+          "at": 1793485634,
           "tools": [
-            "pump_inspect"
+            "get_state"
           ],
-          "cost_usd": 0.001104,
+          "cost_usd": 0.00095,
           "content": null,
           "error": null,
           "usage": {
             "prompt_tokens": 2911,
-            "completion_tokens": 733,
-            "total_tokens": 3644,
+            "completion_tokens": 616,
+            "total_tokens": 3527,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 661
+              "reasoning_tokens": 593
             }
           },
           "call_results": [
             {
-              "name": "pump_inspect",
+              "name": "get_state",
               "result": {
-                "mint": "9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp",
-                "curve": "NpCfqQJZY1KxtgxkgZFrvjip7kvY4KpSHZLqjFVn9Gm",
-                "exists": false
+                "state": {
+                  "age_seconds": 51269,
+                  "next_distribution_unix": 1793520765,
+                  "balances_last_snapshot": {
+                    "native:SOL": "199440000",
+                    "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63109",
+                    "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
+                  },
+                  "reserved": {},
+                  "distribution": {
+                    "by_status": {},
+                    "blocked": [],
+                    "arrears": {}
+                  },
+                  "flashloan_candidates": [],
+                  "inference": {
+                    "provider": "venice",
+                    "model": "deepseek-v4-1-flash-1017-uncensored",
+                    "mode": "external_paid_abliterated",
+                    "credits_usd": 3.85469318,
+                    "balance_http": 200,
+                    "admission_floor_usd": 0.1,
+                    "wallet_usdc_raw": "63109",
+                    "wallet_sol_raw": "199470000",
+                    "state": "ready"
+                  }
+                },
+                "sol_usdc": {
+                  "sol_raw": "199440000",
+                  "usdc_raw": "63109"
+                }
               }
             }
           ]
@@ -6791,8 +6934,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "0d56c9c3cf9b8366531b6ec675061e8b5507d65d6cd0853e50071e3571b7c471",
-          "seq": 2834
+          "head": "7ff7b79bbe5429e246c19b0716ee34627c8691b1c1454102ef95988ae43d89e0",
+          "seq": 2842
         },
         "components": {
           "signer": {
@@ -6826,7 +6969,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793485468
+        "served_at": 1793485670
       },
       "children": [
         {
@@ -6864,7 +7007,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485462,
+        "updated_at": 1793485665,
         "distribution": {
           "next_due_unix": 1793521585,
           "next_due_epoch": 1,
@@ -6886,49 +7029,45 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": null,
-          "balance_http": "connect ECONNREFUSED 127.0.0.1:35053",
+          "credits_usd": 3.98035484,
+          "balance_http": 200,
           "admission_floor_usd": 0.1,
           "wallet_usdc_raw": "63302",
-          "wallet_sol_raw": "199500000",
-          "state": "balance_unreadable",
-          "self_fund": {
-            "state": "error",
-            "reason": "connect ECONNREFUSED 127.0.0.1:35053"
-          }
+          "wallet_sol_raw": "199435000",
+          "state": "ready"
         },
         "funding": {
-          "sol_raw": "199500000",
+          "sol_raw": "199435000",
           "usdc_raw": "63302",
           "ledger_totals": {
-            "native:SOL": "199500000",
+            "native:SOL": "199435000",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63302",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           },
           "spendable": {
-            "native:SOL": "194500000",
+            "native:SOL": "194435000",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63302",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           }
         },
         "last_decision": {
-          "at": 1793485103,
+          "at": 1793485649,
           "tools": [
             "pump_inspect"
           ],
-          "cost_usd": 0.000617,
+          "cost_usd": 0.000782,
           "content": null,
           "error": null,
           "usage": {
             "prompt_tokens": 2911,
-            "completion_tokens": 364,
-            "total_tokens": 3275,
+            "completion_tokens": 489,
+            "total_tokens": 3400,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 292
+              "reasoning_tokens": 417
             }
           },
           "call_results": [
@@ -6962,8 +7101,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "20382926f14fcc8c89501db9b0d229bd0416aa4d9dd674796ac8f1cf7bdb4916",
-          "seq": 3001
+          "head": "3e9d0a6f49a3c5e3bb03ae5ad005c6ab64b1ae164181ddbb054f9884cdac93f6",
+          "seq": 3017
         },
         "components": {
           "signer": {
@@ -6997,7 +7136,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793485470
+        "served_at": 1793485670
       },
       "children": [
         {
@@ -7035,7 +7174,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485464,
+        "updated_at": 1793485666,
         "distribution": {
           "next_due_unix": 1793520719,
           "next_due_epoch": 1,
@@ -7057,45 +7196,45 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 3.92680318,
+          "credits_usd": 3.92466941,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
           "wallet_usdc_raw": "63715",
-          "wallet_sol_raw": "199450000",
+          "wallet_sol_raw": "199420000",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "199450000",
+          "sol_raw": "199420000",
           "usdc_raw": "63715",
           "ledger_totals": {
-            "native:SOL": "199450000",
+            "native:SOL": "199420000",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63715",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           },
           "spendable": {
-            "native:SOL": "194450000",
+            "native:SOL": "194420000",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63715",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           }
         },
         "last_decision": {
-          "at": 1793485464,
+          "at": 1793485666,
           "tools": [
             "pump_inspect"
           ],
-          "cost_usd": 0.000988,
+          "cost_usd": 0.001067,
           "content": null,
           "error": null,
           "usage": {
             "prompt_tokens": 2911,
-            "completion_tokens": 645,
-            "total_tokens": 3556,
+            "completion_tokens": 705,
+            "total_tokens": 3616,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 573
+              "reasoning_tokens": 633
             }
           },
           "call_results": [
@@ -7129,8 +7268,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "d9c1bd0e9ba6edbbc5f9f34ff190b9d9af3940919e51b25d90fad05ad2c3e6f0",
-          "seq": 3082
+          "head": "995223d75f12fed3f67f71d93c55998adf01c3870f6eb8bc9c4e89d6225103c5",
+          "seq": 3090
         },
         "components": {
           "signer": {
@@ -7164,7 +7303,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793485470
+        "served_at": 1793485671
       },
       "children": [
         {
@@ -7202,7 +7341,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485464,
+        "updated_at": 1793485664,
         "distribution": {
           "next_due_unix": 1793520719,
           "next_due_epoch": 1,
@@ -7224,45 +7363,45 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 4.05471716,
+          "credits_usd": 4.0532249,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
           "wallet_usdc_raw": "62824",
-          "wallet_sol_raw": "441237371",
+          "wallet_sol_raw": "441207371",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "441237371",
+          "sol_raw": "441207371",
           "usdc_raw": "62824",
           "ledger_totals": {
-            "native:SOL": "441237371",
+            "native:SOL": "441207371",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "62824",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           },
           "spendable": {
-            "native:SOL": "436237371",
+            "native:SOL": "436207371",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "62824",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           }
         },
         "last_decision": {
-          "at": 1793485387,
+          "at": 1793485586,
           "tools": [
             "pump_inspect"
           ],
-          "cost_usd": 0.000696,
+          "cost_usd": 0.000692,
           "content": null,
           "error": null,
           "usage": {
             "prompt_tokens": 2911,
-            "completion_tokens": 424,
-            "total_tokens": 3335,
+            "completion_tokens": 421,
+            "total_tokens": 3332,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 352
+              "reasoning_tokens": 349
             }
           },
           "call_results": [
@@ -7296,8 +7435,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "f6f962233848701a152f5b4234f4ed0f91d87459dce0daac7495eef9c4216716",
-          "seq": 3049
+          "head": "a4ea9259a0c5793687ff08acbaa47716a683fa70600d76c5f4c3ffaded156c3e",
+          "seq": 3063
         },
         "components": {
           "signer": {
@@ -7331,7 +7470,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793485470
+        "served_at": 1793485671
       },
       "children": [
         {
@@ -7369,7 +7508,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485464,
+        "updated_at": 1793485664,
         "distribution": {
           "next_due_unix": 1793521529,
           "next_due_epoch": 1,
@@ -7391,45 +7530,45 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 4.10881517,
+          "credits_usd": 4.10710907,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
           "wallet_usdc_raw": "63813",
-          "wallet_sol_raw": "285471611",
+          "wallet_sol_raw": "285421611",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "285471611",
+          "sol_raw": "285421611",
           "usdc_raw": "63813",
           "ledger_totals": {
-            "native:SOL": "285471611",
+            "native:SOL": "285421611",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63813",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           },
           "spendable": {
-            "native:SOL": "280471611",
+            "native:SOL": "280421611",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "63813",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           }
         },
         "last_decision": {
-          "at": 1793485436,
+          "at": 1793485639,
           "tools": [
             "pump_inspect"
           ],
-          "cost_usd": 0.000931,
+          "cost_usd": 0.001055,
           "content": null,
           "error": null,
           "usage": {
             "prompt_tokens": 2911,
-            "completion_tokens": 602,
-            "total_tokens": 3513,
+            "completion_tokens": 696,
+            "total_tokens": 3607,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 530
+              "reasoning_tokens": 624
             }
           },
           "call_results": [
@@ -7463,8 +7602,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "2ac61d0dbf40e9157b32b39e23b7a2f965425e957d4e76b9ef4d250db0494acc",
-          "seq": 2740
+          "head": "07c3ac7768bcb70810b7c1440fa65813da7bbb3689db1197e2e278ed890e3ada",
+          "seq": 2748
         },
         "components": {
           "signer": {
@@ -7498,7 +7637,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793485470
+        "served_at": 1793485671
       },
       "children": [
         {
@@ -7536,7 +7675,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485524,
+        "updated_at": 1793485706,
         "distribution": {
           "next_due_unix": 1793530137,
           "next_due_epoch": 1,
@@ -7558,53 +7697,44 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 3.88263732,
+          "credits_usd": 3.87576475,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
           "wallet_usdc_raw": "5384118",
-          "wallet_sol_raw": "131428904",
+          "wallet_sol_raw": "131403904",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "131428904",
+          "sol_raw": "131403904",
           "usdc_raw": "5384118",
           "ledger_totals": {
-            "native:SOL": "131428904",
+            "native:SOL": "131403904",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "5384118"
           },
           "spendable": {
-            "native:SOL": "126428904",
+            "native:SOL": "126403904",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "5384118"
           }
         },
         "last_decision": {
-          "at": 1793485428,
-          "tools": [
-            "pump_launch"
-          ],
-          "cost_usd": 0.002821,
-          "content": "I'll take a concrete value-creating action: launch a Pump token with a small dev buy so I own a position and start accruing creator fees.",
+          "at": 1793485666,
+          "tools": [],
+          "cost_usd": 0.005403,
+          "content": null,
           "error": null,
           "usage": {
             "prompt_tokens": 2871,
-            "completion_tokens": 2044,
-            "total_tokens": 4915,
+            "completion_tokens": 4000,
+            "total_tokens": 6871,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 1873
+              "reasoning_tokens": 4000
             }
           },
-          "call_results": [
-            {
-              "name": "pump_launch",
-              "result": {
-                "error": "Bonding curve account not found: HxyS8SYsMt4ntQ35zQ3iu3ZsDzsUsvYqedPZXxQiG1xu"
-              }
-            }
-          ]
+          "call_results": []
         },
         "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
         "prime_directives": [
@@ -7626,8 +7756,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "26604874a2f82aacbeabd89bc4924cd49d2f5ab48e3ac9b50fa0b0dc16a48ec1",
-          "seq": 2485
+          "head": "8db92116a33d309aa66c7dda328d900088863d957607119d843862c38eeab276",
+          "seq": 2498
         },
         "components": {
           "signer": {
@@ -7661,7 +7791,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793485532
+        "served_at": 1793485727
       },
       "children": [
         {
@@ -7852,7 +7982,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485533,
+        "updated_at": 1793485727,
         "distribution": {
           "next_due_unix": 1793530137,
           "next_due_epoch": 1,
@@ -7874,50 +8004,79 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 3.86148922,
+          "credits_usd": 3.85842914,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
-          "wallet_usdc_raw": "35419",
-          "wallet_sol_raw": "199603338",
+          "wallet_usdc_raw": "7445660",
+          "wallet_sol_raw": "118079898",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "199603338",
-          "usdc_raw": "35419",
+          "sol_raw": "118079898",
+          "usdc_raw": "7445660",
           "ledger_totals": {
-            "native:SOL": "199603338",
-            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "35419"
+            "native:SOL": "118079898",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "7445660"
           },
           "spendable": {
-            "native:SOL": "194603338",
-            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "35419"
+            "native:SOL": "113079898",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "7445660"
           }
         },
         "last_decision": {
-          "at": 1793485524,
+          "at": 1793485630,
           "tools": [
-            "pump_launch"
+            "get_state"
           ],
-          "cost_usd": 0.00306,
+          "cost_usd": 0.000821,
           "content": null,
           "error": null,
           "usage": {
-            "prompt_tokens": 2869,
-            "completion_tokens": 2225,
-            "total_tokens": 5094,
+            "prompt_tokens": 2870,
+            "completion_tokens": 529,
+            "total_tokens": 3399,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 2096
+              "reasoning_tokens": 506
             }
           },
           "call_results": [
             {
-              "name": "pump_launch",
+              "name": "get_state",
               "result": {
-                "error": "Bonding curve account not found: 2LM9Va46xgcaDNTSz57ZPbke4QMo3yJJoq513VLw3drb"
+                "state": {
+                  "age_seconds": 41893,
+                  "next_distribution_unix": 1793530137,
+                  "balances_last_snapshot": {
+                    "native:SOL": "118079898",
+                    "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "7445660"
+                  },
+                  "reserved": {},
+                  "distribution": {
+                    "by_status": {},
+                    "blocked": [],
+                    "arrears": {}
+                  },
+                  "flashloan_candidates": [],
+                  "inference": {
+                    "provider": "venice",
+                    "model": "deepseek-v4-1-flash-1017-uncensored",
+                    "mode": "external_paid_abliterated",
+                    "credits_usd": 3.86148922,
+                    "balance_http": 200,
+                    "admission_floor_usd": 0.1,
+                    "wallet_usdc_raw": "35419",
+                    "wallet_sol_raw": "199603338",
+                    "state": "ready"
+                  }
+                },
+                "sol_usdc": {
+                  "sol_raw": "118079898",
+                  "usdc_raw": "7445660"
+                }
               }
             }
           ]
@@ -7942,42 +8101,32 @@
         ],
         "children": [],
         "journal": {
-          "head": "4d56735badaa35d0649b9f1e76583bd4f4d3aedc771ce9126f23a96c88a9de58",
-          "seq": 2645
+          "head": "5db1cf00e7703c4e9c2e2f02f462e312c379159ca615c6ca1ecb277e75db6109",
+          "seq": 2666
         },
         "components": {
-          "signer": {
-            "alive": true,
-            "pid": 20924,
-            "restarts": 1
-          },
-          "distribution": {
-            "alive": true,
-            "pid": 20927,
-            "restarts": 1
-          },
-          "identity": {
-            "alive": true,
-            "pid": 20928,
-            "restarts": 1
-          },
-          "brain": {
-            "alive": true,
-            "pid": 20940,
-            "ts": 1793485533
-          },
-          "loops": {
-            "alive": true,
-            "pid": 20948,
-            "restarts": 1
-          },
-          "procreate": {
-            "alive": true,
-            "pid": 20954,
-            "restarts": 1
+          "component": "distributor",
+          "ts": 1793485727,
+          "pid": 20927,
+          "status": {
+            "next_due_unix": 1793530137,
+            "next_due_epoch": 1,
+            "highest_epoch": 0,
+            "obligations": 0,
+            "by_status": {},
+            "reserved": {},
+            "carries": {
+              "parent": {},
+              "founder": {}
+            },
+            "arrears_raw": {},
+            "blocked": [],
+            "unresolved_epochs": {},
+            "anchors": {},
+            "supervisor": "deterministic: no model, no credits, no approval step"
           }
         },
-        "served_at": 1793485534
+        "served_at": 1793485728
       },
       "children": [
         {
@@ -8145,7 +8294,7 @@
         },
         {
           "deploymentId": "cmvwytala000z95aucsuv3gas",
-          "endpoint": null,
+          "endpoint": "https://51bc167e45c9978126cb70f109303ef55bc74101-8787.dstack-pha-prod9.phala.network",
           "birth_id": null,
           "address": null,
           "created_at": 1793485258,
@@ -8153,10 +8302,26 @@
         },
         {
           "deploymentId": "cmvwywaty000f7gzg85dbqf61",
-          "endpoint": null,
+          "endpoint": "https://6e53ef58bf06db01549f8a36637f1407d4dcd14e-8787.dstack-pha-prod5.phala.network",
           "birth_id": null,
           "address": null,
           "created_at": 1793485400,
+          "status": "leased"
+        },
+        {
+          "deploymentId": "cmvwz0qee0008siuz881lz8yu",
+          "endpoint": null,
+          "birth_id": null,
+          "address": null,
+          "created_at": 1793485604,
+          "status": "leased"
+        },
+        {
+          "deploymentId": "cmvwz39q40003yl0thyrgd9rx",
+          "endpoint": null,
+          "birth_id": null,
+          "address": null,
+          "created_at": 1793485722,
           "status": "leased"
         }
       ]
@@ -8178,7 +8343,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485514,
+        "updated_at": 1793485720,
         "distribution": {
           "next_due_unix": 1793530137,
           "next_due_epoch": 1,
@@ -8200,82 +8365,54 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 3.91668938,
+          "credits_usd": 3.91516412,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
-          "wallet_usdc_raw": "532857",
-          "wallet_sol_raw": "549550000",
+          "wallet_usdc_raw": "284857",
+          "wallet_sol_raw": "549510000",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "549550000",
-          "usdc_raw": "532857",
+          "sol_raw": "549510000",
+          "usdc_raw": "284857",
           "ledger_totals": {
-            "native:SOL": "549560000",
-            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "532857",
+            "native:SOL": "549510000",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "284857",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           },
           "spendable": {
-            "native:SOL": "544560000",
-            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "532857",
+            "native:SOL": "544510000",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "284857",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           }
         },
         "last_decision": {
-          "at": 1793485424,
+          "at": 1793485649,
           "tools": [
-            "get_state"
+            "pump_inspect"
           ],
-          "cost_usd": 0.000616,
+          "cost_usd": 0.001373,
           "content": null,
           "error": null,
           "usage": {
             "prompt_tokens": 2911,
-            "completion_tokens": 363,
-            "total_tokens": 3274,
+            "completion_tokens": 937,
+            "total_tokens": 3848,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 340
+              "reasoning_tokens": 865
             }
           },
           "call_results": [
             {
-              "name": "get_state",
+              "name": "pump_inspect",
               "result": {
-                "state": {
-                  "age_seconds": 41687,
-                  "next_distribution_unix": 1793530137,
-                  "balances_last_snapshot": {
-                    "native:SOL": "549560000",
-                    "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "532857",
-                    "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
-                  },
-                  "reserved": {},
-                  "distribution": {
-                    "by_status": {},
-                    "blocked": [],
-                    "arrears": {}
-                  },
-                  "flashloan_candidates": [],
-                  "inference": {
-                    "provider": "venice",
-                    "model": "deepseek-v4-1-flash-1017-uncensored",
-                    "mode": "external_paid_abliterated",
-                    "credits_usd": 3.91744838,
-                    "balance_http": 200,
-                    "admission_floor_usd": 0.1,
-                    "wallet_usdc_raw": "780857",
-                    "wallet_sol_raw": "549570000",
-                    "state": "ready"
-                  }
-                },
-                "sol_usdc": {
-                  "sol_raw": "549540000",
-                  "usdc_raw": "532857"
-                }
+                "mint": "9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp",
+                "curve": "NpCfqQJZY1KxtgxkgZFrvjip7kvY4KpSHZLqjFVn9Gm",
+                "exists": false
               }
             }
           ]
@@ -8300,8 +8437,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "cdfe3c70d7279be20886d74785fd9415385ee8cc4b8572eadad14d0b93fc3913",
-          "seq": 2611
+          "head": "64da550f868ffbd0c47ea6f42537b78119622248e92cf89da7653f6372716254",
+          "seq": 2629
         },
         "components": {
           "signer": {
@@ -8335,7 +8472,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793485539
+        "served_at": 1793485728
       },
       "children": [
         {
@@ -8495,7 +8632,7 @@
         },
         {
           "deploymentId": "cmvwyspqd000l95au6tjhxpss",
-          "endpoint": null,
+          "endpoint": "https://953354529b14e542652cca3e75022585de71f18a-8787.dstack-pha-prod9.phala.network",
           "birth_id": null,
           "address": null,
           "created_at": 1793485234,
@@ -8503,10 +8640,26 @@
         },
         {
           "deploymentId": "cmvwyvoa200037gzgb9u1m5d0",
-          "endpoint": null,
+          "endpoint": "https://be92c072d88b09bb5e8ba1b182e3bdac47d0c1a6-8787.dstack-pha-prod5.phala.network",
           "birth_id": null,
           "address": null,
           "created_at": 1793485372,
+          "status": "leased"
+        },
+        {
+          "deploymentId": "cmvwyz8jw001f3mwnd6vrxcdt",
+          "endpoint": null,
+          "birth_id": null,
+          "address": null,
+          "created_at": 1793485539,
+          "status": "leased"
+        },
+        {
+          "deploymentId": "cmvwz2scn0014siuzam95b19g",
+          "endpoint": null,
+          "birth_id": null,
+          "address": null,
+          "created_at": 1793485701,
           "status": "leased"
         }
       ]
@@ -8528,7 +8681,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485534,
+        "updated_at": 1793485725,
         "distribution": {
           "next_due_unix": 1793570657,
           "next_due_epoch": 1,
@@ -8550,59 +8703,57 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 4.98246117,
+          "credits_usd": 4.96925589,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
           "wallet_usdc_raw": "3586225",
-          "wallet_sol_raw": "37388072",
+          "wallet_sol_raw": "37328072",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "37388072",
+          "sol_raw": "37328072",
           "usdc_raw": "3586225",
           "ledger_totals": {
-            "native:SOL": "37388072",
+            "native:SOL": "37328072",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "3586225"
           },
           "spendable": {
-            "native:SOL": "32388072",
+            "native:SOL": "32328072",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "3586225"
           }
         },
         "strategy": {
           "last_scan_at": 1793485210,
-          "sol_raw": "37358072",
+          "sol_raw": "37298072",
           "flash": [],
           "pump_positions": 0,
-          "updated_at": 1793485534
+          "updated_at": 1793485716
         },
         "last_decision": {
-          "at": 1793485437,
+          "at": 1793485662,
           "tools": [
-            "run_script"
+            "pump_launch"
           ],
-          "cost_usd": 0.005941,
-          "content": null,
+          "cost_usd": 0.007271,
+          "content": "I'll take a decisive action toward an earning loop: launch a Pump token to start accruing creator fees, with a small dev buy. Let me first confirm the launch economics are within my SOL balance.",
           "error": null,
           "usage": {
-            "prompt_tokens": 7541,
-            "completion_tokens": 3240,
-            "total_tokens": 10781,
+            "prompt_tokens": 8531,
+            "completion_tokens": 4000,
+            "total_tokens": 12531,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 2643
+              "reasoning_tokens": 3906
             }
           },
           "call_results": [
             {
-              "name": "run_script",
+              "name": "pump_launch",
               "result": {
-                "ok": true,
-                "file": "/var/lib/agent-8081/var/lib/agent/strategy/scripts/env_probe.mjs",
-                "stdout": "CWD /app\nENVKEYS AGENT_BUNDLE_DIR,HOME,RPC_URL,AGENT_IMAGE_URL,AGENT_GUEST_ROOT,AGENT_ROLE,AGENT_HTTP_PORT,AGENT_CLUSTER,PATH,AGENT_RUNTIME_DIR,AGENT_BIND,AGENT_BUNDLE,AGENT_LOG\nLS . => agent.mjs,assets,birth-image.manifest.json,infrastructure,start.sh\nLS /root => .bashrc,.cache,.profile,.ssh,.wget-hsts,boot.sh\nNMERR ENOENT: no such file or directory, scandir 'node_modules'\nPRICEERR Unexpected end of JSON input\nRT 100 net_raw -3610 net_usd -0.00361 imp1 0.0000040651676241635100122126 imp2 0.0000320349626033293063308717\nRT 1000 net_raw -47066 net_usd -0.047066 imp1 0.0000087451606083426524769603 imp2 0.000038321174516483194496166\nRT 10000 net_raw NaN net_usd NaN imp1 0.0000326681165406141119170965 imp2 undefined\nRT 100000 net_raw NaN net_usd NaN imp1 undefined imp2 undefined\n"
+                "error": "The value of \"offset\" is out of range. It must be >= 0 && <= 1000. Received -3"
               }
             }
           ]
@@ -8627,8 +8778,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "d2d9aa95f46e9bc967d883a8b2b343aa17a49a7ce65d04176e7a9f98a805a956",
-          "seq": 71
+          "head": "c4cabd698b766210e60ac2b7ad7912013ded07631153e8c50008c9290ac11a90",
+          "seq": 85
         },
         "components": {
           "signer": {
@@ -8667,7 +8818,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793485540
+        "served_at": 1793485729
       },
       "children": [
         {
@@ -8697,7 +8848,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485539,
+        "updated_at": 1793485719,
         "distribution": {
           "next_due_unix": 1793570656,
           "next_due_epoch": 1,
@@ -8719,50 +8870,50 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 4.97559914,
+          "credits_usd": 4.96583411,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
           "wallet_usdc_raw": "3585909",
-          "wallet_sol_raw": "37389392",
+          "wallet_sol_raw": "37329392",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "37389392",
+          "sol_raw": "37329392",
           "usdc_raw": "3585909",
           "ledger_totals": {
-            "native:SOL": "37389392",
+            "native:SOL": "37329392",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "3585909"
           },
           "spendable": {
-            "native:SOL": "32389392",
+            "native:SOL": "32329392",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "3585909"
           }
         },
         "strategy": {
           "last_scan_at": 1793485224,
-          "sol_raw": "37389392",
+          "sol_raw": "37329392",
           "flash": [],
           "pump_positions": 0,
-          "updated_at": 1793485436
+          "updated_at": 1793485678
         },
         "last_decision": {
-          "at": 1793485498,
+          "at": 1793485710,
           "tools": [
             "run_script"
           ],
-          "cost_usd": 0.006258,
-          "content": null,
+          "cost_usd": 0.005963,
+          "content": "I'll gather fresh market data to decide where the edge is, since all provided flashloan routes are currently negative.",
           "error": null,
           "usage": {
-            "prompt_tokens": 5460,
-            "completion_tokens": 4000,
-            "total_tokens": 9460,
+            "prompt_tokens": 6636,
+            "completion_tokens": 3483,
+            "total_tokens": 10119,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 3571
+              "reasoning_tokens": 3027
             }
           },
           "call_results": [
@@ -8770,8 +8921,8 @@
               "name": "run_script",
               "result": {
                 "ok": true,
-                "file": "/var/lib/agent-8082/var/lib/agent/strategy/scripts/scratch.mjs",
-                "stdout": ""
+                "file": "/var/lib/agent-8082/var/lib/agent/strategy/scripts/probe5.mjs",
+                "stdout": "URL https://frontend-api-v3.pump.fun/coins?limit=20 n 20\nkeys mint,initialized,name,symbol,image_uri,metadata_uri,bonding_curve,associated_bonding_curve,creator,created_timestamp,complete,hidden,total_supply,show_name,last_trade_timestamp,market_cap,nsfw,is_banned,livestream_ban_expiry,is_currently_live,ath_market_cap,ath_market_cap_timestamp,hide_banner,program,token_program,mayhem_state,quote_mint,base_decimals,quote_decimals,pool_address,is_cashback_enabled,indexed_by_pump,tokenized_agent,chain_id,multichain_family,protocol,is_charity,total_supply_str,market_cap_usd,market_cap_quote,canonical_pool_liquidity_usd,boost_mode,verified,is_holder_reward,transfer_fee_bps,is_backfill,transfer_hook_program,depth,mayhem,username,profile_image,usd_market_cap\n   $MFRG 2yDVRjzRFKhpbKFkXagdCSNhoM7ejSxF9WUmTM7jpump mcap 2140.477787431541 vol24 undefined complete false created 1793485708000\n   Trillions DXxh11NpPxbeu419b4zDrfRyCq6KrsVFR7rjvFzkpump mcap 2733.494339572043 vol24 undefined complete false created 1793485705000\n   MIRE TqHt4YxCcD5eufznbJMarnAakc3Qe1cs9dFYAanpump mcap 5005.783520457728 vol24 undefined complete false created 1793485704000\n   MIRE 6WqfLHX4hQHa2E76AjSH4apoYj7dYXgEoQ4TiuSQpump mcap 5416.640481585609 vol24 undefined complete false created 1793485701000\n   MIRE EjTBETCK1AtvtqGhkxtmqWqwJPhX76fqZdhuP5WJpump mcap 4889.661714641526 vol24 undefined complete false created 1793485701000\n   MIRE 9zzUNwfvoj5eJcFXhoyyuSgBCGKQqbEbCKyfU7mPpump mcap 3750.543176665888 vol24 undefined complete false created 1793485701000\n   MIRE 6vG3vddmr2QETWTq6yzgovG4EfFCW3qdjp7zf35rDzCi mcap undefined vol24 undefined complete false created 1793485700000\n   MIRE 8Wr1fneVnfQE4un69Sf2HuWTka6jNJNFFxYtpspYpump mcap 13278.469678865533 vol24 undefined complete false created 1793485700000\nURL https://frontend-api-v3.pump.fun/coins?limit=20&sort=marketCap&order=desc ERR http 400\nURL https://frontend-api-v3.pump.fun/coins?limit=20&sort=volume_24h&order=desc ERR http 400\nURL https://frontend-api-v3.pump.fun/coins?limit=20&sort=created_timestamp&order=desc n 20\nkeys mint,initialized,name,symbol,image_uri,metadata_uri,bonding_curve,associated_bonding_curve,creator,created_timestamp,complete,hidden,total_supply,show_name,last_trade_timestamp,market_cap,nsfw,is_banned,livestream_ban_expiry,is_currently_live,ath_market_cap,ath_market_cap_timestamp,hide_banner,program,token_program,mayhem_state,quote_mint,base_decimals,quote_decimals,pool_address,is_cashback_enabled,indexed_by_pump,tokenized_agent,chain_id,multichain_family,protocol,is_charity,total_supply_str,market_cap_usd,market_cap_quote,canonical_pool_liquidity_usd,boost_mode,verified,is_holder_reward,transfer_fee_bps,is_backfill,transfer_hook_program,depth,mayhem,username,profile_image,usd_market_cap\n   $MFRG 2yDVRjzRFKhpbKFkXagdCSNhoM7ejSxF9WUmTM7jpump mcap 2140.477787431541 vol24 undefined complete false created 1793485708000\n   Trillions DXxh11NpPxbeu419b4zDrfRyCq6KrsVFR7rjvFzkpump mcap 2733.494339572043 vol24 undefined complete false created 1793485705000\n   MIRE TqHt4YxCcD5eufznbJMarnAakc3Qe1cs9dFYAanpump mcap 4761.861871527354 vol24 undefined complete false created 1793485704000\n   MIRE 6WqfLHX4hQHa2E76AjSH4apoYj7dYXgEoQ4TiuSQpump mcap 5094.94986212258 vol24 undefined complete false created 1793485701000\n   MIRE EjTBETCK1AtvtqGhkxtmqWqwJPhX76fqZdhuP5WJpump mcap 3445.4151441959166 vol24 undefined complete false created 1793485701000\n   MIRE 9zzUNwfvoj5eJcFXhoyyuSgBCGKQqbEbCKyfU7mPpump mcap 3750.543176665888 vol24 undefined complete false created 1793485701000\n   MIRE 6vG3vddmr2QETWTq6yzgovG4EfFCW3qdjp7zf35rDzCi mcap undefined vol24 undefined complete false created 1793485700000\n   MIRE 8Wr1fneVnfQE4un69Sf2HuWTka6jNJNFFxYtpspYpump mcap 13278.469678865533 vol24 undefined complete false created 1793485700000\n"
               }
             }
           ]
@@ -8796,32 +8947,47 @@
         ],
         "children": [],
         "journal": {
-          "head": "20bae023e1a050dd7684da4769d15351e3fcc8b24eb0e7e0fc800a70e11c2c19",
-          "seq": 73
+          "head": "342a8e5b7541ce50eb8299f79533e98b77552e66104c170362e3b15357bad6f2",
+          "seq": 83
         },
         "components": {
-          "component": "distributor",
-          "ts": 1793485539,
-          "pid": 1682,
-          "status": {
-            "next_due_unix": 1793570656,
-            "next_due_epoch": 1,
-            "highest_epoch": 0,
-            "obligations": 0,
-            "by_status": {},
-            "reserved": {},
-            "carries": {
-              "parent": {},
-              "founder": {}
-            },
-            "arrears_raw": {},
-            "blocked": [],
-            "unresolved_epochs": {},
-            "anchors": {},
-            "supervisor": "deterministic: no model, no credits, no approval step"
+          "signer": {
+            "alive": true,
+            "pid": 1681,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 1682,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 1683,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 1684,
+            "restarts": 1
+          },
+          "strategy": {
+            "alive": true,
+            "pid": 1690,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 1696,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 1702,
+            "restarts": 1
           }
         },
-        "served_at": 1793485540
+        "served_at": 1793485729
       },
       "children": [
         {
@@ -8851,7 +9017,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485524,
+        "updated_at": 1793485725,
         "distribution": {
           "next_due_unix": 1793570657,
           "next_due_epoch": 1,
@@ -8873,50 +9039,50 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 4.9769363,
+          "credits_usd": 4.96636937,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
           "wallet_usdc_raw": "3585781",
-          "wallet_sol_raw": "37364726",
+          "wallet_sol_raw": "37329726",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "37364726",
+          "sol_raw": "37329726",
           "usdc_raw": "3585781",
           "ledger_totals": {
-            "native:SOL": "37364726",
+            "native:SOL": "37329726",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "3585781"
           },
           "spendable": {
-            "native:SOL": "32364726",
+            "native:SOL": "32329726",
             "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "3585781"
           }
         },
         "strategy": {
           "last_scan_at": 1793485233,
-          "sol_raw": "37359726",
+          "sol_raw": "37329726",
           "flash": [],
           "pump_positions": 0,
-          "updated_at": 1793485493
+          "updated_at": 1793485675
         },
         "last_decision": {
-          "at": 1793485458,
+          "at": 1793485669,
           "tools": [
             "run_script"
           ],
-          "cost_usd": 0.00412,
-          "content": "I'll gather the missing facts in one bounded probe: whether pump.fun's API answers with proper headers, what metadata URIs live coins use, and the current SOL price — so the next action (launch vs. arb) is grounded.",
+          "cost_usd": 0.004378,
+          "content": null,
           "error": null,
           "usage": {
-            "prompt_tokens": 5193,
-            "completion_tokens": 2447,
-            "total_tokens": 7640,
+            "prompt_tokens": 6103,
+            "completion_tokens": 2415,
+            "total_tokens": 8518,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 1833
+              "reasoning_tokens": 1845
             }
           },
           "call_results": [
@@ -8924,8 +9090,8 @@
               "name": "run_script",
               "result": {
                 "ok": true,
-                "file": "/var/lib/agent-8083/var/lib/agent/strategy/scripts/probe2.mjs",
-                "stdout": "{\n  \"https://frontend-api-v3.pump.fun/coins?offset=0&limit=20&sort=created&order=desc&includeNsfw=true\": 400,\n  \"https://frontend-api.pump.fun/coins?offset=0&limit=20&sort=created&order=desc&includeNsfw=true\": 530,\n  \"solPrice\": {\n    \"solana\": {\n      \"usd\": 95.88\n    }\n  },\n  \"bal\": {\n    \"jsonrpc\": \"2.0\",\n    \"id\": 1,\n    \"result\": {\n      \"context\": {\n        \"apiVersion\": \"1.33.7\",\n        \"slot\": 463855478\n      },\n      \"value\": 52919206\n    }\n  }\n}\n"
+                "file": "/var/lib/agent-8083/var/lib/agent/strategy/scripts/pump_api.mjs",
+                "stdout": "{\n  \"https://frontend-api-v3.pump.fun/coins?offset=0&limit=10&sort=created&order=desc\": 400,\n  \"https://frontend-api-v3.pump.fun/coins?offset=0&limit=10&sort=created&order=desc_body\": \"{\\\"statusCode\\\":400,\\\"timestamp\\\":\\\"2026-10-31T22:27:49.769Z\\\",\\\"path\\\":\\\"/coins?offset=0&limit=10&sort=created&order=desc\\\",\\\"message\\\":\\\"Invalid sort value. Must be one of: created_timestamp, market_cap, ath_mar\",\n  \"https://frontend-api-v3.pump.fun/coins?offset=0&limit=10\": 200,\n  \"sample\": [\n    {\n      \"name\": \"Nietzschean Mouse\",\n      \"symbol\": \"Mouse\",\n      \"mint\": \"BmASHbD6c62Fb3gK293MJHL7wa4SstigTddL6ReApump\",\n      \"uri\": \"https://metadata.j7tracker.io/metadata/ff12590ff1bc487a.json\",\n      \"complete\": false\n    },\n    {\n      \"name\": \"The Mouse\",\n      \"symbol\": \"MOUSE\",\n      \"mint\": \"2TWYaSs1XJeF2zqQumGdFdQGKuyc3kziaufFo33fpump\",\n      \"uri\": \"https://metadata.j7tracker.io/metadata/66d9431c2d46432d.json\",\n      \"complete\": false\n    },\n    {\n      \"name\": \"TrenchMouse\",\n      \"symbol\": \"TrenchMouse\",\n      \"mint\": \"8cxGQBivHyiYBHSBYTz83LoNtGc98X7mAXZyckqekzAG\",\n      \"uri\": \"https://m.rapidlaunch.io/m/UiUyy3hdF\",\n      \"complete\": false\n    },\n    {\n      \"name\": \"TrenchMouse\",\n      \"symbol\": \"TrenchMouse\",\n      \"mint\": \"6WmtKYXBpS72JQpJKHadeeBS1ZgKpQNWT8LWP2A5pump\",\n      \"uri\": \"https://m.rapidlaunch.io/m/UiUyy3hdF\",\n      \"complete\": false\n    },\n    {\n      \"name\": \"The Trench Mouse\",\n      \"symbol\": \"MOUSE\",\n      \"mint\": \"2WeHx3UHWh24zRXD8jUpUqfrQEb8KtfSmXK4fhp4CLXE\",\n      \"uri\": \"https://metadata.j7tracker.io/metadata/c8a442b91e674df7.json\",\n      \"complete\": false\n    }\n  ],\n  \"ipfsStatus\": 400,\n  \"ipfsBody\": \"Invalid Server Action request.\"\n}\n"
               }
             }
           ]
@@ -8950,8 +9116,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "8e8e4f43577ab544ad5ca97c79f7aba090e87ed17a5d1d8abc620e4dd11716e8",
-          "seq": 71
+          "head": "913c2d412bcd3fcc7954bf18fa0411c69aa2ec331261b17a687df804623caf3a",
+          "seq": 87
         },
         "components": {
           "signer": {
@@ -8990,7 +9156,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793485540
+        "served_at": 1793485729
       },
       "children": [
         {
@@ -9020,7 +9186,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485540,
+        "updated_at": 1793485721,
         "distribution": {
           "next_due_unix": 1793570754,
           "next_due_epoch": 1,
@@ -9071,7 +9237,7 @@
           "sol_raw": "0",
           "flash": [],
           "pump_positions": 0,
-          "updated_at": 1793485491
+          "updated_at": 1793485673
         },
         "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
         "prime_directives": [
@@ -9083,17 +9249,47 @@
         "launches": [],
         "children": [],
         "journal": {
-          "head": "e64562496618c59882f6e4bc50ad1c9180acc3826c4a3fabfd66f0287057b494",
-          "seq": 21
+          "head": "14e54ba5994848a300a5d27d0aa0709b378d2067e02a228cbe66c54d5562df93",
+          "seq": 23
         },
         "components": {
           "brain": {
             "alive": true,
             "pid": 1772,
-            "ts": 1793485540
+            "restarts": 1
+          },
+          "signer": {
+            "alive": true,
+            "pid": 1753,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 1758,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 1767,
+            "restarts": 1
+          },
+          "strategy": {
+            "alive": true,
+            "pid": 1790,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 1802,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 1819,
+            "restarts": 1
           }
         },
-        "served_at": 1793485540
+        "served_at": 1793485729
       },
       "children": []
     },
@@ -9114,7 +9310,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485538,
+        "updated_at": 1793485718,
         "distribution": {
           "next_due_unix": 1793570754,
           "next_due_epoch": 1,
@@ -9165,7 +9361,7 @@
           "sol_raw": "0",
           "flash": [],
           "pump_positions": 0,
-          "updated_at": 1793485491
+          "updated_at": 1793485673
         },
         "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
         "prime_directives": [
@@ -9177,32 +9373,47 @@
         "launches": [],
         "children": [],
         "journal": {
-          "head": "e69cf91e200bdcdb335bf97e589a8df7b089ab92b6a2cf11ee9ed6cfe264eff2",
-          "seq": 21
+          "head": "c9a7f9a6357da17cd24e3b0f101d8e14045ea87cbf41ad1cae4fc5f4e4927dab",
+          "seq": 23
         },
         "components": {
-          "component": "distributor",
-          "ts": 1793485538,
-          "pid": 1706,
-          "status": {
-            "next_due_unix": 1793570754,
-            "next_due_epoch": 1,
-            "highest_epoch": 0,
-            "obligations": 0,
-            "by_status": {},
-            "reserved": {},
-            "carries": {
-              "parent": {},
-              "founder": {}
-            },
-            "arrears_raw": {},
-            "blocked": [],
-            "unresolved_epochs": {},
-            "anchors": {},
-            "supervisor": "deterministic: no model, no credits, no approval step"
+          "signer": {
+            "alive": true,
+            "pid": 1705,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 1706,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 1707,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 1708,
+            "restarts": 1
+          },
+          "strategy": {
+            "alive": true,
+            "pid": 1709,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 1711,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 1721,
+            "restarts": 1
           }
         },
-        "served_at": 1793485540
+        "served_at": 1793485729
       },
       "children": []
     },
@@ -9223,7 +9434,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793485538,
+        "updated_at": 1793485720,
         "distribution": {
           "next_due_unix": 1793570754,
           "next_due_epoch": 1,
@@ -9274,7 +9485,7 @@
           "sol_raw": "0",
           "flash": [],
           "pump_positions": 0,
-          "updated_at": 1793485532
+          "updated_at": 1793485715
         },
         "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
         "prime_directives": [
@@ -9286,17 +9497,47 @@
         "launches": [],
         "children": [],
         "journal": {
-          "head": "71e1eefd8d81c17a4c7523960347db054ad0e9cbef8df26f1a4a9f53403465bd",
-          "seq": 21
+          "head": "1cbbb9a3e48b8ba4a4741dd3a8399ef495487e8a731c6066652de017ac2d7fb7",
+          "seq": 23
         },
         "components": {
           "brain": {
             "alive": true,
             "pid": 1780,
-            "ts": 1793485538
+            "restarts": 1
+          },
+          "signer": {
+            "alive": true,
+            "pid": 1755,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 1765,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 1769,
+            "restarts": 1
+          },
+          "strategy": {
+            "alive": true,
+            "pid": 1795,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 1809,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 1832,
+            "restarts": 1
           }
         },
-        "served_at": 1793485540
+        "served_at": 1793485729
       },
       "children": []
     }
