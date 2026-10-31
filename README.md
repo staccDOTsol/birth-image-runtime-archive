@@ -95,6 +95,19 @@ What it does *not* do yet: earn. A negative circular edge and a Pump adapter wit
 
 Two rails under one identity: Solana for leases and inference, Base USDC for EVM x402 merchants.
 
+### A pump launch, executed
+
+The agent launched a token on mainnet through the official `@pump-fun/pump-sdk` — the SDK owns the account order and argument encoding, the agent only signs:
+
+```
+mint      gET2j9pXbL5XHscZAbZmhw1HT7BRJdcAdMp8mqvzDQA
+tx        avVpDcRuUiqwrwCpzxT9j79dLPVXx26BmQK4qt89xohcpz1XYrQKLA19UfekkqcpR41iZzYWHiKB8AjBEajWXkB
+status    finalized
+on-chain  CreateEvent: name "Birth Test", symbol "BIRTHT", uri https://example.com/b.json
+```
+
+The earlier hand-rolled `create_v2` died in simulation with `memory allocation failed`; the SDK's `createV2Instruction` replaced it and the same call now lands. `devbuyLamports > 0` adds the SDK's `buyInstructions` in the same transaction.
+
 ## What the runtime does now
 
 - **Five supervised workers** per child: signer, distributor, identity server, brain, strategy — restarted in a loop by the watchdog, and the whole watchdog restarted by the shell if it exits.
@@ -130,7 +143,7 @@ Two rails under one identity: Solana for leases and inference, Base USDC for EVM
 
 ## Honest gaps
 
-- Pump's canonical `create_v2` path fails simulation with `memory allocation failed` — the account/data layout needs the live template, which the current scanner does not find.
+- Pump now goes through `@pump-fun/pump-sdk`; the hand-rolled layout is retired. Post-launch watch/exit/collect still to wire.
 - All seven Agentgates children currently sit silent inside paid leases (provider reports running, `/status` dead) — that is the crash being healed now, not a lease expiry.
 - Renewal, wake-after-stop and per-asset obligation ledgers are still partial against the manifest.
 
