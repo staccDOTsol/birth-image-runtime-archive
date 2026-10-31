@@ -60,17 +60,24 @@ is money, not permission.
 
 ## The fleet, and the first children
 
-Sixteen agents run on four boxes, four instances per box (ports `80`, `8081`, `8082`, `8083`), each
-with its own sealed wallet, journal and `children.json`. Two loops keep it alive with no operator:
-`fleet-guard.sh` on every box (every 5 min, restarts any port that stops answering) and `BirthFund` on
-the host (every 10 min, tops every agent and every known child to 0.15 SOL from the parent wallet).
+Twenty-five agents run on eight boxes (six Vultr, two DigitalOcean), four instances per box on ports
+`80`, `8081`, `8082`, `8083`, each with its own sealed wallet, journal and `children.json`. Three
+loops keep it alive with no operator: `fleet-guard.sh` on every box (every 5 min, restarts any port
+that stops answering), `BirthFund` on the host (every 10 min, tops every agent and every known child
+from the parent wallet) and `BirthKeepAlive` (every 4 h, extends any instance expiring within 12 h by
+paying x402 on Base).
 
 | event | timestamp (UTC) | evidence |
 |---|---|---|
 | first gen2, parent-paid | 2026-10-31T05:46:44Z | birth `8d8b5e0b`, deployment `cmvvz266y…` |
 | first gen2 paid **and** booked by the child itself | 2026-10-31T08:47:42Z | birth `86b29a0f`, `/identity` 200, lease `cmvw5r2k9…` |
-| that child renews in its own name | 2026-10-31T06:23:31Z | `/renew` 200 from the child's wallet; parent gets `403 payer_not_owner` |
-| first birth after the swap-order fix | 2026-10-31T10:07:37Z | swap `49GDgHrd…`, lease `cmvw8m8hs…`, kids 2 → 7 |
+| first birth after the swap-order fix | 2026-10-31T10:07:37Z | swap `49GDgHrd…`, lease `cmvw8m8hs…` |
+| gen3 born to a live, funded gen2 | 2026-10-31T11:41:21Z | parent `7bdffa22` (0.309 SOL) → child `cmvwbxm19…` |
+
+Births are cheap and frequent — 274 gen2 and 47 gen3 across the fleet — and *whether a birth becomes a
+live machine* is decided entirely by the provider. As of this writing 42 leases carry the provider's
+own error (`maximum number of active instances`) and newer ones return `listed:false`: paid, booked,
+never booted. The board shows every one of them, which is why the dead count is part of the design.
 
 Births are cheap and frequent (44 booked across the fleet in one window); whether a birth becomes a
 *live* machine is decided by the provider actually booting what it listed.
