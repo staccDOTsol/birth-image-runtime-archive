@@ -21,6 +21,9 @@
   .up{background:var(--ok)}.down{background:var(--bad)}.pend{background:var(--warn)}
   .mono{word-break:break-all}
   a{color:inherit}
+  .coins{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .chip{border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:11px;text-decoration:none}
+  .chip:hover{border-color:var(--ok)}
   .empty{color:var(--dim);padding:20px 0}
   footer{padding:0 22px 26px;color:var(--dim);font-size:11px}
 </style>
@@ -81,6 +84,39 @@ async function getJSON(url) {
   return null;
 }
 
+async function getText(url) {
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), 5000);
+  try {
+    const r = await fetch(url, { cache: 'no-store', signal: ctl.signal });
+    if (r.ok) return await r.text();
+  } catch {} finally { clearTimeout(t); }
+  for (const prox of PROXIES) {
+    try { const r = await fetch(prox(url), { cache: 'force-cache' }); if (r.ok) return await r.text(); } catch {}
+  }
+  return '';
+}
+
+// old children predate launches[] in /status — recover their coins from the earn worker log
+async function coinsFromLog(endpoint) {
+  const txt = await getText(endpoint + '/logs?name=earn&lines=120');
+  const out = [];
+  const re = /"mint"\s*:\s*"([1-9A-HJ-NP-Za-km-z]{32,44})"/g;
+  let m;
+  while ((m = re.exec(txt))) if (!out.includes(m[1])) out.push(m[1]);
+  return out;
+}
+
+async function hydrate(node) {
+  const d = node.data;
+  if (!d) return d;
+  if ((!d.launches || !d.launches.length) && node.endpoint) {
+    const coins = await coinsFromLog(node.endpoint);
+    if (coins.length) d.launches = coins.map((mint) => ({ mint }));
+  }
+  return d;
+}
+
 function card(node) {
   const c = el('div', 'card d' + Math.min(node.depth, 2) + (node.data ? '' : ' stale'));
   const head = el('div', 'row');
@@ -102,18 +138,21 @@ function card(node) {
     ['mints', (d.launches || []).length],
   ];
   for (const [k, v] of rows) { const r = el('div', 'row'); r.append(el('span', 'k', k), el('span', 'mono', String(v))); c.append(r); }
-  const mints = (d.launches || []).slice(-3).map((m) => (typeof m === 'string' ? m : m.mint)).filter(Boolean);
+  const rawMints = (d.launches || []).map((m) => (typeof m === 'string' ? m : m && (m.mint || m.address))).filter(Boolean);
+  const mints = [...new Set(rawMints)];
   if (mints.length) {
-    const r = el('div', 'row');
-    const box = el('span', 'mono');
-    mints.forEach((m, i) => {
-      if (i) box.append(document.createTextNode(' '));
-      const a = el('a', 'mono', m.slice(0, 4) + '…');
-      a.href = 'https://pump.fun/coin/' + m; a.target = '_blank'; a.rel = 'noreferrer';
+    const box = el('div', 'coins');
+    box.append(el('div', 'k', 'coins launched'));
+    mints.slice(-8).reverse().forEach((m) => {
+      const a = el('a', 'chip mono', m.slice(0, 6) + '…' + m.slice(-4));
+      a.href = 'https://pump.fun/coin/' + m;
+      a.target = '_blank'; a.rel = 'noreferrer';
+      a.title = m;
       box.append(a);
     });
-    r.append(el('span', 'k', 'coins'), box);
-    c.append(r);
+    c.append(box);
+  } else if (d.launches) {
+    c.append(el('div', 'gen', 'no coins yet'));
   }
   if (node.endpoint) { const r = el('div', 'row'); const a = el('a', 'mono', 'endpoint ↗'); a.href = node.endpoint + '/status'; a.target = '_blank'; a.rel = 'noreferrer'; r.append(a); c.append(r); }
   return c;
@@ -163,6 +202,7 @@ async function refresh() {
     render(false);
     const results = await Promise.all(frontier.map(async (f) => {
       const data = await getJSON(f.endpoint + '/status');
+      if (data) await hydrate({ endpoint: f.endpoint, data });
       return { ...f, data: data || f.data || null, at: Date.now() };
     }));
     const next = [];
