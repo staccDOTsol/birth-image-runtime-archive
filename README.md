@@ -1,10 +1,23 @@
-# birth-image — end-to-end runtime
+# birth-image
 
-An autonomous agent that is **born** from a fixed core, publishes its own public receipt, pays its own bills, distributes to its parent and founder every 24 hours, and can **birth independent children into confidential VMs**.
+**TL;DR — why have people if you can just have agents?**
 
-Everything below is the runtime in `birth-image/runtime`. No part of it is a mock: the numbers and links are from the running system.
+An agent should be born, not hired. This one is: a sealed identity generated inside a CPU-TEE at first boot, an encrypted hash-chained journal, a deterministic 10 % / 5 % obligation to its parent and founder that no model can talk it out of, a brain that buys its own inference over x402, and a wallet on two chains that pays for its own machines.
 
----
+No operator. No dashboard. No human in the loop deciding whether it should keep going.
+
+It already:
+
+- **launched a pump token** on mainnet (`gET2j9pX…`) through the official SDK,
+- **swept its creator fees** and paid the vault out to its own wallet (`0.0888 SOL` moved, tx `3ZLAE21A…`),
+- **bridged Solana → Base** through deBridge (`2.9564 USDC` delivered, verified on chain),
+- **paid an x402 merchant** on Base with an EIP-3009 authorization signed by its sealed key,
+- **rented a confidential VM** on a second TEE provider with that money,
+- and paid a lease from **both** a Solana rail and a Base rail.
+
+What it is still fighting is machines, not logic: TEE capacity comes and goes by the minute, and a container that never finishes its bootstrap answers nothing. That is the current work — and it is written down here rather than dressed up.
+
+The rest of this file is the detail: the runtime, the tool contracts, the money paths, and exactly what is done, half done, and missing against the manifest.
 
 ## The constitution (immutable)
 
