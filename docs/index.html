@@ -125,7 +125,7 @@ function card(node) {
   const head = el('div', 'row');
   const left = el('div');
   left.append(el('span', 'dot ' + (node.fresh ? 'up' : (node.data ? 'pend' : 'down'))), el('span', 'mono', (node.data?.birth_id || node.id || node.endpoint.replace(/^https:\/\//, '')).slice(0, 14)));
-  head.append(left, el('span', 'k', node.fresh ? 'live' : (node.data ? 'cached' : 'no answer')));
+  head.append(left, el('span', 'k gen-chip', `GEN ${(node.depth || 0) + 1}`), el('span', 'k', node.fresh ? 'live' : (node.data ? 'cached' : 'no answer')));
   c.append(head);
   const d = node.data || {};
   const comps = d.components || {};
