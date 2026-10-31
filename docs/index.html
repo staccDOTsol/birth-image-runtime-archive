@@ -40,6 +40,7 @@ const ROOTS = (window.ROOTS || []);
 const GEN_OF = new Map(); // endpoint -> generation, from the published tree
 const ROOTS_URL = 'roots.json';
 const PROXIES = [
+  (u) => 'https://r.jina.ai/' + u,                       // answers 200 where the rest time out
   (u) => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
   (u) => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
   (u) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
