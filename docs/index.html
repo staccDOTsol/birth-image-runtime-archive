@@ -56,7 +56,7 @@ const el = (t, c, txt) => { const n = document.createElement(t); if (c) n.classN
 const fmt = (v, d = 3) => v == null ? '—' : (typeof v === 'number' ? v.toFixed(d) : String(v));
 
 let nodes = [];               // {endpoint, depth, data, at}
-let SHOW_DEAD = false;        // dead births are history; the board opens on the living
+let SHOW_DEAD = true;         // show recent dead births (capped) so GEN 2/3 are visible
 const cards = new Map();      // endpoint -> element
 
 function loadCache() {
@@ -198,7 +198,7 @@ function render(initial) {
   }
   const up = nodes.filter((n) => n.fresh).length;
   const dead = nodes.filter(n => !n.data && !n.fresh).length;
-  $('summary').textContent = `${up} live${dead ? ' · ' + dead + ' dead' : ''} · gen ${new Set(nodes.filter(n=>n.data).map((n) => n.depth)).size} · fleet cap is the provider, not this page`;
+  $('summary').textContent = `${up} live · ${dead} dead · ${nodes.filter(n=>n.gen2&&n.data).length} children answering · fleet cap is the provider, not this page`;
   $('ts').textContent = new Date().toLocaleTimeString();
 }
 
