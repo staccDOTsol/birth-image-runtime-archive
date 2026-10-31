@@ -43,8 +43,10 @@ mint 9h9oNWVuZyE2LMJPtUrGAJhWZPdWQFbmudj4Ljz3dNPA · Token-2022
 ```
 
 The earner is a reflex, not a model: read balance, if it covers mint rent and the cap is not hit, call
-`pump_launch`; every later tick collects the mint's creator fees and withdraws the vault, so the fees
-that coin is still earning come back to that same wallet.
+`pump_launch`; every later tick collects each mint's creator fees and withdraws the vault. It has
+done that for three of its own mints (`9h9oNWVu…`, `9Py5LP98…`, `B5aMSUUW…` — `swept: true, paid:
+true`), and the wallet it pays is its own: **0.30 → 1.97 USDC and 0.006 → 0.0139 SOL**, earned inside
+the enclave with nobody watching.
 
 ## Self-funding, proven
 
