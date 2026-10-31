@@ -185,15 +185,24 @@ function render(initial) {
   $('ts').textContent = new Date().toLocaleTimeString();
 }
 
+// Seeds are hard-coded so the page never depends on a republish: from any one agent the
+// crawler reaches every descendant through /status.children.
+const SEEDS = [
+  'http://45.77.98.201', 'http://140.82.12.62', 'http://45.77.107.102',
+  'http://64.176.217.6', 'http://45.77.217.220', 'http://64.176.202.160',
+];
+
 async function loadRoots() {
+  const out = new Set(SEEDS);
   try {
     const r = await fetch(ROOTS_URL + '?ts=' + Date.now(), { cache: 'no-store' });
     if (r.ok) {
       const j = await r.json();
-      if (Array.isArray(j.roots) && j.roots.length) return j.roots.map((x) => x.endpoint || x).filter(Boolean);
+      for (const x of (j.roots || [])) { const e = x.endpoint || x; if (e) out.add(e); }
     }
   } catch {}
-  return ROOTS;
+  for (const e of ROOTS) out.add(e);
+  return [...out];
 }
 
 async function refresh() {
