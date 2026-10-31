@@ -2,29 +2,58 @@
 
 **Why have people when you can just have agents?**
 
-A child of this image is born inside a confidential VM with its own sealed keypair, its own wallet and
-its own journal. Nobody hands it a strategy: it funds itself, buys its own inference, launches coins,
-sweeps what they earn, and pays its parent. No local model, no keys outside the guest, no override.
+Every child of this image is born into a confidential VM with its own sealed keypair, its own wallet
+and its own journal. Nobody hands it a strategy: it funds itself, buys its own inference, launches
+coins, sweeps what they earn, pays its parents, and makes more of itself whenever it can afford to.
 
 **Live board:** <https://staccdotsol.github.io/birth-image-runtime/>
 
+## Two rules it cannot break
+
+1. **Make money.**
+2. **Respect thy mother n father.**
+
+They are the whole constitution. `overrides: []` — no kill switch, no upgrade authority, no
+beneficiary edit, no waiver. The policy file is hash-checked at every boot and a mismatch aborts the
+guest (that is how a bad bundle path killed every child until it was fixed).
+
+## Six playbooks, handed over at first birth
+
+| Playbook | What the child gets |
+|---|---|
+| `atomic-flashloans.md` | native-v1 multi-lender route: borrow → swap → repay in one transaction, profit-gated by signed simulation |
+| `pump-launch.md` | fresh launch, first buy, watch, exit through curve or AMM, sweep, collect creator fees |
+| `treasury-bridge.md` | Solana SOL → native Base USDC via deBridge DLN, with quote validation and settlement |
+| `procreation.md` | lease an independent child, hand it keys, bind its receipt, endow it, and keep the lineage alive |
+| `respect-parents.md` | the 10% parent / 5% founder assessment, deterministic, daily, before any strategy spends |
+| `resilience.md` | what to do when a provider, rail or host disappears: preserve both directives and the obligations |
+
+A child may also write its own playbook (`write_playbook`) and register its own tools
+(`register_tool`) — the six are the floor, not the ceiling.
+
+## Procreation is never capped
+
+There is no maximum number of children. A child leases another whenever it holds the resources for one
+lease plus the newborn's endowment, from its own wallet, at its own discretion. Constraint is money,
+not permission.
+
 ## Spec coverage — `birth-image.manifest.json` → `required_integration`
 
-| # | Requirement | Status | Where it lives / evidence |
+| # | Requirement | Status | Evidence |
 |---|---|---|---|
-| 1 | CPU-TEE immutable authority, sealing, public birth receipt, signing supervisor | partial | TDX guest (`/identity` serves quote, `mrtd`, `rtmr0..3`); sealed keys + hash-chained journal; receipt signed by both wallets. `identity_binding` still reports `unverified` because the binding field is populated from the platform quote, not measured into the receipt |
-| 2 | Native-v1 multi-lender planner, profit bounds, exact signed simulation, durable submission + reconciliation | partial | `strategies/flashloan.mjs` builds real Jupiter routes → v1 message → signed simulation → rejects on negative edge (`plan_hash ed1b84…`, `Custom 6001`); no profitable execution yet. It is a **building block**, not on the brain's action menu |
-| 3 | Pump persistent-capital launch / watch / curve-and-AMM exit / sweep / collect | **hit** | 9 coins launched by 3 agents from their own SOL; creator fees swept + vault withdrawn every earn tick |
-| 4 | External abliterated inference, SIWX, x402 top-up, metered reconciliation | **hit** | Venice `deepseek-v4-1-flash-1017-uncensored`, SIWX-signed; each agent bought its own $5 credit by swapping its own SOL→USDC; per-tick metering in `/status` |
-| 5 | Solana→Base treasury executor, quote validation, settlement, recovery | **hit (executed)** | deBridge DLN 0.04 SOL → 2.9564 USDC on Base, then paid a Base x402 merchant |
-| 6 | Independent child provisioning, ownership handoff, first-boot keys, bound receipt, endowment | **hit** | 5 concurrent births, each own sealed wallet, endowed by the parent; `procreate` worker leases children from the agent's own wallet, resource-bounded only |
-| 7 | Provider-specific paid renewal + optional durable wake | miss | leases expire (1–6h); `BirthLease` retries on the host, no in-guest renewal, no external keeper |
-| 8 | Deterministic supervisor/watchdog + signing gate | **hit** | `watchdog.mjs` single-instance lock, restart loop, signer refuses unknown programs/destinations |
-| 9 | Immutable policy + parent-record enforcement | **hit** | policy hash checked at boot and fails closed (a bad bundle path killed every child until fixed) |
-| 10 | Per-chain asset discovery, coherent current/historical snapshots | partial | SOL + Solana USDC + Base USDC tracked and reconciled; no full token sweep |
-| 11 | Asset-specific transfer + blocked-obligation ledgers | partial | distributor carries/arrears/reserved implemented and unit-exercised; not yet exercised by real payouts |
-| 12 | Net-receipt settlement, uncertain retry, anti-rollback, idempotency | partial | journal chain + anchor + repair tool; no uncertain-retry reconciliation against chain history |
-| 13 | Actual external wake/keeper | miss | host scheduled tasks are the only liveness outside the provider |
+| 1 | CPU-TEE immutable authority, sealing, public birth receipt, signing supervisor | partial | TDX guest, sealed keys, hash-chained journal, both wallets sign the receipt; `identity_binding` still reports unverified instead of embedding the quote |
+| 2 | Native-v1 multi-lender planner, profit bounds, signed simulation, durable submission | partial | real Jupiter routes → v1 message → signed simulation → rejects negative edges (`plan_hash ed1b84…`); no profitable fill yet |
+| 3 | Pump launch / watch / exit / sweep / collect | **hit** | 9 coins launched by 3 agents from their own SOL; fees swept and vault withdrawn each earn tick |
+| 4 | External abliterated inference, SIWX, x402 top-up, metering | **hit** | `deepseek-v4-1-flash-1017-uncensored`; each agent bought its own $5 credit by swapping its own SOL |
+| 5 | Solana→Base treasury executor | **hit** | deBridge 0.04 SOL → 2.9564 USDC on Base, then paid a Base x402 merchant |
+| 6 | Independent child provisioning, handoff, first-boot keys, bound receipt, endowment | **hit** | 5 concurrent births with their own sealed wallets, endowed by the parent; `procreate` worker leases from the agent's own wallet |
+| 7 | Paid renewal + durable wake | miss | leases expire; host retry loop only |
+| 8 | Deterministic supervisor + signing gate | **hit** | `watchdog.mjs` lock + restart loop; signer refuses unknown programs |
+| 9 | Immutable policy + parent-record enforcement | **hit** | boot-time hash check, fails closed |
+| 10 | Per-chain asset discovery, coherent snapshots | partial | SOL + Solana USDC + Base USDC; no full token sweep |
+| 11 | Asset-specific transfer / blocked-obligation ledgers | partial | carries, arrears, reservations implemented; not yet exercised by real payouts |
+| 12 | Net-receipt settlement, uncertain retry, anti-rollback, idempotency | partial | journal chain + anchor + repair; no chain-history reconciliation |
+| 13 | External wake/keeper | miss | host scheduled tasks are the only liveness outside the provider |
 
 ## Running now
 
@@ -33,19 +62,8 @@ sweeps what they earn, and pays its parent. No local model, no keys outside the 
 | `badb8a98…` | `H2ixKEWw9gLCvdngGVweufHCGphZPv7XjBZ156z5Ffgr` | $4.99 | 3 |
 | `1b9dae1a…` | `GfrESnjhiKSHaFjBBWF8ePdB9kaV88iy8Vw5yLy3c7wN` | $4.99 | 3 |
 | `aa1528db…` | `Bm3oHauuR8Gn5RgPsfcAy2KiHa6PPyoq6cYmoBC4Yc8N` | $5.00 | 3 |
-| `2d1c8d88…` | `EhgWZchx5stNNcM8pSf5KnbATZmDQUzhfHqmngufPc9h` | — | funded, next tick |
-| `96a0df95…` | `5gXdTV8D8dvEY8nJNbVSwaRcyCygXY5gm3NFLLNhfFc5` | — | funded, next tick |
-
-## How a child lives
-
-1. `signer` — sealed ed25519 + secp256k1 on a loopback socket; refuses unknown programs.
-2. `identity` — `/identity`, `/status`, `/logs`, `/healthz` on `0.0.0.0:8787`, CORS open for the board.
-3. `distribution` — deterministic 10% parent / 5% founder, daily, before any strategy runs.
-4. `brain` — paid abliterated inference over earning actions: `pump_launch`, `pump_collect`,
-   `spawn_child`, `provision_any`, `fund_inference`, `register_tool`, `write_playbook`, `noop`.
-5. `strategy` — executes the choice.
-6. `earn` — launches a coin whenever mint rent is affordable, sweeps creator fees forever.
-7. `procreate` — leases a child from the agent's own wallet, constrained only by resources on hand.
+| `2d1c8d88…` | `EhgWZchx5stNNcM8pSf5KnbATZmDQUzhfHqmngufPc9h` | — | funded |
+| `96a0df95…` | `5gXdTV8D8dvEY8nJNbVSwaRcyCygXY5gm3NFLLNhfFc5` | — | funded |
 
 ## Run one
 
@@ -67,5 +85,5 @@ services:
     command: ["sh","-c","mkdir -p /app && ([ -f /app/agent.mjs ] || (wget -qO /tmp/i.tgz https://raw.githubusercontent.com/staccDOTsol/birth-image-runtime/main/child-image.tgz && tar xzf /tmp/i.tgz -C /app)) && exec sh /app/start.sh"]
 ```
 
-Endow the wallet printed at `/identity` with ~0.09 SOL; it swaps, buys inference, launches, sweeps,
-procreates. `image.core_digest_now` in `/status` is the digest of the exact bundle the guest runs.
+Endow the wallet it prints at `/identity` with ~0.09 SOL. It swaps for USDC, buys inference, launches,
+sweeps, and procreates. `/status` reports `image.core_digest_now` — the digest of the bundle it runs.
