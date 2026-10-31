@@ -217,7 +217,9 @@ async function refresh() {
     for (const r of (doc.roots || [])) {
       for (const c of (r.children || [])) {
         const ep = c.endpoint || null;
-        if (!ep || nodes.find((n) => n.endpoint === ep)) continue;
+        if (!ep) continue;
+        const seenNode = nodes.find((n) => n.endpoint === ep);
+        if (seenNode) { seenNode.depth = Math.max(1, seenNode.depth || 0); seenNode.gen2 = true; continue; }
         nodes.push({ endpoint: ep, depth: 1, data: null, at: 0, gen2: true, parent: r.endpoint, born_at: c.created_at || null, birth_id: c.birth_id || null });
       }
     }
