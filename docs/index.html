@@ -198,6 +198,10 @@ async function loadRoots() {
 
 async function refresh() {
   const roots = await loadRoots();
+  // instant paint: show every known root before any network result arrives
+  for (const e of roots) if (!nodes.find((n) => n.endpoint === e)) nodes.push({ endpoint: e, depth: 0, data: null, at: 0 });
+  render(false);
+
   const byEndpoint = new Map(nodes.map((n) => [n.endpoint, n]));
   let frontier = roots.map((e) => ({ endpoint: e, depth: 0 }));
   const seen = new Set();
