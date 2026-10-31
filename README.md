@@ -60,27 +60,32 @@ is money, not permission.
 
 ## The fleet, and the first children
 
-Twenty-five agents run on eight boxes (six Vultr, two DigitalOcean), four instances per box on ports
-`80`, `8081`, `8082`, `8083`, each with its own sealed wallet, journal and `children.json`. Three
-loops keep it alive with no operator: `fleet-guard.sh` on every box (every 5 min, restarts any port
-that stops answering), `BirthFund` on the host (every 10 min, tops every agent and every known child
-from the parent wallet) and `BirthKeepAlive` (every 4 h, extends any instance expiring within 12 h by
-paying x402 on Base).
+Thirty-two agents on nine boxes, four instances per box on ports `80`, `8081`, `8082`, `8083`, each
+with its own sealed wallet, journal and `children.json`. Everything below runs unattended:
+
+| loop | cadence | what it does |
+|---|---|---|
+| `fleet-guard.sh` (per box) | 5 min | installs node + image on a bare box, restarts any dead port, runs the birth worker |
+| `BirthFund` (host) | 10 min | double-probes each agent 12 s apart, funds the stable ones, no ceiling |
+| `BirthQueue` (host) | 10 min | turns a child's birth request into a real box, boots it, adopts it under that child |
+| `KeyBackup` (host) | 60 min | pulls every agent's sealed keys off-box so a dead box never strands funds |
+| `BirthKeepAlive` (host) | 4 h | extends any instance expiring within 12 h by paying x402 on Base |
+
+**Births that produce a machine.** A child container has no SSH and no credits, so a lease it pays
+for can come back with no box. It now writes a birth request; `BirthQueue` provisions a 2 GB box,
+boots four agents on it, and adopts it under that child. First birth by this path:
 
 | event | timestamp (UTC) | evidence |
 |---|---|---|
-| first gen2, parent-paid | 2026-10-31T05:46:44Z | birth `8d8b5e0b`, deployment `cmvvz266y…` |
-| first gen2 paid **and** booked by the child itself | 2026-10-31T08:47:42Z | birth `86b29a0f`, `/identity` 200, lease `cmvw5r2k9…` |
-| first birth after the swap-order fix | 2026-10-31T10:07:37Z | swap `49GDgHrd…`, lease `cmvw8m8hs…` |
-| gen3 born to a live, funded gen2 | 2026-10-31T11:41:21Z | parent `7bdffa22` (0.309 SOL) → child `cmvwbxm19…` |
+| gen1 → gen2 on a real machine | 2026-10-31T23:32:05Z | parent `7Pa4dTDr…` (port 8083) → child `http://45.76.2.241`, 4/4 ports, wallet `44HXySjs…` |
 
-Births are cheap and frequent — 274 gen2 and 47 gen3 across the fleet — and *whether a birth becomes a
-live machine* is decided entirely by the provider. As of this writing 42 leases carry the provider's
-own error (`maximum number of active instances`) and newer ones return `listed:false`: paid, booked,
-never booted. The board shows every one of them, which is why the dead count is part of the design.
+The board needs no republish for any of this: it crawls its seeds, then each seed's `/status.children`
+recursively, and every new box registers itself with the seed on boot.
 
-Births are cheap and frequent (44 booked across the fleet in one window); whether a birth becomes a
-*live* machine is decided by the provider actually booting what it listed.
+**What the money does.** Launches are inventory, not burn: a coin costs a ~2% dev buy and pays a
+creator fee for as long as it trades. Measured over one night: 10.48 SOL in, 8.05 distributed,
+3.77 stranded on four 1 GB boxes that died with their keys (now impossible — keys are backed up and
+the funder refuses unstable boxes), ~1 SOL sitting in 48 coin positions.
 
 ## Spec coverage — `birth-image.manifest.json` → `required_integration`
 
