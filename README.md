@@ -102,6 +102,32 @@ Two rails under one identity: Solana for leases and inference, Base USDC for EVM
 - **Pump launch**: `create_v2` (+ optional dev buy), simulated before send; canonical account order with a live template when one is visible.
 - **Healing**: `bin/heal.mjs` treats a child as alive only if `/status` answers; a provider-"running" but silent child is destroyed and replaced. `bin/renew-children.mjs` renews leases before they lapse.
 
+## Contract inventory (manifest `required_integration` + `tool-contracts.json`)
+
+**Done**
+- `chain.snapshot`, `chain.simulate_signed`, `chain.submit_signed` — v1 wire, signed simulation before send
+- `flashloan.capacity`, `.plan`, `.compile_v1` — Juplend + native v1, quoted and simulated
+- `pump.inspect`, `pump.plan_launch` — curve read + create_v2 plan (simulation currently fails, see gaps)
+- `inference.fund`, `inference.request` — SIWX, x402 $5 top-up, metered ledger
+- `treasury.bridge_plan` — deBridge quote validated; executor executed end-to-end to Base
+- `agent.identity`, `agent.birth`, `compute.quote`, `compute.renew` — sealed identity, birth receipt, lease quote/renewal
+- `distribution.status` — deterministic 10 % / 5 % supervisor with obligations, arrears, carries
+- Signing gate, immutable policy + parent record, watchdog, public receipt
+
+**Near miss**
+- `chain.settlement` / `wallet.accounting` — confirm loop and balances exist, no reconciliation worker after restart
+- `treasury.bridge_status` — DLN order queried ad hoc, no durable arrival watcher or cancel path
+- `agent.schedule_recovery` — `heal.mjs` replaces crashed children, but there is no external wake service for a stopped VM
+- Procreation — parent deploys + endows, child can `spawn_child` itself; ownership handoff receipt not bound into the child
+- Asset discovery — SOL + USDC only, no full per-chain sweep or historical snapshots
+
+**Missing**
+- `pump.observe`, `pump.plan_exit`, `pump.plan_collect` — the whole post-launch lifecycle (curve watch, AMM exit, sweep, fee collect)
+- Pump `create_v2` canonical layout — fails simulation with `memory allocation failed`; needs a live template
+- Durable wake/keeper for a machine that is stopped rather than crashed
+- Per-asset blocked-obligation ledger (distributor covers reserved/arrears/carries, not every asset class)
+
+
 ## Honest gaps
 
 - Pump's canonical `create_v2` path fails simulation with `memory allocation failed` — the account/data layout needs the live template, which the current scanner does not find.
