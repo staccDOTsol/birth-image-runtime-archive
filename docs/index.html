@@ -67,10 +67,13 @@ function saveCache() {
 async function getJSON(url) {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), 5000);
-  try {
-    const r = await fetch(url, { cache: 'no-store', signal: ctl.signal });
-    if (r.ok) return await r.json();
-  } catch {} finally { clearTimeout(t); }
+  const httpOnly = url.startsWith('http://');
+  if (!httpOnly) {
+    try {
+      const r = await fetch(url, { cache: 'no-store', signal: ctl.signal });
+      if (r.ok) return await r.json();
+    } catch {} finally { clearTimeout(t); }
+  } else { clearTimeout(t); }
   // dead endpoint: go through the cache proxies, in order, each with its own budget
   for (const prox of PROXIES) {
     try {
@@ -166,13 +169,14 @@ function render(initial) {
     ((b.data?.last_decision?.at || 0) - (a.data?.last_decision?.at || 0)) ||
     (a.depth - b.depth) ||
     ((b.at || 0) - (a.at || 0)));
-  for (const n of sorted) {
+  const shown = sorted.filter((n) => n.data || (n.depth === 0 && Date.now() - (n.at || 0) < 180000));
+  for (const n of shown) {
     const fresh = card(n);
     const old = cards.get(n.endpoint);
     if (old && old.isConnected) old.replaceWith(fresh); else grid.append(fresh);
     cards.set(n.endpoint, fresh);
   }
-  if (!nodes.length) {
+  if (!shown.length) {
     if (!grid.querySelector('.empty')) grid.append(el('div', 'empty', 'no agents answered yet'));
   }
   const up = nodes.filter((n) => n.fresh).length;
