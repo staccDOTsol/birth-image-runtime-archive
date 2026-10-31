@@ -249,6 +249,12 @@ async function refresh() {
         const seenNode = nodes.find((n) => n.endpoint === ep);
         if (seenNode) { seenNode.depth = Math.max(1, seenNode.depth || 0); seenNode.gen2 = true; seenNode.dead = !c.endpoint; continue; }
         nodes.push({ endpoint: ep, depth: 1, data: null, at: 0, gen2: true, dead: !c.endpoint, parent: r.endpoint, born_at: c.created_at || null, birth_id: c.birth_id || null });
+        // grandchildren: GEN 3 and beyond, published recursively by publish-roots
+        for (const g of (c.children || [])) {
+          const gep = g.endpoint || ('dep:' + (g.deploymentId || Math.random()));
+          if (nodes.find((n) => n.endpoint === gep)) continue;
+          nodes.push({ endpoint: gep, depth: 2, data: null, at: 0, gen2: true, dead: !g.endpoint, parent: c.endpoint, born_at: g.created_at || null, birth_id: g.birth_id || null });
+        }
       }
     }
   } catch {}
