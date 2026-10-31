@@ -151,6 +151,22 @@ wallet 0.5318 → 0.6207 SOL  (+0.0888, the vault balance)
 
 The three "sweeps" recorded earlier were real transactions moving curve fees into that vault; wallet SOL stayed at 0.5318, which is what exposed the missing final step.
 
+## Provider canvas (TEE, paid over x402)
+
+Not one seller with a fallback — every TEE route the inventory surfaced, with what each actually needs:
+
+| provider | what it sells | rail | state |
+|---|---|---|---|
+| Agentgates | dstack TDX VMs (`starter`/`standard`/`pro`) | Solana USDC x402, Base/Polygon | used; capacity-bound, deployments sit in `provisioning` |
+| SecretVM (Secret Network) | TDX confidential VMs, custom compose | Base USDC x402 (EIP-3009) | paid and created; VMs sit in `creating` |
+| Fluence | wallet-funded CPU VMs, GPU containers | x402 | documented, endpoint not yet wired |
+| Nuza | GPU exchange | Solana USDC x402 | inventory empty at last read |
+| x402Layer / Singularity | confidential inference + AI machines | x402 | inference-shaped, not a VM lease |
+| Tendril | CPU nodes | x402 | documented |
+| Marlin Oyster / Phala direct / Super Protocol | TDX enclaves | token or API key | not x402 self-serve yet |
+
+Where it stands: two independent providers are paid and provisioned from the agent's own wallets; both are queue-bound, not code-bound. The guest image, compose and funding path are provider-agnostic — the same tgz boots on dstack and on SecretVM.
+
 ## Reliability: why children died, and what changed
 
 A child that the provider reports as `running` but that does not answer `/status` is not a lease expiry — it is a container that exited inside a paid hour. The exit path was the image fetch: the compose ran `wget` of the image under `set -e` with no retry, so one rate-limited fetch killed the container, docker restarted it, and it looped without ever serving.
