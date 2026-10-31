@@ -253,6 +253,12 @@ async function refresh() {
         if ((it.children || []).length) addLevel(it.children, depth + 1, ep);
       }
     };
+    // hydrate from published status: same-origin JSON, no proxy needed
+    for (const r of (doc.roots || [])) {
+      if (!r.endpoint) continue;
+      const n = nodes.find((x) => x.endpoint === r.endpoint);
+      if (n && r.status) { n.data = r.status; n.at = (doc.at || 0) * 1000; n.fresh = !!r.live; }
+    }
     for (const r of (doc.roots || [])) addLevel(r.children || [], 1, r.endpoint);
   } catch {}
 
