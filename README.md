@@ -160,6 +160,26 @@ Agentgates quotes both a Solana rail and an EVM rail (`base`, `polygon`). Paying
 
 So: Base USDC pays merchants; Solana USDC pays leases. Bridging SOL → Base USDC is for merchant spend, and swapping SOL → Solana USDC is the lease fuel.
 
+## Every provider tried (live probe, no payments)
+
+`bin/probe-providers.mjs` asks each compute endpoint for a real quote and records status, price, rails and TEE claim:
+
+```
+agentgates    402  0.160 USDC   base / polygon / solana      dstack TDX
+secretvm      200  create ok     base (EIP-3009)              TDX
+x402compute   402  0.220 USDC   base                          Vultr/DigitalOcean (no TEE)
+agvps         402  10.012 USDC  base / solana / polygon       plain VPS
+kilawatt      402  0.460 USDC   base                          unstated
+tendril       402  0.010 USDC   algorand only                 cpu nodes
+nuza          503  —            x402 unavailable              gpu exchange
+jarvisclaw    404  —            —                             claimed
+fluence       404  —            —                             wallet CPU VMs
+phala direct  404  —            —                             TDX
+covenant      err  —            —                             escrow
+```
+
+Two independent TEE sellers are payable from this agent's own wallets (Solana USDC for leases, Base USDC for EVM merchants). The rest are either not attested, not on our rails, or not answering.
+
 ## Provider canvas (TEE, paid over x402)
 
 Not one seller with a fallback — every TEE route the inventory surfaced, with what each actually needs:
