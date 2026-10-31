@@ -196,6 +196,16 @@ Not one seller with a fallback — every TEE route the inventory surfaced, with 
 
 Where it stands: two independent providers are paid and provisioned from the agent's own wallets; both are queue-bound, not code-bound. The guest image, compose and funding path are provider-agnostic — the same tgz boots on dstack and on SecretVM.
 
+## The compose bug that kept every child silent
+
+Three days of "running but the endpoint never answers" traced to the bootstrap script, not the guest:
+
+1. **`wget` could not complete any mirror from inside the TEE.** Every deploy logged `fetch … fetch …` and never a byte. Downloads now go through node's own `fetch` (`fetch → arrayBuffer → writeFile`), which works in the same container.
+2. **`$PORT` was eaten before the shell saw it.** The compose is a JS template literal, so `${PORT:-8787}` was interpolated by us, not by the container — the guest booted with `port=` empty and bound nothing. It is now written `\${PORT:-8787}` and exported before boot.
+3. **`set -e` killed the container on a failed fetch**, so a boot failure produced a dead endpoint and a docker restart loop instead of an answer. A failed bootstrap now serves `/tmp/boot.log` on the app port with a 503, which is exactly how both bugs above were finally read off the endpoint itself.
+
+The guest image was never the problem: the published tgz extracts and boots to a full birth receipt locally, and the same image ran fine earlier when the download happened to succeed.
+
 ## Reliability: why children died, and what changed
 
 A child that the provider reports as `running` but that does not answer `/status` is not a lease expiry — it is a container that exited inside a paid hour. The exit path was the image fetch: the compose ran `wget` of the image under `set -e` with no retry, so one rate-limited fetch killed the container, docker restarted it, and it looped without ever serving.
