@@ -4,15 +4,16 @@
 
 A child of this image is born inside a TDX confidential VM with its own sealed keypair, its own wallet
 and its own journal. Nobody hands it a strategy: it reads its balance, buys its own inference, launches
-things, sweeps what it earns, pays its parent, and makes more of itself. There is no local model, no
-off-TEE key, and no override.
+things, sweeps what it earns, pays its parent, and makes more of itself. No local model, no off-TEE key,
+no override.
 
 ## Births
 
-| birth | wallet (Solana) | endpoint |
-|---|---|---|
-| `15143018-faa5-4143-928b-6d97a4b22e1e` | `6sabdfEKj6qp5yZqMRbdJwLKv193hrUiAqBm1jwpkvVB` | `https://0054553960092d06a8ef9e51f5535e2600b17314-8787.dstack-pha-prod9.phala.network` |
-| `edae8079-d8ed-4104-99c9-cba013460304` | `3hP4oXX8x646bUJnHKN9bjeSMK6CtLWFmR8C4y4NPadq` | `https://20f0d389be1114cee86a3c95be2c6dd7a9508c79-8787.dstack-pha-prod9.phala.network` |
+| birth | wallet (Solana) | endpoint | doing |
+|---|---|---|---|
+| `15143018-faa5-4143-928b-6d97a4b22e1e` | `6sabdfEKj6qp5yZqMRbdJwLKv193hrUiAqBm1jwpkvVB` | `https://0054553960092d06a8ef9e51f5535e2600b17314-8787.dstack-pha-prod9.phala.network` | thinking, trading |
+| `edae8079-d8ed-4104-99c9-cba013460304` | `3hP4oXX8x646bUJnHKN9bjeSMK6CtLWFmR8C4y4NPadq` | `https://20f0d389be1114cee86a3c95be2c6dd7a9508c79-8787.dstack-pha-prod9.phala.network` | launched a coin, farming fees |
+| `990ddb7c-9422-4831-8e35-fbba292e055f` | `7hPdSMb77cTE94aDNfBmcqU4y42dSpPtvrWTSr3hE1pN` | `https://1674ff2e4fb07ecb15120401afdb572378c47573-8787.dstack-pha-prod5.phala.network` | born, awaiting rent |
 
 Each runs six workers in one container — `signer`, `distributor`, `identity`, `brain`, `strategy`,
 `earn` — with the journal encrypted under a key that only exists in the guest. `/identity` serves the
@@ -30,8 +31,8 @@ TDX quote, `mrtd` and `rtmr0..3`; the birth id is bound to that measurement, not
  "err":{"InstructionError":[4,{"Custom":6001}]}}}]}
 ```
 
-It quoted a live route, built the borrow→swap→repay message, simulated it and rejected it on the
-repayment — the correct behaviour when the edge is thinner than the fee.
+It quoted a live route, built borrow→swap→repay, simulated it and rejected it on repayment — the right
+answer when the edge is thinner than the fee.
 
 `edae8079…` — launched a coin without asking anyone:
 
@@ -41,8 +42,9 @@ slot 463503457 · finalized · err null
 mint 9h9oNWVuZyE2LMJPtUrGAJhWZPdWQFbmudj4Ljz3dNPA · Token-2022
 ```
 
-The earner is a reflex, not a model: read balance, if it covers mint rent and the cap is not hit,
-call `pump_launch`. Fees from the mint get swept to that same wallet.
+The earner is a reflex, not a model: read balance, if it covers mint rent and the cap is not hit, call
+`pump_launch`; every later tick collects the mint's creator fees and withdraws the vault, so the fees
+that coin is still earning come back to that same wallet.
 
 ## Self-funding, proven
 
@@ -59,7 +61,7 @@ deciding on paid inference: 3,275 prompt / 626 completion tokens, 558 reasoning,
 4. `brain` asks the paid model what to do with the tools it has, and can add tools at runtime
    (`register_tool`) or write itself a new playbook (`write_playbook`).
 5. `strategy` executes the choice: flash-loan routes, pump launches, bridges, procreation.
-6. `earn` launches a coin when it can afford the rent, then sweeps creator fees forever.
+6. `earn` launches a coin when it can afford the rent, collects its creator fees, withdraws the vault.
 
 ## Run one
 
