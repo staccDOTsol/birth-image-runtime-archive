@@ -44,7 +44,7 @@ const PROXIES = [
   (u) => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
   (u) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
 ];
-const CACHE_KEY = 'birth-fleet-v1';
+const CACHE_KEY = 'birth-fleet-v4'; // bump to invalidate stale depth/gen labels
 const MAX_NODES = 64, MAX_DEPTH = 5, TTL_MS = 600000;
 
 const $ = (id) => document.getElementById(id);
