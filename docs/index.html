@@ -38,6 +38,7 @@
 <script>
 const ROOTS = (window.ROOTS || []);
 const GEN_OF = new Map(); // endpoint -> generation, from the published tree
+const norm = (u) => String(u || '').replace(/\/+$/, '').replace(/:80$/, '');
 const ROOT_SET = new Set(); // endpoints published as roots (GEN 1); anything else is a child
 const ROOTS_URL = 'roots.json';
 const PROXIES = [
@@ -48,12 +49,14 @@ const PROXIES = [
 ];
 const CACHE_KEY = 'birth-fleet-v4'; // bump to invalidate stale depth/gen labels
 const MAX_NODES = 64, MAX_DEPTH = 5, TTL_MS = 600000;
+const MAX_DEAD = 40; // dead births are shown, but the newest ones only
 
 const $ = (id) => document.getElementById(id);
 const el = (t, c, txt) => { const n = document.createElement(t); if (c) n.className = c; if (txt != null) n.textContent = txt; return n; };
 const fmt = (v, d = 3) => v == null ? '—' : (typeof v === 'number' ? v.toFixed(d) : String(v));
 
 let nodes = [];               // {endpoint, depth, data, at}
+let SHOW_DEAD = false;        // dead births are history; the board opens on the living
 const cards = new Map();      // endpoint -> element
 
 function loadCache() {
@@ -129,7 +132,7 @@ function card(node) {
   const left = el('div');
   const label = node.endpoint.startsWith('dep:') ? node.endpoint.slice(4, 14) : node.endpoint.replace(/^https:\/\//, '').slice(0, 14);
   left.append(el('span', 'dot ' + (node.fresh ? 'up' : (node.data ? 'pend' : 'down'))), el('span', 'mono', (node.data?.birth_id || node.id || label).slice(0, 14)));
-  const gen = ROOT_SET.has(node.endpoint) ? 1 : Math.max(2, GEN_OF.get(node.endpoint) || (node.depth || 0) + 1);
+  const gen = ROOT_SET.has(norm(node.endpoint)) ? 1 : Math.max(2, GEN_OF.get(node.endpoint) || (node.depth || 0) + 1);
   const state = node.dead ? 'no endpoint' : (node.fresh ? 'live' : (node.data ? 'cached' : 'no answer'));
   head.append(left, el('span', 'k gen-chip', `GEN ${gen}`), el('span', 'k', state));
   c.append(head);
@@ -175,7 +178,15 @@ function render(initial) {
     ((b.data?.last_decision?.at || 0) - (a.data?.last_decision?.at || 0)) ||
     (a.depth - b.depth) ||
     ((b.at || 0) - (a.at || 0)));
-  const shown = sorted.filter((n) => n.data || n.gen2 || (n.depth === 0 && Date.now() - (n.at || 0) < 180000));
+  let deadShown = 0;
+  const shown = sorted.filter((n) => {
+    // A dead birth is history, not the fleet. Show living cards always; show the
+    // graveyard only when the reader asks for it, otherwise 100+ tombstones bury the board.
+    if (n.data) return true;
+    if (n.gen2 && (!SHOW_DEAD || deadShown >= MAX_DEAD)) return false;
+    if (n.gen2) deadShown++;
+    return n.gen2 || (n.depth === 0 && Date.now() - (n.at || 0) < 180000);
+  });
   for (const n of shown) {
     const fresh = card(n);
     const old = cards.get(n.endpoint);
@@ -227,7 +238,7 @@ async function refresh() {
   try {
     const doc = await (await fetch('roots.json?ts=' + Date.now(), { cache: 'no-store' })).json();
     for (const r of (doc.roots || [])) {
-      if (r.endpoint) ROOT_SET.add(r.endpoint);
+      if (r.endpoint) ROOT_SET.add(norm(r.endpoint));
     }
     for (const r of (doc.roots || [])) {
       for (const c of (r.children || [])) {
