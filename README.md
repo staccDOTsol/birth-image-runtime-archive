@@ -129,6 +129,15 @@ Both sweeps simulated clean before sending (`sweep_creator_fee` + the coin's bon
 - **Pump launch**: `create_v2` (+ optional dev buy), simulated before send; canonical account order with a live template when one is visible.
 - **Healing**: `bin/heal.mjs` treats a child as alive only if `/status` answers; a provider-"running" but silent child is destroyed and replaced. `bin/renew-children.mjs` renews leases before they lapse.
 
+### Where the creator fees sit
+
+`sweep_creator_fee` moved the coin's accrued fees off the curve into the agent's **creator vault** — `88,849,314` lamports (0.0888 SOL) and still accruing. That is a real balance, but it is not yet spendable SOL:
+
+- The SDK exposes `distributeCreatorFees` / `distributeCreatorFeesV2`, which need a **sharing config**. This coin has none, so the vault→wallet step needs `collectCreatorFee` on the AMM/fee program, which the SDK does not expose as a builder.
+- Until that is wired, the earnings stay in the vault — recoverable, visible on chain, just not in the wallet.
+
+The three "sweeps" recorded earlier were real transactions moving curve fees into that vault; wallet SOL stayed at 0.5318, which is what exposed the missing final step.
+
 ## Reliability: why children died, and what changed
 
 A child that the provider reports as `running` but that does not answer `/status` is not a lease expiry — it is a container that exited inside a paid hour. The exit path was the image fetch: the compose ran `wget` of the image under `set -e` with no retry, so one rate-limited fetch killed the container, docker restarted it, and it looped without ever serving.
