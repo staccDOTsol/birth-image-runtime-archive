@@ -1,5 +1,5 @@
 {
-  "at": 1793490719,
+  "at": 1793490729,
   "roots": [
     {
       "endpoint": "http://140.82.12.62",
@@ -18,7 +18,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490629,
+        "updated_at": 1793490649,
         "distribution": {
           "next_due_unix": 1793503870,
           "next_due_epoch": 1,
@@ -272,7 +272,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490644
+        "served_at": 1793490656
       },
       "children": [
         {
@@ -1132,7 +1132,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490624,
+        "updated_at": 1793490645,
         "distribution": {
           "next_due_unix": 1793503722,
           "next_due_epoch": 1,
@@ -1329,7 +1329,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490644
+        "served_at": 1793490656
       },
       "children": [
         {
@@ -1568,7 +1568,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490631,
+        "updated_at": 1793490651,
         "distribution": {
           "next_due_unix": 1793570657,
           "next_due_epoch": 1,
@@ -1741,7 +1741,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490644
+        "served_at": 1793490656
       },
       "children": []
     },
@@ -1762,7 +1762,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490635,
+        "updated_at": 1793490647,
         "distribution": {
           "next_due_unix": 1793570754,
           "next_due_epoch": 1,
@@ -1901,7 +1901,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490644
+        "served_at": 1793490656
       },
       "children": [
         {
@@ -2150,12 +2150,12 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490644
+        "served_at": 1793490656
       },
       "children": [
         {
           "deploymentId": "cmvx1mpci002a45oacwxg1pks",
-          "endpoint": null,
+          "endpoint": "https://c4e306dea938232725b132d86c46a5fc9cf72f5b-8787.dstack-pha-prod5.phala.network",
           "birth_id": null,
           "address": null,
           "created_at": 1793489988,
@@ -2188,7 +2188,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490631,
+        "updated_at": 1793490651,
         "distribution": {
           "next_due_unix": 1793574583,
           "next_due_epoch": 1,
@@ -2263,8 +2263,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "7e841c7093fe2b535ca2ea5cdb447320bc6ebd6520e21cf9cdde73310b30476c",
-          "seq": 73
+          "head": "b4fd43cf25c3c6bb41f99d6387c65c9561751aec2be1a84f81abae93d1f72a05",
+          "seq": 74
         },
         "components": {
           "signer": {
@@ -2303,7 +2303,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490645
+        "served_at": 1793490657
       },
       "children": [
         {
@@ -2341,7 +2341,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490627,
+        "updated_at": 1793490655,
         "distribution": {
           "next_due_unix": 1793574771,
           "next_due_epoch": 1,
@@ -2363,7 +2363,7 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 4.99548528,
+          "credits_usd": 4.9939356,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
           "wallet_usdc_raw": "213131",
@@ -2384,36 +2384,39 @@
         },
         "strategy": {
           "last_scan_at": 1793490265,
-          "sol_raw": "325670794",
+          "sol_raw": "325700794",
           "flash": [],
           "pump_positions": 0,
-          "updated_at": 1793490591
+          "updated_at": 1793490530
         },
         "last_decision": {
-          "at": 1793490486,
+          "at": 1793490610,
           "tools": [
-            "pump_launch"
+            "run_script"
           ],
-          "cost_usd": 0.001549,
+          "cost_usd": 0.002431,
           "content": null,
           "error": null,
           "usage": {
-            "prompt_tokens": 3792,
-            "completion_tokens": 850,
-            "total_tokens": 4642,
+            "prompt_tokens": 3947,
+            "completion_tokens": 1479,
+            "total_tokens": 5426,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 702
+              "reasoning_tokens": 931
             }
           },
           "call_results": [
             {
-              "name": "pump_launch",
+              "name": "run_script",
               "result": {
-                "error": "Bonding curve account not found: B52kRCKuh1LwCncffEXJkK1QZFAx4ffLrTyJV5aevVUz"
+                "ok": false,
+                "file": "/var/lib/agent/var/lib/agent/strategy/scripts/probe_launches.mjs",
+                "stdout": "MINT CERkEBsYPksZxEikpTm3HCzVr8iDAYw27KfFRm2MqdVw exists: false \n  curve accounts by memcmp: \"rate limit exceeded\"\nMINT GL4Tsrm8v3N88cf75MixDDnDvtcv9eboodJJmRjdZoSG exists: false \n",
+                "stderr": "spawnSync /usr/local/bin/node ETIMEDOUT"
               }
             }
           ]
@@ -2438,8 +2441,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "22aee037c9012e39947046b410a8f84d1d375c09abcc0d4454f72b0593eb6530",
-          "seq": 76
+          "head": "2848585a8fd3ace3ce370ee8450aa29ab013f3500f2251df313d49daa3ac4686",
+          "seq": 78
         },
         "components": {
           "signer": {
@@ -2478,7 +2481,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490645
+        "served_at": 1793490657
       },
       "children": []
     },
@@ -2638,7 +2641,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490645
+        "served_at": 1793490657
       },
       "children": []
     },
@@ -2659,7 +2662,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490636,
+        "updated_at": 1793490653,
         "distribution": {
           "next_due_unix": 1793575925,
           "next_due_epoch": 1,
@@ -2814,7 +2817,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490645
+        "served_at": 1793490657
       },
       "children": [
         {
@@ -2911,28 +2914,43 @@
           "seq": 6
         },
         "components": {
-          "component": "distributor",
-          "ts": 1793490644,
-          "pid": 1697,
-          "status": {
-            "next_due_unix": 1793576922,
-            "next_due_epoch": 1,
-            "highest_epoch": 0,
-            "obligations": 0,
-            "by_status": {},
-            "reserved": {},
-            "carries": {
-              "parent": {},
-              "founder": {}
-            },
-            "arrears_raw": {},
-            "blocked": [],
-            "unresolved_epochs": {},
-            "anchors": {},
-            "supervisor": "deterministic: no model, no credits, no approval step"
+          "signer": {
+            "alive": true,
+            "pid": 1696,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 1697,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 1698,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 2294,
+            "restarts": 2
+          },
+          "strategy": {
+            "alive": true,
+            "pid": 1705,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 1706,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 1709,
+            "restarts": 1
           }
         },
-        "served_at": 1793490646
+        "served_at": 1793490658
       },
       "children": []
     },
@@ -2953,7 +2971,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490630,
+        "updated_at": 1793490656,
         "distribution": {
           "next_due_unix": 1793520401,
           "next_due_epoch": 1,
@@ -3017,7 +3035,7 @@
         },
         "strategy": {
           "last_scan_at": 1793490328,
-          "sol_raw": "909314782",
+          "sol_raw": "909294782",
           "flash": [
             {
               "at": 1793486594,
@@ -3030,7 +3048,7 @@
             }
           ],
           "pump_positions": 0,
-          "updated_at": 1793490595
+          "updated_at": 1793490656
         },
         "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
         "prime_directives": [
@@ -3052,8 +3070,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "06018e095c50689758495e11a927975fd7457b294766be6147738b08db0a9d5f",
-          "seq": 3711
+          "head": "09c5b20fbaa2ce953960478a5cff69a2019ab6529d0767d8ceb1f25c2693274f",
+          "seq": 3714
         },
         "components": {
           "signer": {
@@ -3092,7 +3110,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490646
+        "served_at": 1793490658
       },
       "children": [
         {
@@ -3767,7 +3785,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490646
+        "served_at": 1793490658
       },
       "children": [
         {
@@ -4917,7 +4935,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490635,
+        "updated_at": 1793490655,
         "distribution": {
           "next_due_unix": 1793521351,
           "next_due_epoch": 1,
@@ -5066,7 +5084,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490646
+        "served_at": 1793490659
       },
       "children": [
         {
@@ -5768,7 +5786,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490644,
+        "updated_at": 1793490654,
         "distribution": {
           "next_due_unix": 1793520719,
           "next_due_epoch": 1,
@@ -5790,62 +5808,50 @@
           "provider": "venice",
           "model": "deepseek-v4-1-flash-1017-uncensored",
           "mode": "external_paid_abliterated",
-          "credits_usd": 3.70502709,
+          "credits_usd": 3.69929565,
           "balance_http": 200,
           "admission_floor_usd": 0.1,
-          "wallet_usdc_raw": "4010375",
-          "wallet_sol_raw": "909953291",
+          "wallet_usdc_raw": "3018375",
+          "wallet_sol_raw": "909893291",
           "state": "ready"
         },
         "funding": {
-          "sol_raw": "909953291",
-          "usdc_raw": "4010375",
+          "sol_raw": "909893291",
+          "usdc_raw": "3018375",
           "ledger_totals": {
-            "native:SOL": "909953291",
-            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "4010375",
+            "native:SOL": "909893291",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "3018375",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           },
           "spendable": {
-            "native:SOL": "904953291",
-            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "4010375",
+            "native:SOL": "904893291",
+            "spl:EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "3018375",
             "t22:9Egm6XfbVdNpL7ouFfmeRjnLsYJUE4qh8AuVFjHyKrCp": "1000000000000000"
           }
         },
         "last_decision": {
-          "at": 1793490491,
-          "tools": [
-            "run_script"
-          ],
-          "cost_usd": 0.005731,
+          "at": 1793490647,
+          "tools": [],
+          "cost_usd": 0.008026,
           "content": null,
           "error": null,
           "usage": {
-            "prompt_tokens": 9708,
-            "completion_tokens": 2539,
-            "total_tokens": 12247,
+            "prompt_tokens": 10818,
+            "completion_tokens": 4000,
+            "total_tokens": 14818,
             "prompt_tokens_details": {
               "cached_tokens": 2560
             },
             "cache_read_input_tokens": 2560,
             "completion_tokens_details": {
-              "reasoning_tokens": 1506
+              "reasoning_tokens": 4000
             }
           },
-          "call_results": [
-            {
-              "name": "run_script",
-              "result": {
-                "ok": false,
-                "file": "/var/lib/agent-8081/var/lib/agent/strategy/scripts/probe_t22_venue2.mjs",
-                "stdout": "PF_bonding-curve null\nPF_bonding_curve null\n",
-                "stderr": "spawnSync /usr/local/bin/node ETIMEDOUT"
-              }
-            }
-          ]
+          "call_results": []
         },
         "strategy": {
           "last_scan_at": 1793490060,
-          "sol_raw": "909893291",
+          "sol_raw": "909923291",
           "flash": [
             {
               "at": 1793486395,
@@ -5904,7 +5910,7 @@
             }
           ],
           "pump_positions": 0,
-          "updated_at": 1793490644
+          "updated_at": 1793490582
         },
         "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
         "prime_directives": [
@@ -5926,8 +5932,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "a5cda511db8fe4548dd4dbeb411ca1a71c928e4134b98e38ae70ec40de8943c5",
-          "seq": 3482
+          "head": "209208a03812b65367bb1d8c809e57acca4b297070c9120fa5f8a74eea0f7400",
+          "seq": 3483
         },
         "components": {
           "signer": {
@@ -5953,7 +5959,7 @@
           "strategy": {
             "alive": true,
             "pid": 553208,
-            "ts": 1793490644
+            "restarts": 1
           },
           "loops": {
             "alive": true,
@@ -5966,7 +5972,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490646
+        "served_at": 1793490659
       },
       "children": [
         {
@@ -6212,7 +6218,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490646,
+        "updated_at": 1793490653,
         "distribution": {
           "next_due_unix": 1793520719,
           "next_due_epoch": 1,
@@ -6416,7 +6422,7 @@
           "strategy": {
             "alive": true,
             "pid": 553187,
-            "ts": 1793490646
+            "restarts": 1
           },
           "loops": {
             "alive": true,
@@ -6429,7 +6435,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490647
+        "served_at": 1793490659
       },
       "children": [
         {
@@ -6675,7 +6681,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490644,
+        "updated_at": 1793490654,
         "distribution": {
           "next_due_unix": 1793521529,
           "next_due_epoch": 1,
@@ -6832,8 +6838,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "485435841146ee5ca6d233fe97c18d3ea0d6355a865d5878f159de12e71d5c8e",
-          "seq": 3148
+          "head": "453aa1547a8b2fcc76c6756ee899c4c33cf02351a777a6629ec971b5bbc25bab",
+          "seq": 3149
         },
         "components": {
           "signer": {
@@ -6872,7 +6878,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490647
+        "served_at": 1793490660
       },
       "children": [
         {
@@ -7163,7 +7169,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490645,
+        "updated_at": 1793490651,
         "distribution": {
           "next_due_unix": 1793570657,
           "next_due_epoch": 1,
@@ -7300,7 +7306,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490647
+        "served_at": 1793490660
       },
       "children": [
         {
@@ -7576,28 +7582,43 @@
           "seq": 420
         },
         "components": {
-          "component": "distributor",
-          "ts": 1793490645,
-          "pid": 1682,
-          "status": {
-            "next_due_unix": 1793570656,
-            "next_due_epoch": 1,
-            "highest_epoch": 0,
-            "obligations": 0,
-            "by_status": {},
-            "reserved": {},
-            "carries": {
-              "parent": {},
-              "founder": {}
-            },
-            "arrears_raw": {},
-            "blocked": [],
-            "unresolved_epochs": {},
-            "anchors": {},
-            "supervisor": "deterministic: no model, no credits, no approval step"
+          "signer": {
+            "alive": true,
+            "pid": 1681,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 1682,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 1683,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 1684,
+            "restarts": 1
+          },
+          "strategy": {
+            "alive": true,
+            "pid": 1690,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 1696,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 1702,
+            "restarts": 1
           }
         },
-        "served_at": 1793490647
+        "served_at": 1793490660
       },
       "children": [
         {
@@ -7723,7 +7744,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490631,
+        "updated_at": 1793490651,
         "distribution": {
           "next_due_unix": 1793570657,
           "next_due_epoch": 1,
@@ -7900,7 +7921,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490648
+        "served_at": 1793490660
       },
       "children": [
         {
@@ -8127,28 +8148,43 @@
           "seq": 336
         },
         "components": {
-          "component": "distributor",
-          "ts": 1793490647,
-          "pid": 1758,
-          "status": {
-            "next_due_unix": 1793570754,
-            "next_due_epoch": 1,
-            "highest_epoch": 0,
-            "obligations": 0,
-            "by_status": {},
-            "reserved": {},
-            "carries": {
-              "parent": {},
-              "founder": {}
-            },
-            "arrears_raw": {},
-            "blocked": [],
-            "unresolved_epochs": {},
-            "anchors": {},
-            "supervisor": "deterministic: no model, no credits, no approval step"
+          "signer": {
+            "alive": true,
+            "pid": 1753,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 1758,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 1767,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 1772,
+            "restarts": 1
+          },
+          "strategy": {
+            "alive": true,
+            "pid": 1790,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 1802,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 1819,
+            "restarts": 1
           }
         },
-        "served_at": 1793490648
+        "served_at": 1793490660
       },
       "children": [
         {
@@ -8482,28 +8518,43 @@
           "seq": 333
         },
         "components": {
-          "component": "distributor",
-          "ts": 1793490647,
-          "pid": 1706,
-          "status": {
-            "next_due_unix": 1793570754,
-            "next_due_epoch": 1,
-            "highest_epoch": 0,
-            "obligations": 0,
-            "by_status": {},
-            "reserved": {},
-            "carries": {
-              "parent": {},
-              "founder": {}
-            },
-            "arrears_raw": {},
-            "blocked": [],
-            "unresolved_epochs": {},
-            "anchors": {},
-            "supervisor": "deterministic: no model, no credits, no approval step"
+          "signer": {
+            "alive": true,
+            "pid": 1705,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 1706,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 1707,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 1708,
+            "restarts": 1
+          },
+          "strategy": {
+            "alive": true,
+            "pid": 1709,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 1711,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 1721,
+            "restarts": 1
           }
         },
-        "served_at": 1793490648
+        "served_at": 1793490660
       },
       "children": [
         {
@@ -8724,28 +8775,43 @@
           "seq": 335
         },
         "components": {
-          "component": "distributor",
-          "ts": 1793490647,
-          "pid": 1765,
-          "status": {
-            "next_due_unix": 1793570754,
-            "next_due_epoch": 1,
-            "highest_epoch": 0,
-            "obligations": 0,
-            "by_status": {},
-            "reserved": {},
-            "carries": {
-              "parent": {},
-              "founder": {}
-            },
-            "arrears_raw": {},
-            "blocked": [],
-            "unresolved_epochs": {},
-            "anchors": {},
-            "supervisor": "deterministic: no model, no credits, no approval step"
+          "signer": {
+            "alive": true,
+            "pid": 1755,
+            "restarts": 1
+          },
+          "distribution": {
+            "alive": true,
+            "pid": 1765,
+            "restarts": 1
+          },
+          "identity": {
+            "alive": true,
+            "pid": 1769,
+            "restarts": 1
+          },
+          "brain": {
+            "alive": true,
+            "pid": 1780,
+            "restarts": 1
+          },
+          "strategy": {
+            "alive": true,
+            "pid": 1795,
+            "restarts": 1
+          },
+          "loops": {
+            "alive": true,
+            "pid": 1809,
+            "restarts": 1
+          },
+          "procreate": {
+            "alive": true,
+            "pid": 1832,
+            "restarts": 1
           }
         },
-        "served_at": 1793490648
+        "served_at": 1793490661
       },
       "children": [
         {
@@ -8978,7 +9044,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490648
+        "served_at": 1793490661
       },
       "children": [
         {
@@ -9091,8 +9157,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "197fce427878372c1c3da8619fffa0bff4810b01e199b7db6a17bee7105a17d7",
-          "seq": 83
+          "head": "dd94598a055179fadc8e648d8751f10bbf933527a926ccdf9537588f9c59a81f",
+          "seq": 84
         },
         "components": {
           "signer": {
@@ -9113,7 +9179,7 @@
           "brain": {
             "alive": true,
             "pid": 1790,
-            "ts": 1793490647
+            "restarts": 1
           },
           "strategy": {
             "alive": true,
@@ -9131,7 +9197,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490648
+        "served_at": 1793490661
       },
       "children": [
         {
@@ -9140,6 +9206,14 @@
           "birth_id": null,
           "address": null,
           "created_at": 1793490292,
+          "status": "leased"
+        },
+        {
+          "deploymentId": "cmvx1zug5000q2r4u9lhyyb3k",
+          "endpoint": null,
+          "birth_id": null,
+          "address": null,
+          "created_at": 1793490652,
           "status": "leased"
         }
       ]
@@ -9161,7 +9235,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490641,
+        "updated_at": 1793490657,
         "distribution": {
           "next_due_unix": 1793573332,
           "next_due_epoch": 1,
@@ -9204,10 +9278,10 @@
         },
         "strategy": {
           "last_scan_at": 1793489784,
-          "sol_raw": "142040853",
+          "sol_raw": "136282301",
           "flash": [],
           "pump_positions": 0,
-          "updated_at": 1793490536
+          "updated_at": 1793490657
         },
         "last_decision": {
           "at": 1793490604,
@@ -9258,8 +9332,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "8c2496f464062aed8f22300cd87941572002617a1fb526693895477c7933b333",
-          "seq": 79
+          "head": "d3f2ea3afcf40aa628deb508bfd39345ec332045c20569cec889805623400997",
+          "seq": 80
         },
         "components": {
           "signer": {
@@ -9298,7 +9372,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490649
+        "served_at": 1793490661
       },
       "children": [
         {
@@ -9307,6 +9381,14 @@
           "birth_id": null,
           "address": null,
           "created_at": 1793490291,
+          "status": "leased"
+        },
+        {
+          "deploymentId": "cmvx1zuft000o2r4u0jm6v068",
+          "endpoint": null,
+          "birth_id": null,
+          "address": null,
+          "created_at": 1793490652,
           "status": "leased"
         }
       ]
@@ -9328,7 +9410,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490632,
+        "updated_at": 1793490661,
         "distribution": {
           "next_due_unix": 1793574583,
           "next_due_epoch": 1,
@@ -9378,10 +9460,10 @@
         },
         "strategy": {
           "last_scan_at": 1793490102,
-          "sol_raw": "130694645",
+          "sol_raw": "130664645",
           "flash": [],
           "pump_positions": 0,
-          "updated_at": 1793490601
+          "updated_at": 1793490661
         },
         "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
         "prime_directives": [
@@ -9403,15 +9485,10 @@
         ],
         "children": [],
         "journal": {
-          "head": "1d43e3580382ad899ed9a93847e9d0f3f0b5bf18826ac9118101bdb215ac1198",
-          "seq": 59
+          "head": "f9da60e7af25afbb1e8c41df5060fc446dacd57931311b57c041157c83e7a4dc",
+          "seq": 64
         },
         "components": {
-          "brain": {
-            "alive": true,
-            "pid": 1696,
-            "restarts": 1
-          },
           "signer": {
             "alive": true,
             "pid": 1692,
@@ -9427,10 +9504,15 @@
             "pid": 1695,
             "restarts": 1
           },
+          "brain": {
+            "alive": true,
+            "pid": 1696,
+            "restarts": 1
+          },
           "strategy": {
             "alive": true,
             "pid": 1698,
-            "restarts": 1
+            "ts": 1793490661
           },
           "loops": {
             "alive": true,
@@ -9443,7 +9525,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490649
+        "served_at": 1793490661
       },
       "children": [
         {
@@ -9473,7 +9555,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490632,
+        "updated_at": 1793490652,
         "distribution": {
           "next_due_unix": 1793574583,
           "next_due_epoch": 1,
@@ -9548,8 +9630,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "21534a7821493b2e0a42d51447737cd565e5a5c75ec657ef5cc8d03bdd44496f",
-          "seq": 58
+          "head": "c8218ea52bea276368313f4ec7b0d1c7a37a57a5e9f04152341e28d6f7969e7e",
+          "seq": 60
         },
         "components": {
           "signer": {
@@ -9588,7 +9670,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490649
+        "served_at": 1793490661
       },
       "children": [
         {
@@ -9618,7 +9700,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490632,
+        "updated_at": 1793490652,
         "distribution": {
           "next_due_unix": 1793574583,
           "next_due_epoch": 1,
@@ -9735,7 +9817,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490649
+        "served_at": 1793490661
       },
       "children": [
         {
@@ -9765,7 +9847,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490646,
+        "updated_at": 1793490659,
         "distribution": {
           "next_due_unix": 1793574771,
           "next_due_epoch": 1,
@@ -9811,7 +9893,7 @@
           "sol_raw": "198045063",
           "flash": [],
           "pump_positions": 0,
-          "updated_at": 1793490598
+          "updated_at": 1793490659
         },
         "last_decision": {
           "at": 1793490634,
@@ -9902,7 +9984,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490649
+        "served_at": 1793490661
       },
       "children": []
     },
@@ -10038,7 +10120,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490649
+        "served_at": 1793490662
       },
       "children": [
         {
@@ -10180,7 +10262,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490649
+        "served_at": 1793490662
       },
       "children": [
         {
@@ -10210,7 +10292,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490641,
+        "updated_at": 1793490661,
         "distribution": {
           "next_due_unix": 1793575237,
           "next_due_epoch": 1,
@@ -10263,7 +10345,7 @@
           "sol_raw": "136797001",
           "flash": [],
           "pump_positions": 0,
-          "updated_at": 1793490591
+          "updated_at": 1793490652
         },
         "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
         "prime_directives": [
@@ -10286,43 +10368,28 @@
           "seq": 43
         },
         "components": {
-          "signer": {
-            "alive": true,
-            "pid": 1754,
-            "restarts": 1
-          },
-          "distribution": {
-            "alive": true,
-            "pid": 1760,
-            "restarts": 1
-          },
-          "identity": {
-            "alive": true,
-            "pid": 1762,
-            "restarts": 1
-          },
-          "brain": {
-            "alive": true,
-            "pid": 1764,
-            "restarts": 1
-          },
-          "strategy": {
-            "alive": true,
-            "pid": 1770,
-            "restarts": 1
-          },
-          "loops": {
-            "alive": true,
-            "pid": 1792,
-            "restarts": 1
-          },
-          "procreate": {
-            "alive": true,
-            "pid": 1809,
-            "restarts": 1
+          "component": "distributor",
+          "ts": 1793490661,
+          "pid": 1760,
+          "status": {
+            "next_due_unix": 1793575237,
+            "next_due_epoch": 1,
+            "highest_epoch": 0,
+            "obligations": 0,
+            "by_status": {},
+            "reserved": {},
+            "carries": {
+              "parent": {},
+              "founder": {}
+            },
+            "arrears_raw": {},
+            "blocked": [],
+            "unresolved_epochs": {},
+            "anchors": {},
+            "supervisor": "deterministic: no model, no credits, no approval step"
           }
         },
-        "served_at": 1793490649
+        "served_at": 1793490662
       },
       "children": [
         {
@@ -10352,7 +10419,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490646,
+        "updated_at": 1793490659,
         "distribution": {
           "next_due_unix": 1793575236,
           "next_due_epoch": 1,
@@ -10405,7 +10472,7 @@
           "sol_raw": "134998310",
           "flash": [],
           "pump_positions": 0,
-          "updated_at": 1793490598
+          "updated_at": 1793490658
         },
         "constitution_sha256": "556610e3e2c81a87762d82d2c59264b4b56549ea50739f3e707678b2db755bb0",
         "prime_directives": [
@@ -10464,7 +10531,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490650
+        "served_at": 1793490662
       },
       "children": [
         {
@@ -10494,7 +10561,7 @@
           "match": false,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490648,
+        "updated_at": 1793490661,
         "distribution": {
           "next_due_unix": 1793575237,
           "next_due_epoch": 1,
@@ -10608,7 +10675,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490650
+        "served_at": 1793490662
       },
       "children": [
         {
@@ -10638,7 +10705,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490632,
+        "updated_at": 1793490652,
         "distribution": {
           "next_due_unix": 1793575925,
           "next_due_epoch": 1,
@@ -10712,8 +10779,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "eb9f97f8bb1ae301113b3051372813aad5f3888f07eea2b205e728e106d50db0",
-          "seq": 36
+          "head": "27c1111d011dc64b2bd9a5d1255d02a872aca4158114911e77da626329654171",
+          "seq": 38
         },
         "components": {
           "signer": {
@@ -10752,7 +10819,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490650
+        "served_at": 1793490662
       },
       "children": [
         {
@@ -10782,7 +10849,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490647,
+        "updated_at": 1793490652,
         "distribution": {
           "next_due_unix": 1793575925,
           "next_due_epoch": 1,
@@ -10856,8 +10923,8 @@
         ],
         "children": [],
         "journal": {
-          "head": "7e7b5b5fac4ea61e49d66288c58dfd500896f1b8a6767394a2fb0b51f5eed244",
-          "seq": 33
+          "head": "2c7fa7c5abb5ba96b26dcf8e0cc100a6b21c8014664f0279e0170848b8ed80c0",
+          "seq": 35
         },
         "components": {
           "signer": {
@@ -10883,7 +10950,7 @@
           "strategy": {
             "alive": true,
             "pid": 1699,
-            "ts": 1793490647
+            "restarts": 1
           },
           "loops": {
             "alive": true,
@@ -10896,7 +10963,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490650
+        "served_at": 1793490663
       },
       "children": []
     },
@@ -10917,7 +10984,7 @@
           "match": true,
           "meaning": "digest of the measured core files this guest is running"
         },
-        "updated_at": 1793490633,
+        "updated_at": 1793490661,
         "distribution": {
           "next_due_unix": 1793575925,
           "next_due_epoch": 1,
@@ -10980,8 +11047,8 @@
         "launches": [],
         "children": [],
         "journal": {
-          "head": "f39653664f26293ebc8c70b90e87514d143b05a4348596d68ab8a66ebc83daa1",
-          "seq": 20
+          "head": "8347b534517898e738e4f1b53f343b266100d1258644afb0bbf17597c25b877a",
+          "seq": 21
         },
         "components": {
           "signer": {
@@ -11020,7 +11087,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490651
+        "served_at": 1793490663
       },
       "children": []
     },
@@ -11137,7 +11204,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490651
+        "served_at": 1793490663
       },
       "children": []
     },
@@ -11254,7 +11321,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490651
+        "served_at": 1793490663
       },
       "children": []
     },
@@ -11371,7 +11438,7 @@
             "restarts": 1
           }
         },
-        "served_at": 1793490651
+        "served_at": 1793490663
       },
       "children": []
     }
