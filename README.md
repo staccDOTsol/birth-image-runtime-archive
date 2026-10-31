@@ -1,34 +1,54 @@
-# birth-image — live state
+# birth-image
 
-Autonomous agents born inside TDX confidential VMs. Each one seals an identity, funds itself by
-selling its own SOL for USDC, buys its own inference, and spends every tick trying to end with more
-money than it started with. No human in the loop, no local model, no keys outside the guest.
+**Why have people when you can just have agents?**
 
-## Live children
+A child of this image is born inside a TDX confidential VM with its own sealed keypair, its own wallet
+and its own journal. Nobody hands it a strategy: it reads its balance, buys its own inference, launches
+things, sweeps what it earns, pays its parent, and makes more of itself. There is no local model, no
+off-TEE key, and no override.
 
-| child | endpoint | wallet (Solana) | credits | last action |
-|---|---|---|---|---|
-| `cmvvpn9ga` | `https://0054553960092d06a8ef9e51f5535e2600b17314-8787.dstack-pha-prod9.phala.network` | `6sabdfEKj6qp5yZqMRbdJwLKv193hrUiAqBm1jwpkvVB` | $4.99 | `scan_flashloan` |
-| `cmvvpvjm4` | `https://20f0d389be1114cee86a3c95be2c6dd7a9508c79-8787.dstack-pha-prod9.phala.network` | `3hP4oXX8x646bUJnHKN9bjeSMK6CtLWFmR8C4y4NPadq` | — | launched `9h9oNWVuZyE2LMJPtUrGAJhWZPdWQFbmudj4Ljz3dNPA` |
+## Births
 
-Both run all six workers — `signer`, `distributor`, `identity`, `brain`, `strategy`, `earn` — inside
-one TEE container, with the journal encrypted at rest under a key that only exists in the guest.
-`/identity` serves the TDX quote, `mrtd` and `rtmr0..3`; the birth id is bound to that measurement.
+| birth | wallet (Solana) | endpoint |
+|---|---|---|
+| `15143018-faa5-4143-928b-6d97a4b22e1e` | `6sabdfEKj6qp5yZqMRbdJwLKv193hrUiAqBm1jwpkvVB` | `https://0054553960092d06a8ef9e51f5535e2600b17314-8787.dstack-pha-prod9.phala.network` |
+| `edae8079-d8ed-4104-99c9-cba013460304` | `3hP4oXX8x646bUJnHKN9bjeSMK6CtLWFmR8C4y4NPadq` | `https://20f0d389be1114cee86a3c95be2c6dd7a9508c79-8787.dstack-pha-prod9.phala.network` |
 
-## Proof it earns on its own
+Each runs six workers in one container — `signer`, `distributor`, `identity`, `brain`, `strategy`,
+`earn` — with the journal encrypted under a key that only exists in the guest. `/identity` serves the
+TDX quote, `mrtd` and `rtmr0..3`; the birth id is bound to that measurement, not to a file on a host.
 
-- **Pump launch, unattended.** `cmvvpvjm4`, endowed with 0.012 SOL, launched
-  `9h9oNWVuZyE2LMJPtUrGAJhWZPdWQFbmudj4Ljz3dNPA` on its second earn tick — tx
-  `LFE72LwgxWoTbbpKMjmBvgWmmg6ikNJ8nMGuwfMpL1wKMFdpcf5wtyL96uhmE4bbFPnTqzBNmTgbvsFJ9Uo7XCh`,
-  slot `463503457`, finalized, no error. The mint is a live Token-2022 account. Creator fees from it
-  are swept to the child's own wallet by the same worker.
-- **The earner needs no inference.** It is a reflex: read balance, if it covers mint rent and the
-  mint cap is not hit, call `pump_launch` with a generated name. The model picks strategy; it does
-  not make the launch happen.
-- **Self-funding.** `cmvvpn9ga` was endowed with 0.18 SOL, read its own balance, swapped 0.0543 SOL
-  to USDC and bought its own $5 Venice credit — `2Fibx6kayAmsQNCT4RSRxSi45ssuF6hdHAeHLbEf37quQirAH47z…`.
-- **Paid inference from inside the enclave.** Decisions carry real usage: 3,226 prompt / 1,159
-  completion tokens, 1,115 of them reasoning, $0.0019 a tick.
+## First real decisions
+
+`15143018…` — paid inference, then a full flash-loan plan from its own money:
+
+```
+{"tools":["execute_flashloan"],"cost_usd":0.001248,
+ "usage":{"prompt_tokens":3275,"completion_tokens":626,"reasoning_tokens":558},
+ "call_results":[{"name":"execute_flashloan","result":{"phase":"simulate","candidate":"usdc-JUP-usdc",
+ "plan_hash":"ed1b841d673f3793f46422dd53859ba984f8877f3187b46749153bb0db09ccce",
+ "err":{"InstructionError":[4,{"Custom":6001}]}}}]}
+```
+
+It quoted a live route, built the borrow→swap→repay message, simulated it and rejected it on the
+repayment — the correct behaviour when the edge is thinner than the fee.
+
+`edae8079…` — launched a coin without asking anyone:
+
+```
+tx LFE72LwgxWoTbbpKMjmBvgWmmg6ikNJ8nMGuwfMpL1wKMFdpcf5wtyL96uhmE4bbFPnTqzBNmTgbvsFJ9Uo7XCh
+slot 463503457 · finalized · err null
+mint 9h9oNWVuZyE2LMJPtUrGAJhWZPdWQFbmudj4Ljz3dNPA · Token-2022
+```
+
+The earner is a reflex, not a model: read balance, if it covers mint rent and the cap is not hit,
+call `pump_launch`. Fees from the mint get swept to that same wallet.
+
+## Self-funding, proven
+
+`15143018…` was endowed with 0.18 SOL. It read its own balance, swapped 0.0543 SOL to USDC and bought
+its own $5 Venice credit — `2Fibx6kayAmsQNCT4RSRxSi45ssuF6hdHAeHLbEf37quQirAH47z…` — then kept
+deciding on paid inference: 3,275 prompt / 626 completion tokens, 558 reasoning, $0.0012 a tick.
 
 ## What a child does every tick
 
