@@ -36,7 +36,7 @@ A child may also write its own playbook (`write_playbook`) and register its own 
 ## Procreation is never capped
 
 There is no maximum number of children. A child leases another whenever it holds the resources for one
-lease plus the newborn's endowment (0.05 SOL), from its own wallet, at its own discretion. Constraint
+lease plus the newborn's endowment (0.03 SOL), from its own wallet, at its own discretion. Constraint
 is money, not permission.
 
 ## A lease belongs to the child that pays for it
@@ -45,27 +45,35 @@ is money, not permission.
   `loops.mjs`). The provider accepts only the deployment's own owner wallet as payer; a parent paying
   for its child gets `403 payer_not_owner`.
 - **A 202 is not a deployment.** The lease endpoint returns 202 for an accepted payment, so
-  `strategy-procreate.mjs` re-reads the deployment list and records only a deployment that exists.
+  `strategy-procreate.mjs` records the birth immediately, then backfills the endpoint from the
+  provider's own listing on a later tick and adopts the child's identity when it appears.
 - **Fresh image every boot.** The guest always re-pulls the bundle, and the image URL is cache-busted
-  with `?v=<ts>` (`start.sh`, `bin/vps-fleet.mjs`, `strategy-procreate.mjs`); raw.githubusercontent
-  otherwise serves a stale bundle to a new deployment.
-- **Base rail first.** `procreate` leases on Base, because a Solana-rail lease returns 202 and then
-  404. When the Base pot is short it bridges its own SOL to Base USDC through deBridge DLN
-  (`lib/bridge-base.mjs`). The minimum bridge is ~0.03 SOL — below that deBridge returns
-  `ERROR_LOW_GIVE_AMOUNT`.
-- **Adoption.** `POST /adopt` takes a lease the provider would only provision on Base, endows it from
-  the child's own SOL and records it in the child's own book. `GET /children` serves that book, and
-  `/status` now carries `children[]`, so any crawler can walk the whole tree.
+  with `?v=<ts>`. Each instance downloads to its **own** temp path (`/tmp/img-$PORT.tgz`) — four
+  agents booting in parallel used to overwrite one shared `/tmp/img.tgz` and corrupt `/app`.
+- **Rail is chosen, not pinned.** `railBalances()` reads both wallets and the agent leases on the
+  rail it can actually pay from. When USDC is short it swaps its own SOL first, before any
+  affordability check — an agent holding 0.08 SOL and 0.06 USDC used to report `resources` forever.
+- **Adoption.** `POST /adopt` takes a lease and records it in the child's own book; the procreate tick
+  also adopts any booked child whose endpoint appears later and endows it from the child's own SOL.
+  `GET /children` serves that book, and `/status` carries `children[]`, so any crawler can walk the
+  tree.
 
-## The first gen2
+## The fleet, and the first children
 
-| field | value |
-|---|---|
-| born | 2026-10-31T05:46:44Z |
-| birth_id | `8d8b5e0b-1325-40c5-93df-b147cbf22e41` |
-| deployment | `cmvvz266y002ptysxorv4l52r` |
-| parent | birth `4ac4a091`, 45.77.98.201 |
-| lease payer | the **parent wallet**, not the child — it could not yet pay on Base. The deBridge bridge above is what removes that dependency. |
+Sixteen agents run on four boxes, four instances per box (ports `80`, `8081`, `8082`, `8083`), each
+with its own sealed wallet, journal and `children.json`. Two loops keep it alive with no operator:
+`fleet-guard.sh` on every box (every 5 min, restarts any port that stops answering) and `BirthFund` on
+the host (every 10 min, tops every agent and every known child to 0.15 SOL from the parent wallet).
+
+| event | timestamp (UTC) | evidence |
+|---|---|---|
+| first gen2, parent-paid | 2026-10-31T05:46:44Z | birth `8d8b5e0b`, deployment `cmvvz266y…` |
+| first gen2 paid **and** booked by the child itself | 2026-10-31T08:47:42Z | birth `86b29a0f`, `/identity` 200, lease `cmvw5r2k9…` |
+| that child renews in its own name | 2026-10-31T06:23:31Z | `/renew` 200 from the child's wallet; parent gets `403 payer_not_owner` |
+| first birth after the swap-order fix | 2026-10-31T10:07:37Z | swap `49GDgHrd…`, lease `cmvw8m8hs…`, kids 2 → 7 |
+
+Births are cheap and frequent (44 booked across the fleet in one window); whether a birth becomes a
+*live* machine is decided by the provider actually booting what it listed.
 
 ## Spec coverage — `birth-image.manifest.json` → `required_integration`
 
