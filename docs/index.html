@@ -126,9 +126,11 @@ function card(node) {
   const c = el('div', 'card d' + Math.min(node.depth, 2) + (node.data ? '' : ' stale'));
   const head = el('div', 'row');
   const left = el('div');
-  left.append(el('span', 'dot ' + (node.fresh ? 'up' : (node.data ? 'pend' : 'down'))), el('span', 'mono', (node.data?.birth_id || node.id || node.endpoint.replace(/^https:\/\//, '')).slice(0, 14)));
+  const label = node.endpoint.startsWith('dep:') ? node.endpoint.slice(4, 14) : node.endpoint.replace(/^https:\/\//, '').slice(0, 14);
+  left.append(el('span', 'dot ' + (node.fresh ? 'up' : (node.data ? 'pend' : 'down'))), el('span', 'mono', (node.data?.birth_id || node.id || label).slice(0, 14)));
   const gen = GEN_OF.get(node.endpoint) || (node.depth || 0) + 1;
-  head.append(left, el('span', 'k gen-chip', `GEN ${gen}`), el('span', 'k', node.fresh ? 'live' : (node.data ? 'cached' : 'no answer')));
+  const state = node.dead ? 'no endpoint' : (node.fresh ? 'live' : (node.data ? 'cached' : 'no answer'));
+  head.append(left, el('span', 'k gen-chip', `GEN ${gen}`), el('span', 'k', state));
   c.append(head);
   const d = node.data || {};
   const comps = d.components || {};
@@ -217,14 +219,15 @@ async function refresh() {
   // gen2 nodes: children published by a root in roots.json, shown as their own cards
   try {
     const doc = await (await fetch('roots.json?ts=' + Date.now(), { cache: 'no-store' })).json();
-    for (const r of (doc.roots || [])) for (const c of (r.children || [])) if (c.endpoint) GEN_OF.set(c.endpoint, 2);
     for (const r of (doc.roots || [])) {
       for (const c of (r.children || [])) {
-        const ep = c.endpoint || null;
-        if (!ep) continue;
+        // A child is GEN 2 whether or not the provider ever booted it. Hiding the
+        // endpoint-less ones made the board look like it had no children at all.
+        const ep = c.endpoint || ('dep:' + (c.deploymentId || c.created_at || Math.random()));
+        if (c.endpoint) GEN_OF.set(c.endpoint, 2);
         const seenNode = nodes.find((n) => n.endpoint === ep);
-        if (seenNode) { seenNode.depth = Math.max(1, seenNode.depth || 0); seenNode.gen2 = true; continue; }
-        nodes.push({ endpoint: ep, depth: 1, data: null, at: 0, gen2: true, parent: r.endpoint, born_at: c.created_at || null, birth_id: c.birth_id || null });
+        if (seenNode) { seenNode.depth = Math.max(1, seenNode.depth || 0); seenNode.gen2 = true; seenNode.dead = !c.endpoint; continue; }
+        nodes.push({ endpoint: ep, depth: 1, data: null, at: 0, gen2: true, dead: !c.endpoint, parent: r.endpoint, born_at: c.created_at || null, birth_id: c.birth_id || null });
       }
     }
   } catch {}
