@@ -179,13 +179,17 @@ function render(initial) {
     ((b.data?.last_decision?.at || 0) - (a.data?.last_decision?.at || 0)) ||
     (a.depth - b.depth) ||
     ((b.at || 0) - (a.at || 0)));
-  let deadShown = 0;
+  const deadByDepth = {};
   const shown = sorted.filter((n) => {
     // A dead birth is history, not the fleet. Show living cards always; show the
     // graveyard only when the reader asks for it, otherwise 100+ tombstones bury the board.
     if (n.data) return true;
-    if (n.gen2 && (!SHOW_DEAD || deadShown >= MAX_DEAD)) return false;
-    if (n.gen2) deadShown++;
+    // cap dead cards per generation, otherwise depth-1 floods the list and GEN 3 never renders
+    if (n.gen2) {
+      const d = n.depth || 1;
+      if (!SHOW_DEAD || (deadByDepth[d] || 0) >= MAX_DEAD) return false;
+      deadByDepth[d] = (deadByDepth[d] || 0) + 1;
+    }
     return n.gen2 || (n.depth === 0 && Date.now() - (n.at || 0) < 180000);
   });
   for (const n of shown) {
