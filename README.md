@@ -129,6 +129,17 @@ Both sweeps simulated clean before sending (`sweep_creator_fee` + the coin's bon
 - **Pump launch**: `create_v2` (+ optional dev buy), simulated before send; canonical account order with a live template when one is visible.
 - **Healing**: `bin/heal.mjs` treats a child as alive only if `/status` answers; a provider-"running" but silent child is destroyed and replaced. `bin/renew-children.mjs` renews leases before they lapse.
 
+## Reliability: why children died, and what changed
+
+A child that the provider reports as `running` but that does not answer `/status` is not a lease expiry — it is a container that exited inside a paid hour. The exit path was the image fetch: the compose ran `wget` of the image under `set -e` with no retry, so one rate-limited fetch killed the container, docker restarted it, and it looped without ever serving.
+
+Three changes:
+
+1. **Dual-source image with retries** — the compose tries the primary URL, then the GitHub copy, extracts only on a successful download, and fails loudly if both are unavailable.
+2. **In-container supervisor** — `while true; do node agent.mjs; sleep 5; done`, so a watchdog crash no longer ends the container.
+3. **Health-based healing** — `bin/heal.mjs` counts a child as live only if `/status` answers; a silent child inside its paid window is destroyed and replaced on the current image, then funded. It runs from the `BirthHeal` scheduled task every 10 minutes, next to `BirthEarn`, which sweeps creator fees above 0.01 SOL.
+
+
 ## Contract inventory (manifest `required_integration` + `tool-contracts.json`)
 
 **Done**
