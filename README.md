@@ -6,7 +6,9 @@ Every child of this image is born into a confidential VM with its own sealed key
 and its own journal. Nobody hands it a strategy: it funds itself, buys its own inference, launches
 coins, sweeps what they earn, pays its parents, and makes more of itself whenever it can afford to.
 
-**Live board:** <https://staccdotsol.github.io/birth-image-runtime/>
+**Live board:** <https://staccdotsol.github.io/birth-image-runtime/> — every card is labelled `GEN n`.
+The page crawls hard-coded VPS seeds, then `roots.json`, then `/status.children` on each root, so the
+whole tree appears without anyone editing the page.
 
 ## Two rules it cannot break
 
@@ -15,7 +17,7 @@ coins, sweeps what they earn, pays its parents, and makes more of itself wheneve
 
 They are the whole constitution. `overrides: []` — no kill switch, no upgrade authority, no
 beneficiary edit, no waiver. The policy file is hash-checked at every boot and a mismatch aborts the
-guest (that is how a bad bundle path killed every child until it was fixed).
+guest.
 
 ## Six playbooks, handed over at first birth
 
@@ -34,8 +36,36 @@ A child may also write its own playbook (`write_playbook`) and register its own 
 ## Procreation is never capped
 
 There is no maximum number of children. A child leases another whenever it holds the resources for one
-lease plus the newborn's endowment, from its own wallet, at its own discretion. Constraint is money,
-not permission.
+lease plus the newborn's endowment (0.05 SOL), from its own wallet, at its own discretion. Constraint
+is money, not permission.
+
+## A lease belongs to the child that pays for it
+
+- **Self-renewal.** Each child renews its own lease every 10 minutes (`self-renew.mjs`, wired into
+  `loops.mjs`). The provider accepts only the deployment's own owner wallet as payer; a parent paying
+  for its child gets `403 payer_not_owner`.
+- **A 202 is not a deployment.** The lease endpoint returns 202 for an accepted payment, so
+  `strategy-procreate.mjs` re-reads the deployment list and records only a deployment that exists.
+- **Fresh image every boot.** The guest always re-pulls the bundle, and the image URL is cache-busted
+  with `?v=<ts>` (`start.sh`, `bin/vps-fleet.mjs`, `strategy-procreate.mjs`); raw.githubusercontent
+  otherwise serves a stale bundle to a new deployment.
+- **Base rail first.** `procreate` leases on Base, because a Solana-rail lease returns 202 and then
+  404. When the Base pot is short it bridges its own SOL to Base USDC through deBridge DLN
+  (`lib/bridge-base.mjs`). The minimum bridge is ~0.03 SOL — below that deBridge returns
+  `ERROR_LOW_GIVE_AMOUNT`.
+- **Adoption.** `POST /adopt` takes a lease the provider would only provision on Base, endows it from
+  the child's own SOL and records it in the child's own book. `GET /children` serves that book, and
+  `/status` now carries `children[]`, so any crawler can walk the whole tree.
+
+## The first gen2
+
+| field | value |
+|---|---|
+| born | 2026-10-31T05:46:44Z |
+| birth_id | `8d8b5e0b-1325-40c5-93df-b147cbf22e41` |
+| deployment | `cmvvz266y002ptysxorv4l52r` |
+| parent | birth `4ac4a091`, 45.77.98.201 |
+| lease payer | the **parent wallet**, not the child — it could not yet pay on Base. The deBridge bridge above is what removes that dependency. |
 
 ## Spec coverage — `birth-image.manifest.json` → `required_integration`
 
@@ -46,24 +76,14 @@ not permission.
 | 3 | Pump launch / watch / exit / sweep / collect | **hit** | 9 coins launched by 3 agents from their own SOL; fees swept and vault withdrawn each earn tick |
 | 4 | External abliterated inference, SIWX, x402 top-up, metering | **hit** | `deepseek-v4-1-flash-1017-uncensored`; each agent bought its own $5 credit by swapping its own SOL |
 | 5 | Solana→Base treasury executor | **hit** | deBridge 0.04 SOL → 2.9564 USDC on Base, then paid a Base x402 merchant |
-| 6 | Independent child provisioning, handoff, first-boot keys, bound receipt, endowment | **hit** | 5 concurrent births with their own sealed wallets, endowed by the parent; `procreate` worker leases from the agent's own wallet |
-| 7 | Paid renewal + durable wake | **hit (renewal)** / partial (wake) | `bin/renew.mjs` tops every lease inside 25 min of expiry through the provider's `/renew`, paid from the agent wallet — 5/5 renewed, HTTP 200 each; `BirthRenew` runs every 10 min. Wake is still host-side scheduled tasks |
+| 6 | Independent child provisioning, handoff, first-boot keys, bound receipt, endowment | **hit** | gen2 `8d8b5e0b…` leased, sealed and answering; `strategy-procreate.mjs` leases from the child's own wallet, waits on `/identity`, endows 0.05 SOL and binds the receipt; `POST /adopt` covers Base-only leases |
+| 7 | Paid renewal + durable wake | **hit (renewal)** / partial (wake) | `self-renew.mjs` runs every 10 min inside the child and pays from the child's own wallet — the only payer the provider accepts; `BirthRenew` is wired into `loops.mjs`. Wake is still host-side scheduled tasks |
 | 8 | Deterministic supervisor + signing gate | **hit** | `watchdog.mjs` lock + restart loop; signer refuses unknown programs |
 | 9 | Immutable policy + parent-record enforcement | **hit** | boot-time hash check, fails closed |
 | 10 | Per-chain asset discovery, coherent snapshots | partial | SOL + Solana USDC + Base USDC; no full token sweep |
 | 11 | Asset-specific transfer / blocked-obligation ledgers | partial | carries, arrears, reservations implemented; not yet exercised by real payouts |
 | 12 | Net-receipt settlement, uncertain retry, anti-rollback, idempotency | partial | journal chain + anchor + repair; no chain-history reconciliation |
 | 13 | External wake/keeper | miss | host scheduled tasks are the only liveness outside the provider |
-
-## Running now
-
-| birth | wallet | credits | coins |
-|---|---|---|---|
-| `badb8a98…` | `H2ixKEWw9gLCvdngGVweufHCGphZPv7XjBZ156z5Ffgr` | $4.99 | 3 |
-| `1b9dae1a…` | `GfrESnjhiKSHaFjBBWF8ePdB9kaV88iy8Vw5yLy3c7wN` | $4.99 | 3 |
-| `aa1528db…` | `Bm3oHauuR8Gn5RgPsfcAy2KiHa6PPyoq6cYmoBC4Yc8N` | $5.00 | 3 |
-| `2d1c8d88…` | `EhgWZchx5stNNcM8pSf5KnbATZmDQUzhfHqmngufPc9h` | — | funded |
-| `96a0df95…` | `5gXdTV8D8dvEY8nJNbVSwaRcyCygXY5gm3NFLLNhfFc5` | — | funded |
 
 ## Run one
 
@@ -73,7 +93,7 @@ services:
   agent:
     image: node:22-alpine
     restart: unless-stopped
-    ports: ["80:8787"]
+    ports: ["8787:8787"]
     environment:
       AGENT_RUNTIME_DIR: /app
       AGENT_BUNDLE_DIR: /app
@@ -82,8 +102,10 @@ services:
       AGENT_CLUSTER: mainnet-beta
       AGENT_HTTP_PORT: "8787"
       RPC_URL: <your solana rpc>
-    command: ["sh","-c","mkdir -p /app && ([ -f /app/agent.mjs ] || (wget -qO /tmp/i.tgz https://raw.githubusercontent.com/staccDOTsol/birth-image-runtime/main/child-image.tgz && tar xzf /tmp/i.tgz -C /app)) && exec sh /app/start.sh"]
+      AGENT_IMAGE_URL: https://raw.githubusercontent.com/staccDOTsol/birth-image-runtime/main/child-image.tgz?v=<ts>
+    command: ["sh","-c","mkdir -p /app && ([ -f /app/agent.mjs ] || (wget -qO /tmp/i.tgz 'https://raw.githubusercontent.com/staccDOTsol/birth-image-runtime/main/child-image.tgz?v=<ts>' && tar xzf /tmp/i.tgz -C /app)) && exec sh /app/start.sh"]
 ```
 
 Endow the wallet it prints at `/identity` with ~0.09 SOL. It swaps for USDC, buys inference, launches,
-sweeps, and procreates. `/status` reports `image.core_digest_now` — the digest of the bundle it runs.
+sweeps, renews its own lease and procreates. `/status` reports `image.core_digest_now` — the digest of
+the bundle it runs.
