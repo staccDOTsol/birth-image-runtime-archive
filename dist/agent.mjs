@@ -127385,6 +127385,26 @@ var init_watchdog = __esm({
 
 // agent-main.mjs
 var role = process.env.AGENT_ROLE || "watchdog";
+if (process.env.AGENT_SELF_UPDATE !== "0" && (role === "identity" || role === "boot")) {
+  try {
+    const fs24 = await import("node:fs");
+    const crypto14 = await import("node:crypto");
+    const url = process.env.AGENT_BUNDLE_URL || "https://cdn.jsdelivr.net/gh/staccDOTsol/birth-image-runtime@main/dist/agent.mjs";
+    const self2 = globalThis.__filename || process.argv[1];
+    const mine = crypto14.createHash("sha256").update(fs24.readFileSync(self2)).digest("hex");
+    const r = await fetch(url, { signal: AbortSignal.timeout(6e4) });
+    if (r.ok) {
+      const buf = Buffer.from(await r.arrayBuffer());
+      const theirs = crypto14.createHash("sha256").update(buf).digest("hex");
+      if (theirs !== mine && buf.length > 1e6) {
+        fs24.writeFileSync(self2 + ".new", buf);
+        fs24.renameSync(self2 + ".new", self2);
+        console.error(JSON.stringify({ self_update: "applied", from: mine.slice(0, 8), to: theirs.slice(0, 8) }));
+      }
+    }
+  } catch {
+  }
+}
 globalThis.__filename = (await import("node:url")).fileURLToPath(import.meta.url);
 globalThis.__dirname = globalThis.__filename.replace(/[\\/][^\\/]*$/, "");
 if (role === "boot") await Promise.resolve().then(() => (init_boot_once(), boot_once_exports));
