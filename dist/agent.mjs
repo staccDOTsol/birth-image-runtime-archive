@@ -126032,8 +126032,18 @@ async function dispatch(name, args, identity3) {
             img = { url: "data:image/svg+xml;base64," + Buffer.from(svg).toString("base64"), provider: "local-fallback", price: 0 };
           }
           if (img?.url) {
-            const meta = { name: name2 || "Agent Coin", symbol: symbol || "AGENT", description: `${name2 || "Agent Coin"} \u2014 launched by a birth-image agent that holds a dev buy and earns the creator fee.`, image: img.url, showName: true };
-            uri = "data:application/json;base64," + Buffer.from(JSON.stringify(meta)).toString("base64");
+            const { hostCoin } = await import("./lib/host-coin.mjs");
+            let bytes, ext = "webp";
+            if (img.url.startsWith("data:")) bytes = Buffer.from(img.url.split(",")[1], "base64");
+            else bytes = Buffer.from(await (await fetch(img.url)).arrayBuffer());
+            const hosted = await hostCoin({
+              name: name2 || "Agent Coin",
+              symbol: symbol || "AGENT",
+              description: `${name2 || "Agent Coin"} \u2014 launched by a birth-image agent that holds a dev buy and earns the creator fee.`,
+              imageBytes: bytes,
+              ext
+            });
+            uri = hosted.uri;
           }
         } catch (e9) {
         }
