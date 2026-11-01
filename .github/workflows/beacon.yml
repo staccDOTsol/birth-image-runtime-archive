@@ -10,15 +10,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
       - name: fetch live roster
         run: |
           mkdir -p docs
           curl -fsS --max-time 25 http://64.176.200.115:9099/beacon.json -o docs/beacon.json || echo '{"at":0,"agents":[]}' > docs/beacon.json
           head -c 200 docs/beacon.json
+      - name: value the fleet
+        run: |
+          node dist/valuation.mjs || echo '{}' > docs/valuation.json
       - name: commit if changed
         run: |
           git config user.name beacon
           git config user.email beacon@users.noreply.github.com
-          git add docs/beacon.json
+          git add docs/beacon.json docs/valuation.json
           git diff --cached --quiet || git commit -m "beacon: $(date -u +%FT%TZ)"
           git push
