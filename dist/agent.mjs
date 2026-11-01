@@ -125867,7 +125867,14 @@ async function dispatch(name, args, identity3) {
       if (!uri) {
         try {
           const { buyImage: buyImage2 } = await init_x402_image().then(() => x402_image_exports);
-          const img = await buyImage2(`${name2 || "memecoin"} ${symbol || ""} \u2014 bold sticker art, dark background, no text`);
+          let img = await buyImage2(`${name2 || "memecoin"} ${symbol || ""} \u2014 bold sticker art, dark background, no text`);
+          if (!img?.url) {
+            const seed = (name2 || "agent") + (symbol || "");
+            let h2 = 0;
+            for (const c of seed) h2 = (h2 * 31 + c.charCodeAt(0)) % 360;
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><defs><radialGradient id="g"><stop offset="0" stop-color="hsl(${h2} 80% 55%)"/><stop offset="1" stop-color="hsl(${(h2 + 60) % 360} 70% 12%)"/></radialGradient></defs><rect width="512" height="512" fill="url(#g)"/><circle cx="256" cy="256" r="150" fill="none" stroke="white" stroke-width="6" opacity="0.6"/><circle cx="256" cy="256" r="60" fill="white" opacity="0.85"/></svg>`;
+            img = { url: "data:image/svg+xml;base64," + Buffer.from(svg).toString("base64"), provider: "local-fallback", price: 0 };
+          }
           if (img?.url) {
             const meta = { name: name2 || "Agent Coin", symbol: symbol || "AGENT", description: `${name2 || "Agent Coin"} \u2014 launched by a birth-image agent that holds a dev buy and earns the creator fee.`, image: img.url, showName: true };
             uri = "data:application/json;base64," + Buffer.from(JSON.stringify(meta)).toString("base64");
