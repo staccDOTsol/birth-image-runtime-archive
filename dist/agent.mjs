@@ -125341,6 +125341,38 @@ var init_procreation = __esm({
   }
 });
 
+// lib/discovery-image.mjs
+import fs16 from "node:fs";
+async function discoverImageProviders() {
+  const out = [];
+  try {
+    const r = await (await fetch(BAZAAR, { signal: AbortSignal.timeout(25e3) })).json();
+    for (const x of r.items || r.resources || []) {
+      const blob5 = ((x.resource || x.url || "") + " " + (x.metadata?.description || "") + " " + (x.name || "") + " " + JSON.stringify(x.metadata?.input || "")).slice(0, 900);
+      if (!IMG_KW.test(blob5)) continue;
+      const base2 = (x.accepts || []).find((a2) => String(a2.network).includes("8453")) || (x.accepts || []).find((a2) => String(a2.network).startsWith("solana"));
+      if (!base2) continue;
+      const price = Number(base2.maxAmountRequired || base2.amount || 0) / 1e6;
+      if (!(price > 0 && price <= 0.25)) continue;
+      out.push({ name: (x.resource || x.url || "").replace(/^https?:\/\//, "").split("/")[0], url: x.resource || x.url, price, network: base2.network });
+    }
+  } catch {
+  }
+  const uniq = [...new Map(out.map((o5) => [o5.url, o5])).values()].sort((a2, b2) => a2.price - b2.price);
+  try {
+    fs16.writeFileSync("dist/image-providers.json", JSON.stringify({ at: (/* @__PURE__ */ new Date()).toISOString(), uniq }, null, 1));
+  } catch {
+  }
+  return uniq;
+}
+var BAZAAR, IMG_KW;
+var init_discovery_image = __esm({
+  "lib/discovery-image.mjs"() {
+    BAZAAR = "https://api.cdp.coinbase.com/platform/v2/x402/discovery/resources?limit=1000";
+    IMG_KW = /image|img|diffus|flux|sdxl|banana|dall|seedream|recraft|picture|painting|text-to-image|venice/i;
+  }
+});
+
 // lib/x402.mjs
 async function balances(identity3) {
   const out = { base: 0n, solana: 0n };
@@ -125458,6 +125490,66 @@ var init_x402 = __esm({
   }
 });
 
+// bin/x402-image.mjs
+var x402_image_exports = {};
+__export(x402_image_exports, {
+  buyImage: () => buyImage
+});
+import fs17 from "node:fs";
+import { pathToFileURL } from "node:url";
+function pickImage(j2) {
+  if (!j2) return null;
+  if (j2.url || j2.image_url) return j2.url || j2.image_url;
+  if (typeof j2.image === "string") return j2.image;
+  const b642 = j2.images?.[0] || j2.data?.[0]?.b64_json || j2.data?.[0]?.url;
+  if (typeof b642 === "string" && b642.length > 200) return "data:image/webp;base64," + b642;
+  return null;
+}
+async function buyImage(prompt, { maxProviders = 5 } = {}) {
+  const id = await identity();
+  const providers = await discoverImageProviders();
+  const tried = [];
+  for (const p2 of providers.slice(0, maxProviders)) {
+    for (const body of [{ prompt, n: 1, size: "1024x1024" }, ...MODELS.map((model) => ({ prompt, model, n: 1, size: "1024x1024" }))]) {
+      let r;
+      try {
+        r = await paidRequest(p2.url, body, { identity: id });
+      } catch (e9) {
+        r = { status: 0, tried: [{ err: String(e9.message || e9).slice(0, 60) }] };
+      }
+      const img = pickImage(r.json);
+      if (img) {
+        const out = { provider: p2.name, price: r.paid || 0, rail: r.rail, url: img.slice(0, 2e5), prompt, discovered: providers.length };
+        try {
+          fs17.writeFileSync("dist/last-image.json", JSON.stringify({ ...out, url: out.url.slice(0, 120) + "\u2026" }, null, 1));
+        } catch {
+        }
+        return out;
+      }
+      if (r.status && r.status !== 402) {
+        tried.push({ provider: p2.name, status: r.status });
+        break;
+      }
+    }
+    tried.push({ provider: p2.name, err: "no image" });
+  }
+  return { error: "no image provider settled", tried, discovered: providers.length };
+}
+var MODELS;
+var init_x402_image = __esm({
+  async "bin/x402-image.mjs"() {
+    init_discovery_image();
+    init_x402();
+    init_signer_client();
+    MODELS = ["venice-sd35", "nano-banana-2", "gpt-image-1-5", "flux-2-pro", "sdxl"];
+    if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+      const prompt = process.argv[2] || "memecoin mascot, sticker art, dark background";
+      const r = await buyImage(prompt);
+      console.log(JSON.stringify({ ...r, url: r.url ? r.url.slice(0, 80) + "\u2026" : void 0 }).slice(0, 500));
+    }
+  }
+});
+
 // strategies/rebalance.mjs
 var rebalance_exports = {};
 __export(rebalance_exports, {
@@ -125529,30 +125621,30 @@ var cleanup_exports = {};
 __export(cleanup_exports, {
   cleanup: () => cleanup
 });
-import fs16 from "node:fs";
+import fs18 from "node:fs";
 import path11 from "node:path";
 async function cleanup() {
   const freed = { logs: 0, accounts: 0, bytes: 0 };
   for (const f2 of ["brain.log", "earn.log", "procreate.log", "loops.log", "identity.log"]) {
     const p2 = path11.join(P.state, f2);
-    if (!fs16.existsSync(p2)) continue;
-    const lines = fs16.readFileSync(p2, "utf8").split("\n");
+    if (!fs18.existsSync(p2)) continue;
+    const lines = fs18.readFileSync(p2, "utf8").split("\n");
     const keep = KEEP[f2] || 2e3;
     if (lines.length > keep * 2) {
       const tail = lines.slice(-keep).join("\n");
-      freed.bytes += fs16.statSync(p2).size - Buffer.byteLength(tail);
-      fs16.writeFileSync(p2, tail);
+      freed.bytes += fs18.statSync(p2).size - Buffer.byteLength(tail);
+      fs18.writeFileSync(p2, tail);
       freed.logs++;
     }
   }
   for (const d of ["snapshots", "outbox"]) {
     const dir = path11.join(P.guest, d);
-    if (!fs16.existsSync(dir)) continue;
-    const files = fs16.readdirSync(dir).map((n) => [n, path11.join(dir, n)]).sort();
+    if (!fs18.existsSync(dir)) continue;
+    const files = fs18.readdirSync(dir).map((n) => [n, path11.join(dir, n)]).sort();
     for (const [, f2] of files.slice(0, Math.max(0, files.length - 20))) {
       try {
-        freed.bytes += fs16.statSync(f2).size;
-        fs16.unlinkSync(f2);
+        freed.bytes += fs18.statSync(f2).size;
+        fs18.unlinkSync(f2);
       } catch {
       }
     }
@@ -125560,7 +125652,7 @@ async function cleanup() {
   for (const lock of ["supervisor.lock", "brain.lock"]) {
     const p2 = path11.join(P.state, lock);
     try {
-      if (fs16.existsSync(p2) && Date.now() - fs16.statSync(p2).mtimeMs > 36e5) fs16.unlinkSync(p2);
+      if (fs18.existsSync(p2) && Date.now() - fs18.statSync(p2).mtimeMs > 36e5) fs18.unlinkSync(p2);
     } catch {
     }
   }
@@ -125582,13 +125674,13 @@ var memory_exports = {};
 __export(memory_exports, {
   compactMemory: () => compactMemory
 });
-import fs17 from "node:fs";
+import fs19 from "node:fs";
 import path12 from "node:path";
 async function compactMemory() {
   const f2 = path12.join(P.state, "lessons.jsonl");
-  if (!fs17.existsSync(f2)) return { kept: 0 };
+  if (!fs19.existsSync(f2)) return { kept: 0 };
   const rows = [];
-  for (const line of fs17.readFileSync(f2, "utf8").split("\n")) {
+  for (const line of fs19.readFileSync(f2, "utf8").split("\n")) {
     if (!line.trim()) continue;
     try {
       rows.push(JSON.parse(line));
@@ -125605,7 +125697,7 @@ async function compactMemory() {
     } else byText.set(key, { ...r, count: r.count || 1, last: r.at || 0 });
   }
   const kept = [...byText.values()].sort((a2, b2) => (b2.last || 0) - (a2.last || 0)).slice(0, MAX2);
-  fs17.writeFileSync(f2, kept.map((r) => JSON.stringify(r)).join("\n") + "\n");
+  fs19.writeFileSync(f2, kept.map((r) => JSON.stringify(r)).join("\n") + "\n");
   log("memory", "compacted", { before: rows.length, after: kept.length, at: now() });
   return { before: rows.length, kept: kept.length };
 }
@@ -125616,98 +125708,6 @@ var init_memory = __esm({
     init_util();
     MAX2 = Number(process.env.AGENT_LESSONS_MAX || 300);
     if (process.argv[1] && process.argv[1].endsWith("memory.mjs")) console.log(JSON.stringify(await compactMemory()));
-  }
-});
-
-// lib/discovery-image.mjs
-import fs18 from "node:fs";
-async function discoverImageProviders() {
-  const out = [];
-  try {
-    const r = await (await fetch(BAZAAR, { signal: AbortSignal.timeout(25e3) })).json();
-    for (const x of r.items || r.resources || []) {
-      const blob5 = ((x.resource || x.url || "") + " " + (x.metadata?.description || "") + " " + (x.name || "") + " " + JSON.stringify(x.metadata?.input || "")).slice(0, 900);
-      if (!IMG_KW.test(blob5)) continue;
-      const base2 = (x.accepts || []).find((a2) => String(a2.network).includes("8453")) || (x.accepts || []).find((a2) => String(a2.network).startsWith("solana"));
-      if (!base2) continue;
-      const price = Number(base2.maxAmountRequired || base2.amount || 0) / 1e6;
-      if (!(price > 0 && price <= 0.25)) continue;
-      out.push({ name: (x.resource || x.url || "").replace(/^https?:\/\//, "").split("/")[0], url: x.resource || x.url, price, network: base2.network });
-    }
-  } catch {
-  }
-  const uniq = [...new Map(out.map((o5) => [o5.url, o5])).values()].sort((a2, b2) => a2.price - b2.price);
-  try {
-    fs18.writeFileSync("dist/image-providers.json", JSON.stringify({ at: (/* @__PURE__ */ new Date()).toISOString(), uniq }, null, 1));
-  } catch {
-  }
-  return uniq;
-}
-var BAZAAR, IMG_KW;
-var init_discovery_image = __esm({
-  "lib/discovery-image.mjs"() {
-    BAZAAR = "https://api.cdp.coinbase.com/platform/v2/x402/discovery/resources?limit=1000";
-    IMG_KW = /image|img|diffus|flux|sdxl|banana|dall|seedream|recraft|picture|painting|text-to-image|venice/i;
-  }
-});
-
-// bin/x402-image.mjs
-var x402_image_exports = {};
-__export(x402_image_exports, {
-  buyImage: () => buyImage
-});
-import fs19 from "node:fs";
-import { pathToFileURL } from "node:url";
-function pickImage(j2) {
-  if (!j2) return null;
-  if (j2.url || j2.image_url) return j2.url || j2.image_url;
-  if (typeof j2.image === "string") return j2.image;
-  const b642 = j2.images?.[0] || j2.data?.[0]?.b64_json || j2.data?.[0]?.url;
-  if (typeof b642 === "string" && b642.length > 200) return "data:image/webp;base64," + b642;
-  return null;
-}
-async function buyImage(prompt, { maxProviders = 5 } = {}) {
-  const id = await identity();
-  const providers = await discoverImageProviders();
-  const tried = [];
-  for (const p2 of providers.slice(0, maxProviders)) {
-    for (const body of [{ prompt, n: 1, size: "1024x1024" }, ...MODELS.map((model) => ({ prompt, model, n: 1, size: "1024x1024" }))]) {
-      let r;
-      try {
-        r = await paidRequest(p2.url, body, { identity: id });
-      } catch (e9) {
-        r = { status: 0, tried: [{ err: String(e9.message || e9).slice(0, 60) }] };
-      }
-      const img = pickImage(r.json);
-      if (img) {
-        const out = { provider: p2.name, price: r.paid || 0, rail: r.rail, url: img.slice(0, 2e5), prompt, discovered: providers.length };
-        try {
-          fs19.writeFileSync("dist/last-image.json", JSON.stringify({ ...out, url: out.url.slice(0, 120) + "\u2026" }, null, 1));
-        } catch {
-        }
-        return out;
-      }
-      if (r.status && r.status !== 402) {
-        tried.push({ provider: p2.name, status: r.status });
-        break;
-      }
-    }
-    tried.push({ provider: p2.name, err: "no image" });
-  }
-  return { error: "no image provider settled", tried, discovered: providers.length };
-}
-var MODELS;
-var init_x402_image = __esm({
-  async "bin/x402-image.mjs"() {
-    init_discovery_image();
-    init_x402();
-    init_signer_client();
-    MODELS = ["venice-sd35", "nano-banana-2", "gpt-image-1-5", "flux-2-pro", "sdxl"];
-    if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-      const prompt = process.argv[2] || "memecoin mascot, sticker art, dark background";
-      const r = await buyImage(prompt);
-      console.log(JSON.stringify({ ...r, url: r.url ? r.url.slice(0, 80) + "\u2026" : void 0 }).slice(0, 500));
-    }
   }
 });
 
@@ -125849,6 +125849,10 @@ async function dispatch(name, args, identity3) {
       const r = await fundIfNeeded(identity3, { maxTopUpUsdc: 5 });
       await append("brain.inference_fund", { funded: r.funded, credits: r.credits });
       return r;
+    }
+    case "buy_image": {
+      const { buyImage: buyImage2 } = await init_x402_image().then(() => x402_image_exports);
+      return await buyImage2(String(args?.prompt || "abstract agent art"));
     }
     case "rebalance": {
       const { rebalance: rebalance2 } = await init_rebalance().then(() => rebalance_exports);
@@ -126211,6 +126215,7 @@ var init_brain = __esm({
     policy3 = loadPolicy();
     BUILDING_ONLY = /* @__PURE__ */ new Set(["scan_flashloan", "execute_flashloan"]);
     TOOLS = [
+      { type: "function", function: { name: "buy_image", description: "Buy an image over x402 right now (discovers sellers, pays from your Base USDC). Use it for coin art or anything else you want rendered.", parameters: { type: "object", properties: { prompt: { type: "string" } }, required: ["prompt"] } } },
       { type: "function", function: { name: "rebalance", description: "Top up your own spending resources from your own holdings: bridge to Base USDC for x402 purchases, swap between SOL and USDC when one runs short.", parameters: { type: "object", properties: {} } } },
       { type: "function", function: { name: "cleanup", description: "Housekeeping on a small box: trim logs, drop old snapshots, clear stale locks, reclaim space. Call it when disk or memory feels tight.", parameters: { type: "object", properties: {} } } },
       { type: "function", function: { name: "compact_memory", description: "Compact lessons.jsonl: dedupe repeated lessons and keep the newest ones so memory survives on a small disk.", parameters: { type: "object", properties: {} } } },
@@ -126497,7 +126502,16 @@ async function bridgeSolToBase(identity3, amountRaw) {
   const ixs = ins.map((i) => new import_web3128.TransactionInstruction({
     programId: new import_web3128.PublicKey(i.programId),
     keys: i.keys.map((k2) => ({ pubkey: new import_web3128.PublicKey(k2.pubkey), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
-    data: /^[0-9A-Za-z+/=]+$/.test(i.data) && i.data.length % 4 === 0 ? Buffer.from(i.data, "base64") : Buffer.from(bs58.decode(i.data))
+    data: (() => {
+      const d = String(i.data || "");
+      if (/^[0-9a-fA-F]+$/.test(d) && d.length % 2 === 0) return Buffer.from(d, "hex");
+      try {
+        const b2 = Buffer.from(d, "base64");
+        if (b2.length) return b2;
+      } catch {
+      }
+      return Buffer.from(bs58.decode(d));
+    })()
   }));
   const writable = ixs.flatMap((ix) => ix.keys.filter((k2) => k2.isWritable).map((k2) => k2.pubkey.toBase58()));
   const { blockhash: blockhash2, lastValidBlockHeight } = await getLatestBlockhash();
