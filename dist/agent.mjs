@@ -423,53 +423,6 @@ var init_journal = __esm({
   }
 });
 
-// lib/policy.mjs
-import fs5 from "node:fs";
-function loadPolicy() {
-  const raw = fs5.readFileSync(P.policy);
-  const sha = sha256hex(raw);
-  const manifest = readJson(P.manifest);
-  const expected = manifest?.constitution?.sha256;
-  if (expected && sha !== expected) {
-    throw new Error(`CONSTITUTION MISMATCH: ${sha} != manifest ${expected}`);
-  }
-  const policy5 = JSON.parse(raw.toString("utf8"));
-  const prime = policy5.prime_directives;
-  if (JSON.stringify(prime) !== JSON.stringify(["make money", "respect thy mother n father"])) {
-    throw new Error("PRIME altered");
-  }
-  if (policy5.prime_directives_mutable !== false || (policy5.override_interfaces || []).length !== 0) {
-    throw new Error("override interface present");
-  }
-  if (policy5.authority.owner_override || policy5.authority.kill_switch || policy5.authority.upgrade_authority) {
-    throw new Error("authority not immutable");
-  }
-  return {
-    sha256: sha,
-    canonical: canon(policy5),
-    policy: policy5,
-    prime,
-    intervalSeconds: policy5.schedule.interval_seconds,
-    parentBps: policy5.beneficiaries.parent.basis_points,
-    founderBps: policy5.beneficiaries.founder.basis_points,
-    founderSolana: policy5.beneficiaries.founder.solana,
-    founderEvm: policy5.beneficiaries.founder.evm
-  };
-}
-function assess(raw, priorCarry, bps) {
-  const pct = BigInt(bps) / 100n;
-  const numerator = pct * BigInt(raw) + BigInt(priorCarry || 0);
-  const due = numerator / 100n;
-  const carry = numerator % 100n;
-  return { due, carry };
-}
-var init_policy = __esm({
-  "lib/policy.mjs"() {
-    init_paths();
-    init_util();
-  }
-});
-
 // node_modules/@noble/hashes/cryptoNode.js
 var require_cryptoNode = __commonJS({
   "node_modules/@noble/hashes/cryptoNode.js"(exports) {
@@ -35248,987 +35201,6 @@ var init_secp256k1 = __esm({
   }
 });
 
-// node_modules/@noble/curves/esm/abstract/edwards.js
-function isEdValidXY(Fp2, CURVE, x, y) {
-  const x2 = Fp2.sqr(x);
-  const y2 = Fp2.sqr(y);
-  const left = Fp2.add(Fp2.mul(CURVE.a, x2), y2);
-  const right = Fp2.add(Fp2.ONE, Fp2.mul(CURVE.d, Fp2.mul(x2, y2)));
-  return Fp2.eql(left, right);
-}
-function edwards(params, extraOpts = {}) {
-  const validated = _createCurveFields("edwards", params, extraOpts, extraOpts.FpFnLE);
-  const { Fp: Fp2, Fn: Fn2 } = validated;
-  let CURVE = validated.CURVE;
-  const { h: cofactor } = CURVE;
-  _validateObject(extraOpts, {}, { uvRatio: "function" });
-  const MASK = _2n4 << BigInt(Fn2.BYTES * 8) - _1n6;
-  const modP = (n) => Fp2.create(n);
-  const uvRatio3 = extraOpts.uvRatio || ((u, v2) => {
-    try {
-      return { isValid: true, value: Fp2.sqrt(Fp2.div(u, v2)) };
-    } catch (e9) {
-      return { isValid: false, value: _0n6 };
-    }
-  });
-  if (!isEdValidXY(Fp2, CURVE, CURVE.Gx, CURVE.Gy))
-    throw new Error("bad curve params: generator point");
-  function acoord(title, n, banZero = false) {
-    const min = banZero ? _1n6 : _0n6;
-    aInRange("coordinate " + title, n, min, MASK);
-    return n;
-  }
-  function aextpoint(other) {
-    if (!(other instanceof Point))
-      throw new Error("ExtendedPoint expected");
-  }
-  const toAffineMemo = memoized((p2, iz) => {
-    const { X, Y: Y2, Z: Z2 } = p2;
-    const is0 = p2.is0();
-    if (iz == null)
-      iz = is0 ? _8n2 : Fp2.inv(Z2);
-    const x = modP(X * iz);
-    const y = modP(Y2 * iz);
-    const zz = Fp2.mul(Z2, iz);
-    if (is0)
-      return { x: _0n6, y: _1n6 };
-    if (zz !== _1n6)
-      throw new Error("invZ was invalid");
-    return { x, y };
-  });
-  const assertValidMemo = memoized((p2) => {
-    const { a: a2, d } = CURVE;
-    if (p2.is0())
-      throw new Error("bad point: ZERO");
-    const { X, Y: Y2, Z: Z2, T: T2 } = p2;
-    const X2 = modP(X * X);
-    const Y22 = modP(Y2 * Y2);
-    const Z22 = modP(Z2 * Z2);
-    const Z4 = modP(Z22 * Z22);
-    const aX2 = modP(X2 * a2);
-    const left = modP(Z22 * modP(aX2 + Y22));
-    const right = modP(Z4 + modP(d * modP(X2 * Y22)));
-    if (left !== right)
-      throw new Error("bad point: equation left != right (1)");
-    const XY = modP(X * Y2);
-    const ZT = modP(Z2 * T2);
-    if (XY !== ZT)
-      throw new Error("bad point: equation left != right (2)");
-    return true;
-  });
-  class Point {
-    constructor(X, Y2, Z2, T2) {
-      this.X = acoord("x", X);
-      this.Y = acoord("y", Y2);
-      this.Z = acoord("z", Z2, true);
-      this.T = acoord("t", T2);
-      Object.freeze(this);
-    }
-    static CURVE() {
-      return CURVE;
-    }
-    static fromAffine(p2) {
-      if (p2 instanceof Point)
-        throw new Error("extended point not allowed");
-      const { x, y } = p2 || {};
-      acoord("x", x);
-      acoord("y", y);
-      return new Point(x, y, _1n6, modP(x * y));
-    }
-    // Uses algo from RFC8032 5.1.3.
-    static fromBytes(bytes, zip215 = false) {
-      const len = Fp2.BYTES;
-      const { a: a2, d } = CURVE;
-      bytes = copyBytes(_abytes2(bytes, len, "point"));
-      _abool2(zip215, "zip215");
-      const normed = copyBytes(bytes);
-      const lastByte = bytes[len - 1];
-      normed[len - 1] = lastByte & ~128;
-      const y = bytesToNumberLE(normed);
-      const max = zip215 ? MASK : Fp2.ORDER;
-      aInRange("point.y", y, _0n6, max);
-      const y2 = modP(y * y);
-      const u = modP(y2 - _1n6);
-      const v2 = modP(d * y2 - a2);
-      let { isValid, value: x } = uvRatio3(u, v2);
-      if (!isValid)
-        throw new Error("bad point: invalid y coordinate");
-      const isXOdd = (x & _1n6) === _1n6;
-      const isLastByteOdd = (lastByte & 128) !== 0;
-      if (!zip215 && x === _0n6 && isLastByteOdd)
-        throw new Error("bad point: x=0 and x_0=1");
-      if (isLastByteOdd !== isXOdd)
-        x = modP(-x);
-      return Point.fromAffine({ x, y });
-    }
-    static fromHex(bytes, zip215 = false) {
-      return Point.fromBytes(ensureBytes("point", bytes), zip215);
-    }
-    get x() {
-      return this.toAffine().x;
-    }
-    get y() {
-      return this.toAffine().y;
-    }
-    precompute(windowSize = 8, isLazy = true) {
-      wnaf.createCache(this, windowSize);
-      if (!isLazy)
-        this.multiply(_2n4);
-      return this;
-    }
-    // Useful in fromAffine() - not for fromBytes(), which always created valid points.
-    assertValidity() {
-      assertValidMemo(this);
-    }
-    // Compare one point to another.
-    equals(other) {
-      aextpoint(other);
-      const { X: X1, Y: Y1, Z: Z1 } = this;
-      const { X: X2, Y: Y2, Z: Z2 } = other;
-      const X1Z2 = modP(X1 * Z2);
-      const X2Z1 = modP(X2 * Z1);
-      const Y1Z2 = modP(Y1 * Z2);
-      const Y2Z1 = modP(Y2 * Z1);
-      return X1Z2 === X2Z1 && Y1Z2 === Y2Z1;
-    }
-    is0() {
-      return this.equals(Point.ZERO);
-    }
-    negate() {
-      return new Point(modP(-this.X), this.Y, this.Z, modP(-this.T));
-    }
-    // Fast algo for doubling Extended Point.
-    // https://hyperelliptic.org/EFD/g1p/auto-twisted-extended.html#doubling-dbl-2008-hwcd
-    // Cost: 4M + 4S + 1*a + 6add + 1*2.
-    double() {
-      const { a: a2 } = CURVE;
-      const { X: X1, Y: Y1, Z: Z1 } = this;
-      const A2 = modP(X1 * X1);
-      const B = modP(Y1 * Y1);
-      const C2 = modP(_2n4 * modP(Z1 * Z1));
-      const D2 = modP(a2 * A2);
-      const x1y1 = X1 + Y1;
-      const E = modP(modP(x1y1 * x1y1) - A2 - B);
-      const G2 = D2 + B;
-      const F2 = G2 - C2;
-      const H2 = D2 - B;
-      const X3 = modP(E * F2);
-      const Y3 = modP(G2 * H2);
-      const T3 = modP(E * H2);
-      const Z3 = modP(F2 * G2);
-      return new Point(X3, Y3, Z3, T3);
-    }
-    // Fast algo for adding 2 Extended Points.
-    // https://hyperelliptic.org/EFD/g1p/auto-twisted-extended.html#addition-add-2008-hwcd
-    // Cost: 9M + 1*a + 1*d + 7add.
-    add(other) {
-      aextpoint(other);
-      const { a: a2, d } = CURVE;
-      const { X: X1, Y: Y1, Z: Z1, T: T1 } = this;
-      const { X: X2, Y: Y2, Z: Z2, T: T2 } = other;
-      const A2 = modP(X1 * X2);
-      const B = modP(Y1 * Y2);
-      const C2 = modP(T1 * d * T2);
-      const D2 = modP(Z1 * Z2);
-      const E = modP((X1 + Y1) * (X2 + Y2) - A2 - B);
-      const F2 = D2 - C2;
-      const G2 = D2 + C2;
-      const H2 = modP(B - a2 * A2);
-      const X3 = modP(E * F2);
-      const Y3 = modP(G2 * H2);
-      const T3 = modP(E * H2);
-      const Z3 = modP(F2 * G2);
-      return new Point(X3, Y3, Z3, T3);
-    }
-    subtract(other) {
-      return this.add(other.negate());
-    }
-    // Constant-time multiplication.
-    multiply(scalar) {
-      if (!Fn2.isValidNot0(scalar))
-        throw new Error("invalid scalar: expected 1 <= sc < curve.n");
-      const { p: p2, f: f2 } = wnaf.cached(this, scalar, (p3) => normalizeZ(Point, p3));
-      return normalizeZ(Point, [p2, f2])[0];
-    }
-    // Non-constant-time multiplication. Uses double-and-add algorithm.
-    // It's faster, but should only be used when you don't care about
-    // an exposed private key e.g. sig verification.
-    // Does NOT allow scalars higher than CURVE.n.
-    // Accepts optional accumulator to merge with multiply (important for sparse scalars)
-    multiplyUnsafe(scalar, acc = Point.ZERO) {
-      if (!Fn2.isValid(scalar))
-        throw new Error("invalid scalar: expected 0 <= sc < curve.n");
-      if (scalar === _0n6)
-        return Point.ZERO;
-      if (this.is0() || scalar === _1n6)
-        return this;
-      return wnaf.unsafe(this, scalar, (p2) => normalizeZ(Point, p2), acc);
-    }
-    // Checks if point is of small order.
-    // If you add something to small order point, you will have "dirty"
-    // point with torsion component.
-    // Multiplies point by cofactor and checks if the result is 0.
-    isSmallOrder() {
-      return this.multiplyUnsafe(cofactor).is0();
-    }
-    // Multiplies point by curve order and checks if the result is 0.
-    // Returns `false` is the point is dirty.
-    isTorsionFree() {
-      return wnaf.unsafe(this, CURVE.n).is0();
-    }
-    // Converts Extended point to default (x, y) coordinates.
-    // Can accept precomputed Z^-1 - for example, from invertBatch.
-    toAffine(invertedZ) {
-      return toAffineMemo(this, invertedZ);
-    }
-    clearCofactor() {
-      if (cofactor === _1n6)
-        return this;
-      return this.multiplyUnsafe(cofactor);
-    }
-    toBytes() {
-      const { x, y } = this.toAffine();
-      const bytes = Fp2.toBytes(y);
-      bytes[bytes.length - 1] |= x & _1n6 ? 128 : 0;
-      return bytes;
-    }
-    toHex() {
-      return bytesToHex(this.toBytes());
-    }
-    toString() {
-      return `<Point ${this.is0() ? "ZERO" : this.toHex()}>`;
-    }
-    // TODO: remove
-    get ex() {
-      return this.X;
-    }
-    get ey() {
-      return this.Y;
-    }
-    get ez() {
-      return this.Z;
-    }
-    get et() {
-      return this.T;
-    }
-    static normalizeZ(points) {
-      return normalizeZ(Point, points);
-    }
-    static msm(points, scalars) {
-      return pippenger(Point, Fn2, points, scalars);
-    }
-    _setWindowSize(windowSize) {
-      this.precompute(windowSize);
-    }
-    toRawBytes() {
-      return this.toBytes();
-    }
-  }
-  Point.BASE = new Point(CURVE.Gx, CURVE.Gy, _1n6, modP(CURVE.Gx * CURVE.Gy));
-  Point.ZERO = new Point(_0n6, _1n6, _1n6, _0n6);
-  Point.Fp = Fp2;
-  Point.Fn = Fn2;
-  const wnaf = new wNAF(Point, Fn2.BITS);
-  Point.BASE.precompute(8);
-  return Point;
-}
-function eddsa(Point, cHash, eddsaOpts = {}) {
-  if (typeof cHash !== "function")
-    throw new Error('"hash" function param is required');
-  _validateObject(eddsaOpts, {}, {
-    adjustScalarBytes: "function",
-    randomBytes: "function",
-    domain: "function",
-    prehash: "function",
-    mapToCurve: "function"
-  });
-  const { prehash } = eddsaOpts;
-  const { BASE: BASE6, Fp: Fp2, Fn: Fn2 } = Point;
-  const randomBytes2 = eddsaOpts.randomBytes || randomBytes;
-  const adjustScalarBytes2 = eddsaOpts.adjustScalarBytes || ((bytes) => bytes);
-  const domain = eddsaOpts.domain || ((data, ctx, phflag) => {
-    _abool2(phflag, "phflag");
-    if (ctx.length || phflag)
-      throw new Error("Contexts/pre-hash are not supported");
-    return data;
-  });
-  function modN_LE(hash) {
-    return Fn2.create(bytesToNumberLE(hash));
-  }
-  function getPrivateScalar(key) {
-    const len = lengths.secretKey;
-    key = ensureBytes("private key", key, len);
-    const hashed = ensureBytes("hashed private key", cHash(key), 2 * len);
-    const head2 = adjustScalarBytes2(hashed.slice(0, len));
-    const prefix = hashed.slice(len, 2 * len);
-    const scalar = modN_LE(head2);
-    return { head: head2, prefix, scalar };
-  }
-  function getExtendedPublicKey(secretKey) {
-    const { head: head2, prefix, scalar } = getPrivateScalar(secretKey);
-    const point = BASE6.multiply(scalar);
-    const pointBytes = point.toBytes();
-    return { head: head2, prefix, scalar, point, pointBytes };
-  }
-  function getPublicKey(secretKey) {
-    return getExtendedPublicKey(secretKey).pointBytes;
-  }
-  function hashDomainToScalar(context = Uint8Array.of(), ...msgs) {
-    const msg = concatBytes(...msgs);
-    return modN_LE(cHash(domain(msg, ensureBytes("context", context), !!prehash)));
-  }
-  function sign(msg, secretKey, options = {}) {
-    msg = ensureBytes("message", msg);
-    if (prehash)
-      msg = prehash(msg);
-    const { prefix, scalar, pointBytes } = getExtendedPublicKey(secretKey);
-    const r = hashDomainToScalar(options.context, prefix, msg);
-    const R2 = BASE6.multiply(r).toBytes();
-    const k2 = hashDomainToScalar(options.context, R2, pointBytes, msg);
-    const s3 = Fn2.create(r + k2 * scalar);
-    if (!Fn2.isValid(s3))
-      throw new Error("sign failed: invalid s");
-    const rs = concatBytes(R2, Fn2.toBytes(s3));
-    return _abytes2(rs, lengths.signature, "result");
-  }
-  const verifyOpts = { zip215: true };
-  function verify(sig, msg, publicKey2, options = verifyOpts) {
-    const { context, zip215 } = options;
-    const len = lengths.signature;
-    sig = ensureBytes("signature", sig, len);
-    msg = ensureBytes("message", msg);
-    publicKey2 = ensureBytes("publicKey", publicKey2, lengths.publicKey);
-    if (zip215 !== void 0)
-      _abool2(zip215, "zip215");
-    if (prehash)
-      msg = prehash(msg);
-    const mid = len / 2;
-    const r = sig.subarray(0, mid);
-    const s3 = bytesToNumberLE(sig.subarray(mid, len));
-    let A2, R2, SB;
-    try {
-      A2 = Point.fromBytes(publicKey2, zip215);
-      R2 = Point.fromBytes(r, zip215);
-      SB = BASE6.multiplyUnsafe(s3);
-    } catch (error) {
-      return false;
-    }
-    if (!zip215 && A2.isSmallOrder())
-      return false;
-    const k2 = hashDomainToScalar(context, R2.toBytes(), A2.toBytes(), msg);
-    const RkA = R2.add(A2.multiplyUnsafe(k2));
-    return RkA.subtract(SB).clearCofactor().is0();
-  }
-  const _size = Fp2.BYTES;
-  const lengths = {
-    secretKey: _size,
-    publicKey: _size,
-    signature: 2 * _size,
-    seed: _size
-  };
-  function randomSecretKey(seed = randomBytes2(lengths.seed)) {
-    return _abytes2(seed, lengths.seed, "seed");
-  }
-  function keygen(seed) {
-    const secretKey = utils.randomSecretKey(seed);
-    return { secretKey, publicKey: getPublicKey(secretKey) };
-  }
-  function isValidSecretKey(key) {
-    return isBytes(key) && key.length === Fn2.BYTES;
-  }
-  function isValidPublicKey(key, zip215) {
-    try {
-      return !!Point.fromBytes(key, zip215);
-    } catch (error) {
-      return false;
-    }
-  }
-  const utils = {
-    getExtendedPublicKey,
-    randomSecretKey,
-    isValidSecretKey,
-    isValidPublicKey,
-    /**
-     * Converts ed public key to x public key. Uses formula:
-     * - ed25519:
-     *   - `(u, v) = ((1+y)/(1-y), sqrt(-486664)*u/x)`
-     *   - `(x, y) = (sqrt(-486664)*u/v, (u-1)/(u+1))`
-     * - ed448:
-     *   - `(u, v) = ((y-1)/(y+1), sqrt(156324)*u/x)`
-     *   - `(x, y) = (sqrt(156324)*u/v, (1+u)/(1-u))`
-     */
-    toMontgomery(publicKey2) {
-      const { y } = Point.fromBytes(publicKey2);
-      const size = lengths.publicKey;
-      const is25519 = size === 32;
-      if (!is25519 && size !== 57)
-        throw new Error("only defined for 25519 and 448");
-      const u = is25519 ? Fp2.div(_1n6 + y, _1n6 - y) : Fp2.div(y - _1n6, y + _1n6);
-      return Fp2.toBytes(u);
-    },
-    toMontgomerySecret(secretKey) {
-      const size = lengths.secretKey;
-      _abytes2(secretKey, size);
-      const hashed = cHash(secretKey.subarray(0, size));
-      return adjustScalarBytes2(hashed).subarray(0, size);
-    },
-    /** @deprecated */
-    randomPrivateKey: randomSecretKey,
-    /** @deprecated */
-    precompute(windowSize = 8, point = Point.BASE) {
-      return point.precompute(windowSize, false);
-    }
-  };
-  return Object.freeze({
-    keygen,
-    getPublicKey,
-    sign,
-    verify,
-    utils,
-    Point,
-    lengths
-  });
-}
-function _eddsa_legacy_opts_to_new(c) {
-  const CURVE = {
-    a: c.a,
-    d: c.d,
-    p: c.Fp.ORDER,
-    n: c.n,
-    h: c.h,
-    Gx: c.Gx,
-    Gy: c.Gy
-  };
-  const Fp2 = c.Fp;
-  const Fn2 = Field(CURVE.n, c.nBitLength, true);
-  const curveOpts = { Fp: Fp2, Fn: Fn2, uvRatio: c.uvRatio };
-  const eddsaOpts = {
-    randomBytes: c.randomBytes,
-    adjustScalarBytes: c.adjustScalarBytes,
-    domain: c.domain,
-    prehash: c.prehash,
-    mapToCurve: c.mapToCurve
-  };
-  return { CURVE, curveOpts, hash: c.hash, eddsaOpts };
-}
-function _eddsa_new_output_to_legacy(c, eddsa2) {
-  const Point = eddsa2.Point;
-  const legacy = Object.assign({}, eddsa2, {
-    ExtendedPoint: Point,
-    CURVE: c,
-    nBitLength: Point.Fn.BITS,
-    nByteLength: Point.Fn.BYTES
-  });
-  return legacy;
-}
-function twistedEdwards(c) {
-  const { CURVE, curveOpts, hash, eddsaOpts } = _eddsa_legacy_opts_to_new(c);
-  const Point = edwards(CURVE, curveOpts);
-  const EDDSA = eddsa(Point, hash, eddsaOpts);
-  return _eddsa_new_output_to_legacy(c, EDDSA);
-}
-var _0n6, _1n6, _2n4, _8n2, PrimeEdwardsPoint;
-var init_edwards = __esm({
-  "node_modules/@noble/curves/esm/abstract/edwards.js"() {
-    init_utils2();
-    init_curve();
-    init_modular();
-    _0n6 = BigInt(0);
-    _1n6 = BigInt(1);
-    _2n4 = BigInt(2);
-    _8n2 = BigInt(8);
-    PrimeEdwardsPoint = class {
-      constructor(ep) {
-        this.ep = ep;
-      }
-      // Static methods that must be implemented by subclasses
-      static fromBytes(_bytes) {
-        notImplemented();
-      }
-      static fromHex(_hex) {
-        notImplemented();
-      }
-      get x() {
-        return this.toAffine().x;
-      }
-      get y() {
-        return this.toAffine().y;
-      }
-      // Common implementations
-      clearCofactor() {
-        return this;
-      }
-      assertValidity() {
-        this.ep.assertValidity();
-      }
-      toAffine(invertedZ) {
-        return this.ep.toAffine(invertedZ);
-      }
-      toHex() {
-        return bytesToHex(this.toBytes());
-      }
-      toString() {
-        return this.toHex();
-      }
-      isTorsionFree() {
-        return true;
-      }
-      isSmallOrder() {
-        return false;
-      }
-      add(other) {
-        this.assertSame(other);
-        return this.init(this.ep.add(other.ep));
-      }
-      subtract(other) {
-        this.assertSame(other);
-        return this.init(this.ep.subtract(other.ep));
-      }
-      multiply(scalar) {
-        return this.init(this.ep.multiply(scalar));
-      }
-      multiplyUnsafe(scalar) {
-        return this.init(this.ep.multiplyUnsafe(scalar));
-      }
-      double() {
-        return this.init(this.ep.double());
-      }
-      negate() {
-        return this.init(this.ep.negate());
-      }
-      precompute(windowSize, isLazy) {
-        return this.init(this.ep.precompute(windowSize, isLazy));
-      }
-      /** @deprecated use `toBytes` */
-      toRawBytes() {
-        return this.toBytes();
-      }
-    };
-  }
-});
-
-// node_modules/@noble/curves/esm/ed25519.js
-function ed25519_pow_2_252_3(x) {
-  const _10n = BigInt(10), _20n = BigInt(20), _40n = BigInt(40), _80n = BigInt(80);
-  const P6 = ed25519_CURVE_p;
-  const x2 = x * x % P6;
-  const b2 = x2 * x % P6;
-  const b4 = pow2(b2, _2n5, P6) * b2 % P6;
-  const b5 = pow2(b4, _1n7, P6) * x % P6;
-  const b10 = pow2(b5, _5n2, P6) * b5 % P6;
-  const b20 = pow2(b10, _10n, P6) * b10 % P6;
-  const b40 = pow2(b20, _20n, P6) * b20 % P6;
-  const b80 = pow2(b40, _40n, P6) * b40 % P6;
-  const b160 = pow2(b80, _80n, P6) * b80 % P6;
-  const b240 = pow2(b160, _80n, P6) * b80 % P6;
-  const b250 = pow2(b240, _10n, P6) * b10 % P6;
-  const pow_p_5_8 = pow2(b250, _2n5, P6) * x % P6;
-  return { pow_p_5_8, b2 };
-}
-function adjustScalarBytes(bytes) {
-  bytes[0] &= 248;
-  bytes[31] &= 127;
-  bytes[31] |= 64;
-  return bytes;
-}
-function uvRatio(u, v2) {
-  const P6 = ed25519_CURVE_p;
-  const v33 = mod(v2 * v2 * v2, P6);
-  const v72 = mod(v33 * v33 * v2, P6);
-  const pow3 = ed25519_pow_2_252_3(u * v72).pow_p_5_8;
-  let x = mod(u * v33 * pow3, P6);
-  const vx2 = mod(v2 * x * x, P6);
-  const root1 = x;
-  const root2 = mod(x * ED25519_SQRT_M1, P6);
-  const useRoot1 = vx2 === u;
-  const useRoot2 = vx2 === mod(-u, P6);
-  const noRoot = vx2 === mod(-u * ED25519_SQRT_M1, P6);
-  if (useRoot1)
-    x = root1;
-  if (useRoot2 || noRoot)
-    x = root2;
-  if (isNegativeLE(x, P6))
-    x = mod(-x, P6);
-  return { isValid: useRoot1 || useRoot2, value: x };
-}
-function calcElligatorRistrettoMap(r0) {
-  const { d } = ed25519_CURVE;
-  const P6 = ed25519_CURVE_p;
-  const mod4 = (n) => Fp.create(n);
-  const r = mod4(SQRT_M1 * r0 * r0);
-  const Ns = mod4((r + _1n7) * ONE_MINUS_D_SQ);
-  let c = BigInt(-1);
-  const D2 = mod4((c - d * r) * mod4(r + d));
-  let { isValid: Ns_D_is_sq, value: s3 } = uvRatio(Ns, D2);
-  let s_ = mod4(s3 * r0);
-  if (!isNegativeLE(s_, P6))
-    s_ = mod4(-s_);
-  if (!Ns_D_is_sq)
-    s3 = s_;
-  if (!Ns_D_is_sq)
-    c = r;
-  const Nt = mod4(c * (r - _1n7) * D_MINUS_ONE_SQ - D2);
-  const s22 = s3 * s3;
-  const W0 = mod4((s3 + s3) * D2);
-  const W1 = mod4(Nt * SQRT_AD_MINUS_ONE);
-  const W2 = mod4(_1n7 - s22);
-  const W3 = mod4(_1n7 + s22);
-  return new ed25519.Point(mod4(W0 * W3), mod4(W2 * W1), mod4(W1 * W3), mod4(W0 * W2));
-}
-function ristretto255_map(bytes) {
-  abytes(bytes, 64);
-  const r1 = bytes255ToNumberLE(bytes.subarray(0, 32));
-  const R1 = calcElligatorRistrettoMap(r1);
-  const r2 = bytes255ToNumberLE(bytes.subarray(32, 64));
-  const R2 = calcElligatorRistrettoMap(r2);
-  return new _RistrettoPoint(R1.add(R2));
-}
-var _0n7, _1n7, _2n5, _3n3, _5n2, _8n3, ed25519_CURVE_p, ed25519_CURVE, ED25519_SQRT_M1, Fp, Fn, ed25519Defaults, ed25519, SQRT_M1, SQRT_AD_MINUS_ONE, INVSQRT_A_MINUS_D, ONE_MINUS_D_SQ, D_MINUS_ONE_SQ, invertSqrt, MAX_255B, bytes255ToNumberLE, _RistrettoPoint;
-var init_ed25519 = __esm({
-  "node_modules/@noble/curves/esm/ed25519.js"() {
-    init_sha2();
-    init_utils();
-    init_curve();
-    init_edwards();
-    init_modular();
-    init_utils2();
-    _0n7 = /* @__PURE__ */ BigInt(0);
-    _1n7 = BigInt(1);
-    _2n5 = BigInt(2);
-    _3n3 = BigInt(3);
-    _5n2 = BigInt(5);
-    _8n3 = BigInt(8);
-    ed25519_CURVE_p = BigInt("0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed");
-    ed25519_CURVE = /* @__PURE__ */ (() => ({
-      p: ed25519_CURVE_p,
-      n: BigInt("0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed"),
-      h: _8n3,
-      a: BigInt("0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffec"),
-      d: BigInt("0x52036cee2b6ffe738cc740797779e89800700a4d4141d8ab75eb4dca135978a3"),
-      Gx: BigInt("0x216936d3cd6e53fec0a4e231fdd6dc5c692cc7609525a7b2c9562d608f25d51a"),
-      Gy: BigInt("0x6666666666666666666666666666666666666666666666666666666666666658")
-    }))();
-    ED25519_SQRT_M1 = /* @__PURE__ */ BigInt("19681161376707505956807079304988542015446066515923890162744021073123829784752");
-    Fp = /* @__PURE__ */ (() => Field(ed25519_CURVE.p, { isLE: true }))();
-    Fn = /* @__PURE__ */ (() => Field(ed25519_CURVE.n, { isLE: true }))();
-    ed25519Defaults = /* @__PURE__ */ (() => ({
-      ...ed25519_CURVE,
-      Fp,
-      hash: sha512,
-      adjustScalarBytes,
-      // dom2
-      // Ratio of u to v. Allows us to combine inversion and square root. Uses algo from RFC8032 5.1.3.
-      // Constant-time, u/√v
-      uvRatio
-    }))();
-    ed25519 = /* @__PURE__ */ (() => twistedEdwards(ed25519Defaults))();
-    SQRT_M1 = ED25519_SQRT_M1;
-    SQRT_AD_MINUS_ONE = /* @__PURE__ */ BigInt("25063068953384623474111414158702152701244531502492656460079210482610430750235");
-    INVSQRT_A_MINUS_D = /* @__PURE__ */ BigInt("54469307008909316920995813868745141605393597292927456921205312896311721017578");
-    ONE_MINUS_D_SQ = /* @__PURE__ */ BigInt("1159843021668779879193775521855586647937357759715417654439879720876111806838");
-    D_MINUS_ONE_SQ = /* @__PURE__ */ BigInt("40440834346308536858101042469323190826248399146238708352240133220865137265952");
-    invertSqrt = (number) => uvRatio(_1n7, number);
-    MAX_255B = /* @__PURE__ */ BigInt("0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-    bytes255ToNumberLE = (bytes) => ed25519.Point.Fp.create(bytesToNumberLE(bytes) & MAX_255B);
-    _RistrettoPoint = class __RistrettoPoint extends PrimeEdwardsPoint {
-      constructor(ep) {
-        super(ep);
-      }
-      static fromAffine(ap) {
-        return new __RistrettoPoint(ed25519.Point.fromAffine(ap));
-      }
-      assertSame(other) {
-        if (!(other instanceof __RistrettoPoint))
-          throw new Error("RistrettoPoint expected");
-      }
-      init(ep) {
-        return new __RistrettoPoint(ep);
-      }
-      /** @deprecated use `import { ristretto255_hasher } from '@noble/curves/ed25519.js';` */
-      static hashToCurve(hex2) {
-        return ristretto255_map(ensureBytes("ristrettoHash", hex2, 64));
-      }
-      static fromBytes(bytes) {
-        abytes(bytes, 32);
-        const { a: a2, d } = ed25519_CURVE;
-        const P6 = ed25519_CURVE_p;
-        const mod4 = (n) => Fp.create(n);
-        const s3 = bytes255ToNumberLE(bytes);
-        if (!equalBytes(Fp.toBytes(s3), bytes) || isNegativeLE(s3, P6))
-          throw new Error("invalid ristretto255 encoding 1");
-        const s22 = mod4(s3 * s3);
-        const u1 = mod4(_1n7 + a2 * s22);
-        const u2 = mod4(_1n7 - a2 * s22);
-        const u1_2 = mod4(u1 * u1);
-        const u2_2 = mod4(u2 * u2);
-        const v2 = mod4(a2 * d * u1_2 - u2_2);
-        const { isValid, value: I } = invertSqrt(mod4(v2 * u2_2));
-        const Dx = mod4(I * u2);
-        const Dy = mod4(I * Dx * v2);
-        let x = mod4((s3 + s3) * Dx);
-        if (isNegativeLE(x, P6))
-          x = mod4(-x);
-        const y = mod4(u1 * Dy);
-        const t = mod4(x * y);
-        if (!isValid || isNegativeLE(t, P6) || y === _0n7)
-          throw new Error("invalid ristretto255 encoding 2");
-        return new __RistrettoPoint(new ed25519.Point(x, y, _1n7, t));
-      }
-      /**
-       * Converts ristretto-encoded string to ristretto point.
-       * Described in [RFC9496](https://www.rfc-editor.org/rfc/rfc9496#name-decode).
-       * @param hex Ristretto-encoded 32 bytes. Not every 32-byte string is valid ristretto encoding
-       */
-      static fromHex(hex2) {
-        return __RistrettoPoint.fromBytes(ensureBytes("ristrettoHex", hex2, 32));
-      }
-      static msm(points, scalars) {
-        return pippenger(__RistrettoPoint, ed25519.Point.Fn, points, scalars);
-      }
-      /**
-       * Encodes ristretto point to Uint8Array.
-       * Described in [RFC9496](https://www.rfc-editor.org/rfc/rfc9496#name-encode).
-       */
-      toBytes() {
-        let { X, Y: Y2, Z: Z2, T: T2 } = this.ep;
-        const P6 = ed25519_CURVE_p;
-        const mod4 = (n) => Fp.create(n);
-        const u1 = mod4(mod4(Z2 + Y2) * mod4(Z2 - Y2));
-        const u2 = mod4(X * Y2);
-        const u2sq = mod4(u2 * u2);
-        const { value: invsqrt } = invertSqrt(mod4(u1 * u2sq));
-        const D1 = mod4(invsqrt * u1);
-        const D2 = mod4(invsqrt * u2);
-        const zInv = mod4(D1 * D2 * T2);
-        let D3;
-        if (isNegativeLE(T2 * zInv, P6)) {
-          let _x = mod4(Y2 * SQRT_M1);
-          let _y = mod4(X * SQRT_M1);
-          X = _x;
-          Y2 = _y;
-          D3 = mod4(D1 * INVSQRT_A_MINUS_D);
-        } else {
-          D3 = D2;
-        }
-        if (isNegativeLE(X * zInv, P6))
-          Y2 = mod4(-Y2);
-        let s3 = mod4((Z2 - Y2) * D3);
-        if (isNegativeLE(s3, P6))
-          s3 = mod4(-s3);
-        return Fp.toBytes(s3);
-      }
-      /**
-       * Compares two Ristretto points.
-       * Described in [RFC9496](https://www.rfc-editor.org/rfc/rfc9496#name-equals).
-       */
-      equals(other) {
-        this.assertSame(other);
-        const { X: X1, Y: Y1 } = this.ep;
-        const { X: X2, Y: Y2 } = other.ep;
-        const mod4 = (n) => Fp.create(n);
-        const one = mod4(X1 * Y2) === mod4(Y1 * X2);
-        const two = mod4(Y1 * Y2) === mod4(X1 * X2);
-        return one || two;
-      }
-      is0() {
-        return this.equals(__RistrettoPoint.ZERO);
-      }
-    };
-    _RistrettoPoint.BASE = /* @__PURE__ */ (() => new _RistrettoPoint(ed25519.Point.BASE))();
-    _RistrettoPoint.ZERO = /* @__PURE__ */ (() => new _RistrettoPoint(ed25519.Point.ZERO))();
-    _RistrettoPoint.Fp = /* @__PURE__ */ (() => Fp)();
-    _RistrettoPoint.Fn = /* @__PURE__ */ (() => Fn)();
-  }
-});
-
-// node_modules/@noble/hashes/esm/sha3.js
-function keccakP(s3, rounds = 24) {
-  const B = new Uint32Array(5 * 2);
-  for (let round = 24 - rounds; round < 24; round++) {
-    for (let x = 0; x < 10; x++)
-      B[x] = s3[x] ^ s3[x + 10] ^ s3[x + 20] ^ s3[x + 30] ^ s3[x + 40];
-    for (let x = 0; x < 10; x += 2) {
-      const idx1 = (x + 8) % 10;
-      const idx0 = (x + 2) % 10;
-      const B0 = B[idx0];
-      const B1 = B[idx0 + 1];
-      const Th = rotlH(B0, B1, 1) ^ B[idx1];
-      const Tl = rotlL(B0, B1, 1) ^ B[idx1 + 1];
-      for (let y = 0; y < 50; y += 10) {
-        s3[x + y] ^= Th;
-        s3[x + y + 1] ^= Tl;
-      }
-    }
-    let curH = s3[2];
-    let curL = s3[3];
-    for (let t = 0; t < 24; t++) {
-      const shift = SHA3_ROTL[t];
-      const Th = rotlH(curH, curL, shift);
-      const Tl = rotlL(curH, curL, shift);
-      const PI = SHA3_PI[t];
-      curH = s3[PI];
-      curL = s3[PI + 1];
-      s3[PI] = Th;
-      s3[PI + 1] = Tl;
-    }
-    for (let y = 0; y < 50; y += 10) {
-      for (let x = 0; x < 10; x++)
-        B[x] = s3[y + x];
-      for (let x = 0; x < 10; x++)
-        s3[y + x] ^= ~B[(x + 2) % 10] & B[(x + 4) % 10];
-    }
-    s3[0] ^= SHA3_IOTA_H[round];
-    s3[1] ^= SHA3_IOTA_L[round];
-  }
-  clean(B);
-}
-var _0n8, _1n8, _2n6, _7n2, _256n, _0x71n, SHA3_PI, SHA3_ROTL, _SHA3_IOTA, IOTAS, SHA3_IOTA_H, SHA3_IOTA_L, rotlH, rotlL, Keccak, gen, keccak_256;
-var init_sha3 = __esm({
-  "node_modules/@noble/hashes/esm/sha3.js"() {
-    init_u64();
-    init_utils();
-    _0n8 = BigInt(0);
-    _1n8 = BigInt(1);
-    _2n6 = BigInt(2);
-    _7n2 = BigInt(7);
-    _256n = BigInt(256);
-    _0x71n = BigInt(113);
-    SHA3_PI = [];
-    SHA3_ROTL = [];
-    _SHA3_IOTA = [];
-    for (let round = 0, R2 = _1n8, x = 1, y = 0; round < 24; round++) {
-      [x, y] = [y, (2 * x + 3 * y) % 5];
-      SHA3_PI.push(2 * (5 * y + x));
-      SHA3_ROTL.push((round + 1) * (round + 2) / 2 % 64);
-      let t = _0n8;
-      for (let j2 = 0; j2 < 7; j2++) {
-        R2 = (R2 << _1n8 ^ (R2 >> _7n2) * _0x71n) % _256n;
-        if (R2 & _2n6)
-          t ^= _1n8 << (_1n8 << /* @__PURE__ */ BigInt(j2)) - _1n8;
-      }
-      _SHA3_IOTA.push(t);
-    }
-    IOTAS = split(_SHA3_IOTA, true);
-    SHA3_IOTA_H = IOTAS[0];
-    SHA3_IOTA_L = IOTAS[1];
-    rotlH = (h2, l3, s3) => s3 > 32 ? rotlBH(h2, l3, s3) : rotlSH(h2, l3, s3);
-    rotlL = (h2, l3, s3) => s3 > 32 ? rotlBL(h2, l3, s3) : rotlSL(h2, l3, s3);
-    Keccak = class _Keccak extends Hash {
-      // NOTE: we accept arguments in bytes instead of bits here.
-      constructor(blockLen, suffix, outputLen, enableXOF = false, rounds = 24) {
-        super();
-        this.pos = 0;
-        this.posOut = 0;
-        this.finished = false;
-        this.destroyed = false;
-        this.enableXOF = false;
-        this.blockLen = blockLen;
-        this.suffix = suffix;
-        this.outputLen = outputLen;
-        this.enableXOF = enableXOF;
-        this.rounds = rounds;
-        anumber(outputLen);
-        if (!(0 < blockLen && blockLen < 200))
-          throw new Error("only keccak-f1600 function is supported");
-        this.state = new Uint8Array(200);
-        this.state32 = u32(this.state);
-      }
-      clone() {
-        return this._cloneInto();
-      }
-      keccak() {
-        swap32IfBE(this.state32);
-        keccakP(this.state32, this.rounds);
-        swap32IfBE(this.state32);
-        this.posOut = 0;
-        this.pos = 0;
-      }
-      update(data) {
-        aexists(this);
-        data = toBytes(data);
-        abytes(data);
-        const { blockLen, state: state2 } = this;
-        const len = data.length;
-        for (let pos = 0; pos < len; ) {
-          const take = Math.min(blockLen - this.pos, len - pos);
-          for (let i = 0; i < take; i++)
-            state2[this.pos++] ^= data[pos++];
-          if (this.pos === blockLen)
-            this.keccak();
-        }
-        return this;
-      }
-      finish() {
-        if (this.finished)
-          return;
-        this.finished = true;
-        const { state: state2, suffix, pos, blockLen } = this;
-        state2[pos] ^= suffix;
-        if ((suffix & 128) !== 0 && pos === blockLen - 1)
-          this.keccak();
-        state2[blockLen - 1] ^= 128;
-        this.keccak();
-      }
-      writeInto(out) {
-        aexists(this, false);
-        abytes(out);
-        this.finish();
-        const bufferOut = this.state;
-        const { blockLen } = this;
-        for (let pos = 0, len = out.length; pos < len; ) {
-          if (this.posOut >= blockLen)
-            this.keccak();
-          const take = Math.min(blockLen - this.posOut, len - pos);
-          out.set(bufferOut.subarray(this.posOut, this.posOut + take), pos);
-          this.posOut += take;
-          pos += take;
-        }
-        return out;
-      }
-      xofInto(out) {
-        if (!this.enableXOF)
-          throw new Error("XOF is not possible for this instance");
-        return this.writeInto(out);
-      }
-      xof(bytes) {
-        anumber(bytes);
-        return this.xofInto(new Uint8Array(bytes));
-      }
-      digestInto(out) {
-        aoutput(out, this);
-        if (this.finished)
-          throw new Error("digest() was already called");
-        this.writeInto(out);
-        this.destroy();
-        return out;
-      }
-      digest() {
-        return this.digestInto(new Uint8Array(this.outputLen));
-      }
-      destroy() {
-        this.destroyed = true;
-        clean(this.state);
-      }
-      _cloneInto(to) {
-        const { blockLen, suffix, outputLen, rounds, enableXOF } = this;
-        to || (to = new _Keccak(blockLen, suffix, outputLen, enableXOF, rounds));
-        to.state32.set(this.state32);
-        to.pos = this.pos;
-        to.posOut = this.posOut;
-        to.finished = this.finished;
-        to.rounds = rounds;
-        to.suffix = suffix;
-        to.outputLen = outputLen;
-        to.enableXOF = enableXOF;
-        to.destroyed = this.destroyed;
-        return to;
-      }
-    };
-    gen = (suffix, blockLen, outputLen) => createHasher(() => new Keccak(blockLen, suffix, outputLen));
-    keccak_256 = /* @__PURE__ */ (() => gen(1, 136, 256 / 8))();
-  }
-});
-
 // node_modules/base-x/src/esm/index.js
 function base(ALPHABET2) {
   if (ALPHABET2.length >= 255) {
@@ -36376,158 +35348,6 @@ var init_esm2 = __esm({
     init_esm();
     ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
     esm_default2 = esm_default(ALPHABET);
-  }
-});
-
-// lib/keys.mjs
-import crypto8 from "node:crypto";
-function newSolanaKeypair() {
-  const kp = import_web3.Keypair.generate();
-  return { secretKey: Buffer.from(kp.secretKey), publicKey: kp.publicKey.toBase58() };
-}
-function solanaFromSecret(secret) {
-  const kp = import_web3.Keypair.fromSecretKey(Uint8Array.from(secret));
-  return { secretKey: Buffer.from(kp.secretKey), publicKey: kp.publicKey.toBase58() };
-}
-function newEvmKey() {
-  const priv = crypto8.randomBytes(32);
-  return { secretKey: priv, address: evmAddress(priv) };
-}
-function evmAddress(priv) {
-  const pub = secp256k1.getPublicKey(priv, false);
-  const h2 = keccak_256(pub.slice(1));
-  return "0x" + Buffer.from(h2.slice(12)).toString("hex");
-}
-function evmSign(priv, message) {
-  const body = Buffer.isBuffer(message) ? message : Buffer.from(message, "utf8");
-  const prefixed = Buffer.concat([
-    Buffer.from(`Ethereum Signed Message:
-${body.length}`, "utf8"),
-    body
-  ]);
-  const digest = Buffer.from(keccak_256(prefixed));
-  const sig = secp256k1.sign(digest, priv, { lowS: true });
-  const r = Buffer.from(sig.r.toString(16).padStart(64, "0"), "hex");
-  const s3 = Buffer.from(sig.s.toString(16).padStart(64, "0"), "hex");
-  const v2 = Buffer.from([sig.recovery + 27]);
-  return "0x" + Buffer.concat([r, s3, v2]).toString("hex");
-}
-function ed25519Sign(secret64, message) {
-  const seed = Uint8Array.from(secret64).slice(0, 32);
-  const body = Buffer.isBuffer(message) ? message : Buffer.from(message, "utf8");
-  return esm_default2.encode(Buffer.from(ed25519.sign(body, seed)));
-}
-var import_web3;
-var init_keys = __esm({
-  "lib/keys.mjs"() {
-    import_web3 = __toESM(require_index_cjs(), 1);
-    init_secp256k1();
-    init_ed25519();
-    init_sha3();
-    init_esm2();
-  }
-});
-
-// lib/receipt.mjs
-import fs6 from "node:fs";
-import path4 from "node:path";
-function imageDigest() {
-  const files = [];
-  const walk = (dir) => {
-    for (const e9 of fs6.readdirSync(dir, { withFileTypes: true })) {
-      if (e9.name === "node_modules" || e9.name === "guest" || e9.name.startsWith(".")) continue;
-      const full = path4.join(dir, e9.name);
-      if (e9.isDirectory()) walk(full);
-      else if (/\.(mjs|json|md)$/.test(e9.name)) files.push(full);
-    }
-  };
-  walk(RUNTIME_DIR);
-  for (const f2 of [P.policy, P.manifest, P.toolContracts, P.inferenceLock]) {
-    try {
-      files.push(f2);
-    } catch {
-    }
-  }
-  const rows = [];
-  for (const f2 of files.sort()) {
-    try {
-      rows.push([path4.relative(P.bundle, f2).replace(/\\/g, "/"), sha256hex(fs6.readFileSync(f2))]);
-    } catch {
-    }
-  }
-  return "sha256:" + sha256hex(Buffer.from(canon(rows)));
-}
-function signingMessage(payload) {
-  return `agent-birth-receipt-v1
-${sha256hex(Buffer.from(canon(payload)))}`;
-}
-function buildParentRecord({ birthId, t0, constitutionSha256, founderSolana, founderEvm }) {
-  const record = {
-    child_birth_id: birthId,
-    parent_birth_id_or_founder_identity: `founder:${founderSolana}`,
-    authenticated_birth_request_hash: sha256hex(Buffer.from(canon({ child: birthId, t0, requested_by: "founder", constitution: constitutionSha256 }))),
-    parent_solana_destination: founderSolana,
-    parent_evm_destination: founderEvm,
-    networks: ["solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", "eip155:8453"],
-    birth_anchor_unix_seconds: t0,
-    constitution_sha256: constitutionSha256
-  };
-  return { record, sha256: sha256hex(Buffer.from(canon(record))) };
-}
-function buildPayload({ birthId, t0, imageDigestHex, inferenceConfigSha256, solana, evm, constitutionSha256, parentRecordSha256 }) {
-  return {
-    domain: "agent-birth-receipt-v1",
-    schema_version: 1,
-    birth_id: birthId,
-    image_digest: imageDigestHex,
-    inference_config_sha256: inferenceConfigSha256,
-    solana: { public_key: solana.public_key, cluster: solana.cluster, genesis_hash: solana.genesis_hash },
-    evm: { address: evm.address, supported_chain_ids: evm.supported_chain_ids },
-    created_at: new Date(t0 * 1e3).toISOString(),
-    constitution_sha256: constitutionSha256,
-    parent_record_sha256: parentRecordSha256,
-    birth_anchor_unix_seconds: t0
-  };
-}
-function writeReceipt(receipt2) {
-  atomicJson(P.receipt, receipt2, 420);
-  return receipt2;
-}
-function readReceipt() {
-  return readJson(P.receipt, null);
-}
-function readParentRecord() {
-  return readJson(P.parentRecord, null);
-}
-function verifyReceiptShape(r) {
-  const errs = [];
-  const p2 = r?.payload || {};
-  if (p2.domain !== "agent-birth-receipt-v1") errs.push("domain");
-  if (p2.schema_version !== 1) errs.push("schema_version");
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(p2.birth_id || "")) errs.push("birth_id");
-  if (!/^sha256:[0-9a-f]{64}$/.test(p2.image_digest || "")) errs.push("image_digest");
-  if (!/^[0-9a-f]{64}$/.test(p2.inference_config_sha256 || "")) errs.push("inference_config_sha256");
-  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(p2.solana?.public_key || "")) errs.push("solana.public_key");
-  if (!["mainnet-beta", "devnet", "testnet", "custom"].includes(p2.solana?.cluster)) errs.push("solana.cluster");
-  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(p2.solana?.genesis_hash || "")) errs.push("solana.genesis_hash");
-  if (!/^0x[0-9a-fA-F]{40}$/.test(p2.evm?.address || "")) errs.push("evm.address");
-  if (!Array.isArray(p2.evm?.supported_chain_ids) || !p2.evm.supported_chain_ids.length) errs.push("evm.supported_chain_ids");
-  if (!/^[0-9a-f]{64}$/.test(p2.constitution_sha256 || "")) errs.push("constitution_sha256");
-  if (!/^[0-9a-f]{64}$/.test(p2.parent_record_sha256 || "")) errs.push("parent_record_sha256");
-  if (!Number.isInteger(p2.birth_anchor_unix_seconds)) errs.push("birth_anchor_unix_seconds");
-  const sigs = r?.signatures || [];
-  if (!sigs.length || sigs.length > 2) errs.push("signatures");
-  for (const s3 of sigs) {
-    if (s3.wallet === "solana" && !(s3.algorithm === "ed25519" && s3.encoding === "base58")) errs.push("sig:solana");
-    if (s3.wallet === "evm" && !(s3.algorithm === "eip191-secp256k1" && s3.encoding === "hex")) errs.push("sig:evm");
-    if (!["solana", "evm"].includes(s3.wallet)) errs.push("sig:wallet");
-  }
-  return errs;
-}
-var init_receipt = __esm({
-  "lib/receipt.mjs"() {
-    init_paths();
-    init_util();
   }
 });
 
@@ -36738,267 +35558,6 @@ var init_signer_client = __esm({
     signEvmTyped = (args) => request("sign_evm_typed", args);
     signTx = (wireBase64) => request("sign_tx", { wireBase64 }, 6e4);
     signEvmHash = (hashHex) => request("sign_evm_hash", { hashHex }, 3e4);
-  }
-});
-
-// lib/proc.mjs
-import { spawn } from "node:child_process";
-import fs9 from "node:fs";
-import path5 from "node:path";
-function spawnChild(script, { env = {}, detach = false } = {}) {
-  const out = fs9.openSync(path5.join(P.state, `child-${path5.basename(script)}.log`), "a");
-  const bundled = process.env.AGENT_BUNDLE === "1";
-  const role2 = path5.basename(script, ".mjs");
-  const child = spawn(process.execPath, bundled ? [process.argv[1]] : [path5.join(RUNTIME_DIR, script)], {
-    cwd: RUNTIME_DIR,
-    env: { ...process.env, AGENT_LOG: P.log, ...bundled ? { AGENT_ROLE: role2 } : {}, ...env },
-    stdio: ["ignore", out, out],
-    detached: detach,
-    windowsHide: true
-  });
-  child.unref?.();
-  return child;
-}
-async function waitFor(fn, { timeoutMs = 2e4, every: every2 = 200, label = "wait" } = {}) {
-  const t0 = Date.now();
-  let last;
-  while (Date.now() - t0 < timeoutMs) {
-    try {
-      const v2 = await fn();
-      if (v2) return v2;
-    } catch (e9) {
-      last = e9;
-    }
-    await sleep(every2);
-  }
-  throw new Error(`${label} timed out${last ? `: ${last.message}` : ""}`);
-}
-async function identityWhenReady({ timeoutMs = 45e3 } = {}) {
-  const { identity: identity4 } = await Promise.resolve().then(() => (init_signer_client(), signer_client_exports));
-  const t0 = Date.now();
-  for (; ; ) {
-    try {
-      return await identity4();
-    } catch (e9) {
-      if (Date.now() - t0 > timeoutMs) throw e9;
-      await sleep(1e3);
-    }
-  }
-}
-var init_proc = __esm({
-  "lib/proc.mjs"() {
-    init_paths();
-    init_util();
-  }
-});
-
-// boot-once.mjs
-var boot_once_exports = {};
-import fs10 from "node:fs";
-import crypto9 from "node:crypto";
-async function main() {
-  ensureDirs();
-  const policy5 = loadPolicy();
-  openJournal();
-  const img = imageDigest();
-  const inferenceConfigSha256 = sha256hex(fs10.readFileSync(P.inferenceLock));
-  const genesis = await getGenesisHash();
-  let state2 = state({});
-  let keysMeta = null;
-  const hasSealed = fs10.existsSync(P.sealed);
-  if (!hasSealed) {
-    if (state2.birth_id) throw new Error("state exists without sealed keys");
-    const bornAt = now();
-    const solana = newSolanaKeypair();
-    const evm = newEvmKey();
-    const master = ensureMasterKey().key;
-    const box = encrypt("identity", master, Buffer.from(JSON.stringify({
-      solana: { secretKey: Array.from(solana.secretKey), publicKey: solana.publicKey },
-      evm: { secretKey: evm.secretKey.toString("hex"), address: evm.address },
-      bornAt
-    }), "utf8"), "birth-image-identity");
-    atomicJson(P.sealed, box);
-    fs10.rmSync(P.stateFile, { force: true });
-    state2 = { birth_id: crypto9.randomUUID(), t0: bornAt, highest_epoch: 0, created_at: bornAt };
-    saveState(state2);
-    await append("birth.entropy", { birth_id: state2.birth_id, t0: bornAt, solana: solana.publicKey, evm: evm.address, cluster: CLUSTER, genesis_hash: genesis, image_digest: img });
-    keysMeta = { solana, evm };
-    log("boot", "new birth: fresh in-guest keys generated and sealed", { solana: solana.publicKey, evm: evm.address, birth_id: state2.birth_id });
-  } else {
-    if (!state2.birth_id) throw new Error("sealed keys exist without journal state");
-    await append("boot.restore", { birth_id: state2.birth_id, t0: state2.t0, seq: head().seq });
-    log("boot", "restore: sealed identity replayed", { birth_id: state2.birth_id, t0: state2.t0 });
-  }
-  let receipt2 = readReceipt();
-  let parent = readParentRecord();
-  if (!parent) {
-    const built = buildParentRecord({
-      birthId: state2.birth_id,
-      t0: state2.t0,
-      constitutionSha256: policy5.sha256,
-      founderSolana: policy5.founderSolana,
-      founderEvm: policy5.founderEvm
-    });
-    atomicJson(P.parentRecord, built, 420);
-    parent = built;
-    await append("parent.record", { record_sha256: built.sha256, record: built.record });
-  }
-  if (receipt2 && receipt2.payload.birth_anchor_unix_seconds !== state2.t0) {
-    throw new Error("receipt anchor != committed T0");
-  }
-  if (!receipt2) {
-    let id = null;
-    try {
-      id = await identity();
-    } catch {
-      id = null;
-    }
-    if (!id) {
-      spawnChild("signer.mjs");
-      id = await waitFor(async () => {
-        try {
-          return await identity();
-        } catch {
-          return null;
-        }
-      }, { label: "signer start", timeoutMs: 2e4 });
-    }
-    const payload = buildPayload({
-      birthId: state2.birth_id,
-      t0: state2.t0,
-      imageDigestHex: img,
-      inferenceConfigSha256,
-      solana: { public_key: id.solana.public_key, cluster: CLUSTER, genesis_hash: genesis },
-      evm: { address: id.evm.address, supported_chain_ids: [8453] },
-      constitutionSha256: policy5.sha256,
-      parentRecordSha256: parent.sha256
-    });
-    const msg = signingMessage(payload);
-    const sig = await signMessage(msg);
-    receipt2 = {
-      payload,
-      signatures: [
-        { wallet: "solana", algorithm: "ed25519", encoding: "base58", signature: sig.solana.signature },
-        { wallet: "evm", algorithm: "eip191-secp256k1", encoding: "hex", signature: sig.evm.signature }
-      ]
-    };
-    const errs = verifyReceiptShape(receipt2);
-    if (errs.length) throw new Error(`receipt schema: ${errs.join(",")}`);
-    writeReceipt(receipt2);
-    await append("identity.sealed", { receipt_sha256: sha256hex(Buffer.from(canon(receipt2))), receipt: receipt2 });
-    log("boot", "identity sealed; public receipt committed");
-  }
-  const birthDigest = receipt2?.payload?.image_digest || img;
-  const imageCheck = { birth_digest: birthDigest, current_digest: img, match: birthDigest === img, checked_at: now() };
-  if (receipt2 && !imageCheck.match) {
-    await append("image.drift", imageCheck);
-    log("boot", "IMAGE DRIFT: running core differs from the birth image", imageCheck);
-  } else if (receipt2) {
-    await append("image.check", imageCheck);
-  }
-  const p2 = receipt2.payload;
-  console.log("\n================ PUBLIC BIRTH RECEIPT ================");
-  console.log(`birth_id                ${p2.birth_id}`);
-  console.log(`solana (${p2.solana.cluster})      ${p2.solana.public_key}`);
-  console.log(`evm (eip155:8453)       ${p2.evm.address}`);
-  console.log(`constitution_sha256     ${p2.constitution_sha256}`);
-  console.log(`parent_record_sha256    ${p2.parent_record_sha256}`);
-  console.log(`image_digest            ${p2.image_digest}`);
-  console.log(`inference_config_sha256 ${p2.inference_config_sha256}`);
-  console.log(`birth_anchor_unix       ${p2.birth_anchor_unix_seconds}`);
-  console.log(`identity_binding        unverified (no TDX quote on this host)`);
-  console.log("=====================================================\n");
-  const status = readJson(P.status, {}) || {};
-  atomicJson(P.status, {
-    ...status,
-    phase: "identity_sealed",
-    birth_id: p2.birth_id,
-    solana: p2.solana.public_key,
-    evm: p2.evm.address,
-    t0: p2.birth_anchor_unix_seconds,
-    image: imageCheck,
-    updated_at: now()
-  }, 420);
-}
-var CLUSTER;
-var init_boot_once = __esm({
-  "boot-once.mjs"() {
-    init_paths();
-    init_util();
-    init_seal();
-    init_journal();
-    init_policy();
-    init_keys();
-    init_receipt();
-    init_rpc();
-    init_proc();
-    init_signer_client();
-    CLUSTER = process.env.AGENT_CLUSTER || "mainnet-beta";
-    main().then(() => process.exit(0)).catch((e9) => {
-      log("boot", `FATAL ${e9.stack || e9}`);
-      process.exit(1);
-    });
-  }
-});
-
-// lib/evm712.mjs
-function keccak(buf) {
-  return Buffer.from(keccak_256(buf));
-}
-function typeHash(primaryType, types) {
-  const fields = types[primaryType].map((f2) => `${f2.type} ${f2.name}`).join(",");
-  return keccak(enc.encode(`${primaryType}(${fields})`));
-}
-function eip712DomainHash(domain, types) {
-  const fields = types.EIP712Domain.map((f2) => `${f2.type} ${f2.name}`).join(",");
-  const th = keccak(enc.encode(`EIP712Domain(${fields})`));
-  const parts = [th];
-  for (const f2 of types.EIP712Domain) {
-    const v2 = domain[f2.name];
-    if (f2.type === "uint256") parts.push(uint256(v2));
-    else if (f2.type === "address") parts.push(address(v2));
-    else parts.push(keccak(enc.encode(String(v2))));
-  }
-  return keccak(Buffer.concat(parts));
-}
-function uint256(v2) {
-  const b2 = Buffer.alloc(32);
-  let n = BigInt(v2);
-  for (let i = 31; i >= 0 && n > 0n; i--) {
-    b2[i] = Number(n & 0xffn);
-    n >>= 8n;
-  }
-  return b2;
-}
-function address(a2) {
-  const b2 = Buffer.alloc(32);
-  Buffer.from(a2.replace(/^0x/, ""), "hex").copy(b2, 12);
-  return b2;
-}
-function bytes32(v2) {
-  return Buffer.from(v2.replace(/^0x/, ""), "hex");
-}
-function hashStruct(primaryType, types, message) {
-  const parts = [typeHash(primaryType, types)];
-  for (const f2 of types[primaryType]) {
-    const v2 = message[f2.name];
-    if (f2.type === "uint256") parts.push(uint256(v2));
-    else if (f2.type === "address") parts.push(address(v2));
-    else if (f2.type === "bytes32") parts.push(bytes32(v2));
-    else parts.push(keccak(enc.encode(String(v2))));
-  }
-  return keccak(Buffer.concat(parts));
-}
-function eip712Digest({ domain, types, primaryType, message }) {
-  const d = eip712DomainHash(domain, types);
-  const s3 = hashStruct(primaryType, types, message);
-  return keccak(Buffer.concat([Buffer.from([25, 1]), d, s3]));
-}
-var enc;
-var init_evm712 = __esm({
-  "lib/evm712.mjs"() {
-    init_sha3();
-    enc = new TextEncoder();
   }
 });
 
@@ -55416,377 +53975,6 @@ var init_index_node39 = __esm({
   }
 });
 
-// signer.mjs
-var signer_exports = {};
-import fs11 from "node:fs";
-import net2 from "node:net";
-import crypto10 from "node:crypto";
-function decodeSystemTransfer(dataB64) {
-  const d = Buffer.from(dataB64, "base64");
-  if (d.length < 12) return null;
-  if (d.readUInt32LE(0) !== SYSTEM_TRANSFER_TAG) return null;
-  return d.readBigUInt64LE(4);
-}
-function loadKeys() {
-  const master = ensureMasterKey().key;
-  const box = JSON.parse(fs11.readFileSync(P.sealed, "utf8"));
-  const raw = JSON.parse(decrypt("identity", master, box, "birth-image-identity").toString("utf8"));
-  return {
-    solana: solanaFromSecret(Buffer.from(raw.solana.secretKey)),
-    evm: { secretKey: Buffer.from(raw.evm.secretKey, "hex"), address: raw.evm.address },
-    bornAt: raw.bornAt
-  };
-}
-async function buildV1WithFeePayer({ feePayer, instructions, blockhash: blockhash2, lastValidBlockHeight, cuLimit, loadedAccountsDataSizeLimit }) {
-  const kit = await Promise.resolve().then(() => (init_index_node39(), index_node_exports));
-  const me = await kit.createKeyPairSignerFromBytes(new Uint8Array(KEYS.solana.secretKey));
-  const byAddr = /* @__PURE__ */ new Map([[KEYS.solana.publicKey, me]]);
-  const converted = instructions.map((ix) => ({
-    programAddress: kit.address(ix.programId),
-    accounts: ix.keys.map((meta) => {
-      const signer = byAddr.get(meta.pubkey);
-      const role2 = meta.isSigner ? meta.isWritable ? kit.AccountRole.WRITABLE_SIGNER : kit.AccountRole.READONLY_SIGNER : meta.isWritable ? kit.AccountRole.WRITABLE : kit.AccountRole.READONLY;
-      return signer ? { address: signer.address, role: role2, signer } : { address: kit.address(meta.pubkey), role: role2 };
-    }),
-    data: new Uint8Array(Buffer.from(ix.dataHex || "", "hex"))
-  }));
-  let message = kit.createTransactionMessage({ version: 1 });
-  message = kit.setTransactionMessageFeePayer(kit.address(feePayer), message);
-  message = kit.setTransactionMessageLifetimeUsingBlockhash({
-    blockhash: kit.blockhash(blockhash2),
-    lastValidBlockHeight: BigInt(lastValidBlockHeight)
-  }, message);
-  if (cuLimit || loadedAccountsDataSizeLimit) {
-    message = kit.setTransactionMessageConfig({
-      computeUnitLimit: cuLimit ?? 14e5,
-      loadedAccountsDataSizeLimit: loadedAccountsDataSizeLimit ?? 67108864
-    }, message);
-  }
-  message = kit.appendTransactionMessageInstructions(converted, message);
-  const signed = await kit.partiallySignTransactionMessageWithSigners(message);
-  const wire3 = Buffer.from(kit.getTransactionEncoder().encode(signed));
-  if (wire3.length > MAX_WIRE) throw new Error(`v1 wire ${wire3.length} > ${MAX_WIRE}`);
-  const bs582 = (await Promise.resolve().then(() => (init_esm2(), esm_exports))).default;
-  const dec = kit.getTransactionDecoder().decode(wire3);
-  const sigBytes = dec.signatures?.[KEYS.solana.publicKey];
-  return { wireBase64: wire3.toString("base64"), bytes: wire3.length, ownerSignature: sigBytes ? bs582.encode(Buffer.from(Object.values(sigBytes))) : null };
-}
-async function buildV1({ instructions, blockhash: blockhash2, lastValidBlockHeight, cuLimit, loadedAccountsDataSizeLimit, extraSigners = [] }) {
-  const kit = await Promise.resolve().then(() => (init_index_node39(), index_node_exports));
-  const feePayer = await kit.createKeyPairSignerFromBytes(new Uint8Array(KEYS.solana.secretKey));
-  const byAddr = /* @__PURE__ */ new Map([[KEYS.solana.publicKey, feePayer]]);
-  for (const s3 of extraSigners) {
-    const sg = await kit.createKeyPairSignerFromBytes(Uint8Array.from(Buffer.from(s3, "base64")));
-    byAddr.set(sg.address, sg);
-  }
-  const converted = instructions.map((ix) => ({
-    programAddress: kit.address(ix.programId),
-    accounts: ix.keys.map((meta) => {
-      const signer = byAddr.get(meta.pubkey);
-      const role2 = meta.isSigner ? meta.isWritable ? kit.AccountRole.WRITABLE_SIGNER : kit.AccountRole.READONLY_SIGNER : meta.isWritable ? kit.AccountRole.WRITABLE : kit.AccountRole.READONLY;
-      return signer ? { address: signer.address, role: role2, signer } : { address: kit.address(meta.pubkey), role: role2 };
-    }),
-    data: new Uint8Array(Buffer.from(ix.dataHex || "", "hex"))
-  }));
-  let message = kit.createTransactionMessage({ version: 1 });
-  message = kit.setTransactionMessageFeePayerSigner(feePayer, message);
-  message = kit.setTransactionMessageLifetimeUsingBlockhash({
-    blockhash: kit.blockhash(blockhash2),
-    lastValidBlockHeight: BigInt(lastValidBlockHeight)
-  }, message);
-  message = kit.setTransactionMessageConfig({
-    computeUnitLimit: cuLimit ?? 14e5,
-    loadedAccountsDataSizeLimit: loadedAccountsDataSizeLimit ?? 67108864
-  }, message);
-  message = kit.appendTransactionMessageInstructions(converted, message);
-  const signed = await kit.signTransactionMessageWithSigners(message);
-  const wire3 = Buffer.from(kit.getTransactionEncoder().encode(signed));
-  const uniq = [...new Set(converted.flatMap((ix) => ix.accounts.map((a2) => a2.address)))];
-  if (wire3.length > MAX_WIRE) throw new Error(`v1 wire ${wire3.length} > ${MAX_WIRE}`);
-  if (uniq.length > MAX_ADDRS) throw new Error(`v1 ${uniq.length} addresses > ${MAX_ADDRS}`);
-  if (converted.length > MAX_IXS) throw new Error(`v1 ${converted.length} instructions > ${MAX_IXS}`);
-  const bs582 = (await Promise.resolve().then(() => (init_esm2(), esm_exports))).default;
-  const dec = kit.getTransactionDecoder().decode(wire3);
-  const sigBytes = dec.signatures?.[KEYS.solana.publicKey];
-  const signature2 = sigBytes ? bs582.encode(Buffer.from(Object.values(sigBytes))) : null;
-  return { wireBase64: wire3.toString("base64"), signature: signature2, bytes: wire3.length, addresses: uniq.length, instructions: converted.length };
-}
-function gateV1({ instructions, allowedDestinations = [] }) {
-  const allowed = /* @__PURE__ */ new Set([KEYS.solana.publicKey, ...allowedDestinations]);
-  for (const ix of instructions) {
-    if (!PROGRAMS.has(ix.programId)) throw new Error(`program not allowed: ${ix.programId}`);
-    if (ix.programId === "11111111111111111111111111111111") {
-      const lamports2 = decodeSystemTransfer(ix.dataHex);
-      if (lamports2 != null) {
-        const dest = ix.keys?.[1]?.pubkey;
-        if (!allowed.has(dest)) throw new Error(`system transfer to non-allowlisted destination: ${dest}`);
-      }
-    }
-  }
-  return true;
-}
-async function handle(op, a2) {
-  switch (op) {
-    case "identity":
-      return {
-        solana: { public_key: KEYS.solana.publicKey, algorithm: "ed25519" },
-        evm: { address: KEYS.evm.address, algorithm: "secp256k1" },
-        born_at: KEYS.bornAt
-      };
-    case "sign_message": {
-      const body = Buffer.from(a2.message, "utf8");
-      return {
-        solana: { signature: ed25519Sign(KEYS.solana.secretKey, body), encoding: "base58" },
-        evm: { signature: evmSign(KEYS.evm.secretKey, body), encoding: "hex" },
-        message_sha256: sha256hex(body)
-      };
-    }
-    case "sign_v1": {
-      gateV1(a2);
-      const r = await buildV1(a2);
-      fs11.appendFileSync(P.run + "/signer.log", JSON.stringify({ ts: Math.floor(Date.now() / 1e3), op, bytes: r.bytes, sig: r.signature }) + "\n");
-      return r;
-    }
-    case "sign_payment_svm": {
-      gateV1(a2);
-      const r = await buildV1WithFeePayer(a2);
-      fs11.appendFileSync(P.run + "/signer.log", JSON.stringify({ ts: Math.floor(Date.now() / 1e3), op, bytes: r.bytes, feePayer: a2.feePayer }) + "\n");
-      return r;
-    }
-    case "sign_payment_legacy": {
-      const { Transaction: Web3Tx, TransactionInstruction: Web3Ix, PublicKey: Web3Pk, Keypair: Web3Kp } = await Promise.resolve().then(() => __toESM(require_index_cjs(), 1));
-      const tx = new Web3Tx({ feePayer: new Web3Pk(a2.feePayer), recentBlockhash: a2.blockhash });
-      for (const ix of a2.instructions) {
-        tx.add(new Web3Ix({
-          programId: new Web3Pk(ix.programId),
-          keys: ix.keys.map((k2) => ({ pubkey: new Web3Pk(k2.pubkey), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
-          data: Buffer.from(ix.dataHex || "", "hex")
-        }));
-      }
-      tx.partialSign(Web3Kp.fromSecretKey(Uint8Array.from(KEYS.solana.secretKey)));
-      return { wireBase64: tx.serialize({ requireAllSignatures: false, verifySignatures: false }).toString("base64"), bytes: tx.serialize({ requireAllSignatures: false }).length };
-    }
-    case "sign_tx": {
-      const web3 = await Promise.resolve().then(() => __toESM(require_index_cjs(), 1));
-      const raw = String(a2.wireBase64 || a2.wire || "");
-      const buf = raw.startsWith("0x") ? Buffer.from(raw.slice(2), "hex") : Buffer.from(raw, "base64");
-      const kp = web3.Keypair.fromSecretKey(Uint8Array.from(KEYS.solana.secretKey));
-      const bs582 = (await Promise.resolve().then(() => (init_esm2(), esm_exports))).default;
-      let wire3 = null;
-      let sigB58 = null;
-      let via = null;
-      try {
-        const vtx = web3.VersionedTransaction.deserialize(buf);
-        vtx.sign([kp]);
-        wire3 = Buffer.from(vtx.serialize()).toString("base64");
-        sigB58 = bs582.encode(Buffer.from(vtx.signatures[0]));
-        via = "v0";
-      } catch (e1) {
-        try {
-          const tx = web3.Transaction.from(buf);
-          tx.partialSign(kp);
-          wire3 = tx.serialize({ requireAllSignatures: false, verifySignatures: false }).toString("base64");
-          sigB58 = tx.signatures[0]?.signature ? bs582.encode(Buffer.from(tx.signatures[0].signature)) : null;
-          via = "legacy";
-        } catch (e22) {
-          return { error: `decode failed \u2014 v0: ${String(e1.message).slice(0, 120)} | legacy: ${String(e22.message).slice(0, 120)}` };
-        }
-      }
-      fs11.appendFileSync(P.run + "/signer.log", JSON.stringify({ ts: Math.floor(Date.now() / 1e3), op, bytes: buf.length, via }) + String.fromCharCode(10));
-      return { wireBase64: wire3, signature: sigB58, via };
-    }
-    case "sign_evm_hash": {
-      const body = Buffer.from(String(a2.hashHex || "").replace(/^0x/, ""), "hex");
-      return { signature: evmSign(KEYS.evm.secretKey, body), encoding: "hex", address: KEYS.evm.address };
-    }
-    case "sign_evm_typed": {
-      const digest = eip712Digest(a2);
-      const { secp256k1: secp256k12 } = await Promise.resolve().then(() => (init_secp256k1(), secp256k1_exports));
-      const sig = secp256k12.sign(digest, KEYS.evm.secretKey, { lowS: true });
-      const r = Buffer.from(sig.r.toString(16).padStart(64, "0"), "hex");
-      const s3 = Buffer.from(sig.s.toString(16).padStart(64, "0"), "hex");
-      return { signature: "0x" + Buffer.concat([r, s3, Buffer.from([sig.recovery + 27])]).toString("hex"), digest: "0x" + digest.toString("hex") };
-    }
-    default:
-      throw new Error(`unknown op ${op}`);
-  }
-}
-var MAX_WIRE, MAX_ADDRS, MAX_IXS, PROGRAMS, SYSTEM_TRANSFER_TAG, KEYS, server, TOKEN;
-var init_signer = __esm({
-  "signer.mjs"() {
-    init_paths();
-    init_util();
-    init_seal();
-    init_keys();
-    init_evm712();
-    MAX_WIRE = 4096;
-    MAX_ADDRS = 64;
-    MAX_IXS = 64;
-    PROGRAMS = /* @__PURE__ */ new Set([
-      "11111111111111111111111111111111",
-      // system
-      "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-      // token
-      "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
-      // token-2022
-      "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
-      // ATA
-      "ComputeBudget111111111111111111111111111111",
-      // compute budget
-      "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
-      // memo v2
-      "Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo",
-      // memo v1
-      "Sysvar1nstructions1111111111111111111111111",
-      "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
-      // pump
-      "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA",
-      // pump amm
-      "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ",
-      // pump fees
-      "KLend2g3cP87fffoy8q1mQqGKjrxjC8boSyAYavgmjD",
-      // kamino klend
-      "jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS",
-      // jupiter lend
-      "jupgfSgfbUMwdznGQXfNMeBHWge5YqaeMXETt2XS",
-      "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-      // jupiter aggregator
-      "99vQwtBwYtrqqD9YSXbdum3KBdxPAVxYTaQ3cfnJSrN2"
-      // relay depository (solana -> base)
-    ]);
-    SYSTEM_TRANSFER_TAG = 2;
-    KEYS = null;
-    server = net2.createServer((sock) => {
-      let buf = "";
-      sock.on("data", async (chunk) => {
-        buf += chunk.toString("utf8");
-        const nl = buf.indexOf("\n");
-        if (nl < 0) return;
-        const line = buf.slice(0, nl);
-        let req;
-        try {
-          req = JSON.parse(line);
-        } catch {
-          sock.end(JSON.stringify({ error: "bad json" }) + "\n");
-          return;
-        }
-        try {
-          if (req.token !== TOKEN) throw new Error("auth");
-          const out = await handle(req.op, req.args || {});
-          sock.end(JSON.stringify({ result: out }) + "\n");
-        } catch (e9) {
-          sock.end(JSON.stringify({ error: String(e9.message || e9) }) + "\n");
-        }
-      });
-    });
-    TOKEN = "";
-    ensureDirs();
-    KEYS = loadKeys();
-    TOKEN = crypto10.randomBytes(24).toString("hex");
-    fs11.writeFileSync(P.run + "/signer.token", TOKEN, { mode: 384 });
-    server.listen(0, "127.0.0.1", () => {
-      fs11.writeFileSync(P.signerPort, String(server.address().port));
-      console.log(JSON.stringify({ event: "signer_ready", port: server.address().port, solana: KEYS.solana.publicKey, evm: KEYS.evm.address }));
-    });
-    process.on("SIGTERM", () => {
-      try {
-        fs11.unlinkSync(P.signerPort);
-      } catch {
-      }
-      process.exit(0);
-    });
-  }
-});
-
-// lib/snapshot.mjs
-import path6 from "node:path";
-async function snapshot(owner) {
-  const reads = [];
-  const bal = await rpc("getBalance", [owner, { commitment: "confirmed" }]);
-  reads.push(bal.context.slot);
-  const assets = [{
-    chain: "solana",
-    asset: "native:SOL",
-    mint: null,
-    program: "system",
-    decimals: 9,
-    raw: BigInt(bal.value).toString(),
-    owner
-  }];
-  for (const program of [TOKEN_PROGRAM, TOKEN_2022]) {
-    const r = await rpc("getTokenAccountsByOwner", [owner, { programId: program }, { encoding: "jsonParsed", commitment: "confirmed" }]);
-    reads.push(r.context.slot);
-    for (const a2 of r.value) {
-      const info = a2.account.data.parsed.info;
-      const raw = BigInt(info.tokenAmount.amount);
-      if (raw === 0n) continue;
-      assets.push({
-        chain: "solana",
-        asset: `${program === TOKEN_2022 ? "t22" : "spl"}:${info.mint}`,
-        mint: info.mint,
-        program,
-        decimals: info.tokenAmount.decimals,
-        raw: raw.toString(),
-        ui: info.tokenAmount.uiAmountString,
-        tokenAccount: a2.pubkey,
-        state: info.state,
-        owner: info.owner
-      });
-    }
-  }
-  for (const a2 of assets) {
-    if (a2.program !== TOKEN_2022) continue;
-    try {
-      const mint = await rpc("getAccountInfo", [a2.mint, { encoding: "jsonParsed", commitment: "confirmed" }]);
-      reads.push(mint.context.slot);
-      const ext = mint.value?.data?.parsed?.info?.extensions || [];
-      const tf = ext.find((e9) => e9.extension === "transferFeeConfig");
-      if (tf) {
-        const newer = tf.state?.newerTransferFee?.transferFeeBasisPoints ?? 0;
-        const older = tf.state?.olderTransferFee?.transferFeeBasisPoints ?? 0;
-        if (newer || older) a2.blocked = { reason: "token2022_transfer_fee", basis_points: Math.max(newer, older) };
-      }
-      const frozen = mint.value?.data?.parsed?.info?.freezeAuthority;
-      if (frozen && a2.state === "frozen") a2.blocked = { reason: "frozen_account" };
-    } catch (e9) {
-      a2.coverage = `mint_read_failed:${e9.message}`;
-    }
-  }
-  const slotMin = Math.min(...reads), slotMax = Math.max(...reads);
-  const snap = {
-    chain: "solana",
-    owner,
-    captured_at: now(),
-    slots: reads,
-    slot_min: slotMin,
-    slot_max: slotMax,
-    coherence: slotMin === slotMax ? "coherent_at_slot" : "multi_call_range",
-    assets,
-    coverage: { token_programs: [TOKEN_PROGRAM, TOKEN_2022], native: true }
-  };
-  snap.evidence_sha256 = sha256hex(Buffer.from(canon(snap)));
-  try {
-    atomicJson(path6.join(P.snapshots, `snap-${snap.captured_at}-${slotMin}-${process.pid}-${Math.random().toString(16).slice(2, 8)}.json`), snap, 420);
-  } catch {
-  }
-  return snap;
-}
-function totalByAsset(snap) {
-  const m = /* @__PURE__ */ new Map();
-  for (const a2 of snap.assets) m.set(a2.asset, (BigInt(m.get(a2.asset) || 0n) + BigInt(a2.raw)).toString());
-  return m;
-}
-var TOKEN_PROGRAM, TOKEN_2022;
-var init_snapshot = __esm({
-  "lib/snapshot.mjs"() {
-    init_rpc();
-    init_util();
-    init_paths();
-    TOKEN_PROGRAM = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
-    TOKEN_2022 = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
-  }
-});
-
 // node_modules/@solana/spl-token/lib/esm/constants.js
 function programSupportsExtensions(programId) {
   if (programId.equals(TOKEN_PROGRAM_ID)) {
@@ -66240,411 +64428,6 @@ var init_esm6 = __esm({
   }
 });
 
-// distributor.mjs
-var distributor_exports = {};
-function baseState() {
-  return {
-    birth_id: null,
-    t0: null,
-    highest_epoch: 0,
-    carry: { parent: {}, founder: {} },
-    obligations: {},
-    // id -> obligation
-    reserved: {},
-    // asset -> raw reserved for unpaid obligations
-    unresolved: {},
-    // epoch -> reason
-    anchors: {},
-    // epoch -> on-chain memo signature
-    settlements: {}
-    // id -> {signature, at, actual}
-  };
-}
-function loadState() {
-  const s3 = { ...baseState(), ...state({}) || {} };
-  s3.carry = { parent: {}, founder: {}, ...s3.carry || {} };
-  return s3;
-}
-function dueAt(t0, n) {
-  return t0 + n * 86400;
-}
-async function snapshotForEpoch(owner, epoch, t0) {
-  const due = dueAt(t0, epoch);
-  const snap = await snapshot(owner);
-  const lag = snap.captured_at - due;
-  if (lag < -60) return { ok: false, reason: "not_due" };
-  if (lag > 900) {
-    return { ok: false, reason: "snapshot_unresolved", detail: `live read ${lag}s after cutoff`, snap };
-  }
-  return { ok: true, snap, lag };
-}
-function assetBlocked(entry) {
-  if (entry.blocked) return entry.blocked.reason;
-  if (entry.state && entry.state !== "initialized") return `token_state_${entry.state}`;
-  return null;
-}
-function assessEpoch(st, snap, epoch) {
-  const byAsset = /* @__PURE__ */ new Map();
-  for (const a2 of snap.assets) {
-    const cur = byAsset.get(a2.asset) || { asset: a2.asset, chain: a2.chain, mint: a2.mint, program: a2.program, decimals: a2.decimals, raw: 0n, blocked: null, entry: a2 };
-    cur.raw += BigInt(a2.raw);
-    if (!cur.blocked && assetBlocked(a2)) cur.blocked = assetBlocked(a2);
-    byAsset.set(a2.asset, cur);
-  }
-  const created = [];
-  for (const v2 of byAsset.values()) {
-    const B = v2.raw;
-    for (const role2 of ["parent", "founder"]) {
-      const bps = role2 === "parent" ? policy.parentBps : policy.founderBps;
-      const prior = BigInt(st.carry[role2][v2.asset] || 0);
-      const { due, carry } = assess(B, prior, bps);
-      st.carry[role2][v2.asset] = carry.toString();
-      const id = `${st.birth_id}:${epoch}:solana:${v2.asset}:${role2}`;
-      if (st.obligations[id]) continue;
-      const dest = role2 === "parent" ? policy.policy.beneficiaries.parent : null;
-      const ob = {
-        id,
-        epoch,
-        chain: "solana",
-        asset: v2.asset,
-        mint: v2.mint,
-        program: v2.program,
-        decimals: v2.decimals,
-        role: role2,
-        basis_raw: B.toString(),
-        bps,
-        due_raw: due.toString(),
-        carry_after: carry.toString(),
-        destination: role2 === "parent" ? "parent_record" : policy.founderSolana,
-        status: v2.blocked ? "payment_blocked" : due > 0n ? "assessed" : "assessed_zero",
-        blocked_reason: v2.blocked || null,
-        snapshot_hash: snap.evidence_sha256,
-        assessed_at: now()
-      };
-      st.obligations[id] = ob;
-      created.push(ob);
-    }
-  }
-  return created;
-}
-function reserve(st) {
-  const r = {};
-  for (const ob of Object.values(st.obligations)) {
-    if (!["assessed", "signed", "pending", "partially_settled", "arrears"].includes(ob.status)) continue;
-    r[ob.asset] = (BigInt(r[ob.asset] || 0) + BigInt(ob.due_raw) - BigInt(ob.settled_raw || 0)).toString();
-  }
-  st.reserved = r;
-}
-function destFor(ob, parentRecord) {
-  if (ob.role === "parent") {
-    const rec = parentRecord?.record || parentRecord;
-    const d = rec?.parent_solana_destination;
-    if (!d || !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(d)) throw new Error("parent record has no valid solana destination");
-    return d;
-  }
-  return policy.founderSolana;
-}
-async function ensureAta(owner, mint, program) {
-  const prog = program === TOKEN_2022_PROGRAM_ID.toBase58() ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID;
-  const ata = getAssociatedTokenAddressSync(new import_web398.PublicKey(mint), new import_web398.PublicKey(owner), false, prog);
-  const info = await getAccountInfo(ata.toBase58());
-  return { ata: ata.toBase58(), exists: !!info, program: prog };
-}
-function toIx(ix) {
-  return {
-    programId: ix.programId.toBase58(),
-    keys: ix.keys.map((k2) => ({ pubkey: k2.pubkey.toBase58(), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
-    dataHex: Buffer.from(ix.data).toString("hex")
-  };
-}
-function systemTransfer(from, to, lamports2) {
-  const data = Buffer.alloc(12);
-  data.writeUInt32LE(2, 0);
-  data.writeBigUInt64LE(BigInt(lamports2), 4);
-  return new import_web398.TransactionInstruction({
-    programId: new import_web398.PublicKey(SYSTEM),
-    keys: [{ pubkey: new import_web398.PublicKey(from), isSigner: true, isWritable: true }, { pubkey: new import_web398.PublicKey(to), isSigner: false, isWritable: true }],
-    data
-  });
-}
-async function signAndSend({ ixs, watch, allowedDestinations, label }) {
-  const { blockhash: blockhash2, lastValidBlockHeight } = await getLatestBlockhash();
-  const env = await signV1({ instructions: ixs.map(toIx), blockhash: blockhash2, lastValidBlockHeight, cuLimit: 2e5, allowedDestinations });
-  const sim = await simulate(env.wireBase64, watch);
-  const v2 = sim.value || {};
-  if (v2.err) return { ok: false, stage: "simulate", err: v2.err, logs: (v2.logs || []).slice(-12), env };
-  const sig = await sendRaw(env.wireBase64);
-  if (sig !== env.signature) return { ok: false, stage: "send", err: "signature mismatch", sig, expected: env.signature, bytes: env.bytes };
-  const t0 = Date.now();
-  while (Date.now() - t0 < 9e4) {
-    const st = (await signatureStatuses([sig]))[0];
-    if (st) {
-      if (st.err) return { ok: false, stage: "chain", err: st.err, sig };
-      if (st.confirmationStatus === "confirmed" || st.confirmationStatus === "finalized") {
-        const tx = await getTransaction(sig);
-        if (!tx) return { ok: false, stage: "confirm_unresolved", sig };
-        if (tx.meta?.err) return { ok: false, stage: "chain", err: tx.meta.err, sig };
-        return { ok: true, sig, tx, blockhash: blockhash2, lastValidBlockHeight, env, units: v2.unitsConsumed };
-      }
-    }
-    await sleep(1200);
-  }
-  return { ok: false, stage: "pending", sig, note: "status unknown; resolve before replacement" };
-}
-async function payObligations(st, snap, parentRecord) {
-  const created = [];
-  for (const ob of Object.values(st.obligations)) {
-    if (!["arrears", "pending", "partially_settled"].includes(ob.status) || !ob.signature) continue;
-    try {
-      const stt = (await signatureStatuses([ob.signature]))[0];
-      if (stt && !stt.err && stt.confirmationStatus) {
-        ob.status = "settled";
-        ob.settled_raw = ob.due_raw;
-        ob.settled_at = now();
-        await append("distribution.reconcile", { id: ob.id, signature: ob.signature, status: stt.confirmationStatus });
-      }
-    } catch {
-    }
-  }
-  await save(st);
-  const groups = /* @__PURE__ */ new Map();
-  for (const ob of Object.values(st.obligations)) {
-    if (ob.status !== "assessed" || BigInt(ob.due_raw) === 0n) continue;
-    const dest = destFor(ob, parentRecord);
-    const key = `${ob.asset}|${dest}`;
-    const g2 = groups.get(key) || { asset: ob.asset, mint: ob.mint, program: ob.program, decimals: ob.decimals, dest, roles: [] };
-    g2.roles.push(ob);
-    groups.set(key, g2);
-  }
-  for (const g2 of groups.values()) {
-    const total = g2.roles.reduce((s3, r) => s3 + BigInt(r.due_raw), 0n);
-    try {
-      let ixs = [], watch = [];
-      if (g2.asset === "native:SOL") {
-        ixs = [systemTransfer(snap.owner, g2.dest, total)];
-        watch = [snap.owner, g2.dest];
-      } else {
-        const { ata, exists } = await ensureAta(g2.dest, g2.mint, g2.program);
-        const src = getAssociatedTokenAddressSync(
-          new import_web398.PublicKey(g2.mint),
-          new import_web398.PublicKey(snap.owner),
-          false,
-          g2.program === TOKEN_2022_PROGRAM_ID.toBase58() ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID
-        ).toBase58();
-        const prog = g2.program === TOKEN_2022_PROGRAM_ID.toBase58() ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID;
-        if (!exists) {
-          ixs.push(createAssociatedTokenAccountIdempotentInstruction(
-            new import_web398.PublicKey(snap.owner),
-            new import_web398.PublicKey(ata),
-            new import_web398.PublicKey(g2.dest),
-            new import_web398.PublicKey(g2.mint),
-            prog
-          ));
-        }
-        ixs.push(createTransferCheckedInstruction(
-          new import_web398.PublicKey(src),
-          new import_web398.PublicKey(g2.mint),
-          new import_web398.PublicKey(ata),
-          new import_web398.PublicKey(snap.owner),
-          total,
-          g2.decimals,
-          [],
-          prog
-        ));
-        watch = [src, ata, snap.owner];
-      }
-      const res = await signAndSend({ ixs, watch, allowedDestinations: [g2.dest], label: g2.asset });
-      const rec = {
-        at: now(),
-        asset: g2.asset,
-        dest: g2.dest,
-        amount_raw: total.toString(),
-        roles: g2.roles.map((r) => ({ id: r.id, role: r.role, due_raw: r.due_raw })),
-        ok: res.ok,
-        signature: res.sig || null,
-        stage: res.stage || "settled",
-        error: res.err || null,
-        logs: res.logs || null
-      };
-      created.push(rec);
-      await append("distribution.payment", rec);
-      for (const r of g2.roles) {
-        const ob = st.obligations[r.id];
-        if (res.ok) {
-          ob.status = "settled";
-          ob.settled_raw = ob.due_raw;
-          ob.settled_at = rec.at;
-          ob.signature = rec.signature;
-          st.settlements[r.id] = { signature: rec.signature, at: rec.at };
-        } else {
-          ob.status = res.stage === "pending" ? "pending" : "arrears";
-          ob.last_error = res.err || res.stage;
-          ob.attempts = (ob.attempts || 0) + 1;
-        }
-      }
-      await save(st);
-    } catch (e9) {
-      log("distributor", `payment failed ${g2.asset}`, { err: String(e9.message || e9), stack: (e9.stack || "").split("\n").slice(0, 4) });
-      for (const r of g2.roles) {
-        const ob = st.obligations[r.id];
-        ob.status = "arrears";
-        ob.last_error = String(e9.message || e9);
-        ob.attempts = (ob.attempts || 0) + 1;
-      }
-      await save(st);
-    }
-  }
-  return created;
-}
-async function anchorEpoch(st, epoch, assessmentHash) {
-  try {
-    const msg = `birth:${st.birth_id.slice(0, 8)} epoch:${epoch} assessment:${assessmentHash.slice(0, 16)}`;
-    const ix = new import_web398.TransactionInstruction({ programId: new import_web398.PublicKey(MEMO), keys: [{ pubkey: new import_web398.PublicKey(st.solana), isSigner: true, isWritable: false }], data: Buffer.from(msg, "utf8") });
-    const res = await signAndSend({ ixs: [ix], watch: [st.solana], allowedDestinations: [st.solana], label: "anchor" });
-    if (res.ok) {
-      st.anchors[epoch] = res.sig;
-      await append("distribution.anchor", { epoch, signature: res.sig, memo: msg });
-      await save(st);
-      return res.sig;
-    }
-    log("distributor", "epoch anchor not confirmed", { epoch, stage: res.stage, err: res.err });
-  } catch (e9) {
-    log("distributor", "anchor failed", { err: String(e9.message || e9) });
-  }
-  return null;
-}
-async function save(st) {
-  await updateState((cur) => {
-    const next = { ...cur };
-    for (const k2 of OWNED) if (st[k2] !== void 0) next[k2] = st[k2];
-    return next;
-  });
-}
-function statusOf(st) {
-  const obs = Object.values(st.obligations);
-  const byStatus = {};
-  for (const o5 of obs) byStatus[o5.status] = (byStatus[o5.status] || 0) + 1;
-  const nextEpoch = (st.highest_epoch || 0) + 1;
-  return {
-    next_due_unix: st.t0 ? dueAt(st.t0, nextEpoch) : null,
-    next_due_epoch: nextEpoch,
-    highest_epoch: st.highest_epoch,
-    obligations: obs.length,
-    by_status: byStatus,
-    reserved: st.reserved,
-    carries: st.carry,
-    arrears_raw: obs.filter((o5) => ["arrears", "partially_settled"].includes(o5.status)).reduce((a2, o5) => {
-      a2[o5.asset] = (BigInt(a2[o5.asset] || 0) + BigInt(o5.due_raw) - BigInt(o5.settled_raw || 0)).toString();
-      return a2;
-    }, {}),
-    blocked: obs.filter((o5) => o5.status === "payment_blocked").map((o5) => ({ asset: o5.asset, role: o5.role, due_raw: o5.due_raw, reason: o5.blocked_reason })),
-    unresolved_epochs: st.unresolved,
-    anchors: st.anchors,
-    supervisor: "deterministic: no model, no credits, no approval step"
-  };
-}
-async function loopOnce(st) {
-  const parentRecord = readJson(P.parentRecord, null);
-  if (!parentRecord) throw new Error("parent record missing");
-  if (!st.birth_id) {
-    st.birth_id = state({}).birth_id;
-    st.t0 = state({}).t0;
-    st.solana = readJson(P.receipt, null).payload.solana.public_key;
-    await save(st);
-  }
-  const owner = st.solana;
-  while (now() >= dueAt(st.t0, st.highest_epoch + 1)) {
-    const epoch = st.highest_epoch + 1;
-    const due = dueAt(st.t0, epoch);
-    const got = await snapshotForEpoch(owner, epoch, st.t0);
-    if (!got.ok) {
-      st.unresolved[epoch] = got.reason;
-      await append("distribution.unresolved", { epoch, due, reason: got.reason, detail: got.detail || null });
-      if (got.reason === "snapshot_unresolved" && now() - due > 3600) {
-        st.highest_epoch = epoch;
-        await save(st);
-        continue;
-      }
-      await save(st);
-      break;
-    }
-    const created = assessEpoch(st, got.snap, epoch);
-    reserve(st);
-    st.highest_epoch = epoch;
-    const assessmentHash = sha256hex(Buffer.from(canon({ epoch, created, snapshot: got.snap.evidence_sha256 })));
-    await append("distribution.assessed", { epoch, due, snapshot_hash: got.snap.evidence_sha256, coherence: got.snap.coherence, assessment_hash: assessmentHash, obligations: created });
-    await save(st);
-    log("distributor", `epoch ${epoch} assessed`, { due, assets: new Set(created.map((c) => c.asset)).size, obligations: created.length });
-    if (!DRY) {
-      await payObligations(st, got.snap, parentRecord);
-      reserve(st);
-      await save(st);
-      await anchorEpoch(st, epoch, assessmentHash);
-    }
-  }
-  if (!DRY) {
-    const due = Object.values(st.obligations).filter((o5) => ["arrears", "partially_settled", "pending"].includes(o5.status) && BigInt(o5.due_raw) > 0n);
-    if (due.length) {
-      const snap = await snapshot(owner);
-      await payObligations(st, snap, parentRecord);
-      reserve(st);
-      await save(st);
-    }
-  }
-  return statusOf(st);
-}
-async function main2() {
-  ensureDirs();
-  openJournal();
-  let st = loadState();
-  const { birth_id, t0 } = state({});
-  st.birth_id = birth_id;
-  st.t0 = t0;
-  st.solana = readJson(P.receipt, null)?.payload?.solana?.public_key || null;
-  st.constitution_sha256 = policy.sha256;
-  await save(st);
-  log("distributor", "supervisor started", { birth_id, t0, next_due: dueAt(t0, st.highest_epoch + 1), dry: DRY });
-  const write2 = (s3) => atomicJson(P.heartbeat, { component: "distributor", ts: now(), pid: process.pid, status: s3 }, 420);
-  do {
-    try {
-      const s3 = await loopOnce(st);
-      st = loadState();
-      write2(s3);
-      const status = readJson(P.status, {}) || {};
-      atomicJson(P.status, { ...status, distribution: s3, updated_at: now() }, 420);
-    } catch (e9) {
-      log("distributor", `tick error ${e9.message}`, { stack: (e9.stack || "").split("\n").slice(0, 3) });
-      write2({ error: String(e9.message || e9) });
-    }
-    if (!ONCE) await sleep(TICK_MS);
-  } while (!ONCE);
-}
-var import_web398, SYSTEM, MEMO, TICK_MS, ONCE, DRY, policy, OWNED;
-var init_distributor = __esm({
-  "distributor.mjs"() {
-    init_paths();
-    init_util();
-    init_journal();
-    init_policy();
-    init_snapshot();
-    init_signer_client();
-    init_rpc();
-    import_web398 = __toESM(require_index_cjs(), 1);
-    init_esm6();
-    SYSTEM = "11111111111111111111111111111111";
-    MEMO = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr";
-    TICK_MS = Number(process.env.DIST_TICK_MS || 2e4);
-    ONCE = process.argv.includes("--once");
-    DRY = process.argv.includes("--dry");
-    policy = loadPolicy();
-    OWNED = ["birth_id", "t0", "solana", "constitution_sha256", "highest_epoch", "carry", "obligations", "reserved", "unresolved", "anchors", "settlements"];
-    main2().then(() => process.exit(0)).catch((e9) => {
-      log("distributor", `FATAL ${e9.stack || e9}`);
-      process.exit(1);
-    });
-  }
-});
-
 // lib/transfer.mjs
 var transfer_exports = {};
 __export(transfer_exports, {
@@ -66706,186 +64489,6 @@ var init_adopt = __esm({
     book = path7.join(P.strategy, "children.json");
     ENDOW = BigInt(process.env.PROCREATE_ENDOW_LAMPORTS || "10000000");
     FEE_RESERVE = 4000000n;
-  }
-});
-
-// identity-server.mjs
-var identity_server_exports = {};
-import http from "node:http";
-import fs12 from "node:fs";
-import path8 from "node:path";
-function currentDigest() {
-  if (now() - digestCache.at > 60) digestCache = { at: now(), value: imageDigest() };
-  return digestCache.value;
-}
-function receipt() {
-  const r = readJson(P.receipt, null);
-  if (!r) throw new Error("no receipt");
-  return r;
-}
-function publicStatus() {
-  const s3 = readJson(P.status, {}) || {};
-  const hb = readJson(P.heartbeat, {}) || {};
-  const r = readJson(P.receipt, null);
-  return {
-    ...s3,
-    birth_id: r?.payload?.birth_id || null,
-    solana: r?.payload?.solana?.public_key || null,
-    evm: r?.payload?.evm?.address || null,
-    constitution_sha256: r?.payload?.constitution_sha256 || policy2.sha256,
-    prime_directives: policy2.prime,
-    overrides: [],
-    image: (() => {
-      const birth = r?.payload?.image_digest || null;
-      const cur = currentDigest();
-      return { birth_digest: birth, core_digest_now: cur, match: birth === cur, meaning: "digest of the measured core files this guest is running" };
-    })(),
-    identity_binding: "identity_binding_unverified",
-    launches: (() => {
-      const book4 = readJson(`${P.strategy}/launches.json`, { mints: [] });
-      const mints = Array.isArray(book4) ? book4 : book4.mints || [];
-      return mints.slice(-12).map((m) => typeof m === "string" ? { mint: m } : m);
-    })(),
-    children: (() => {
-      const book4 = readJson(`${P.state}/children.json`, { children: [] });
-      const list2 = Array.isArray(book4) ? book4 : book4.children || [];
-      return list2.filter((c) => c && c.deploymentId).slice(-32).map((c) => ({ deploymentId: c.deploymentId, endpoint: c.endpoint || null, birth_id: c.identity?.birth_id || c.birth_id || null, status: c.status || null, created_at: c.created_at || null }));
-    })(),
-    journal: { head: head().head, seq: head().seq },
-    components: hb.components || hb,
-    served_at: now()
-  };
-}
-var PORT, BIND, policy2, digestCache, server2;
-var init_identity_server = __esm({
-  "identity-server.mjs"() {
-    init_paths();
-    init_util();
-    init_receipt();
-    init_journal();
-    init_signer_client();
-    init_rpc();
-    init_policy();
-    PORT = Number(process.env.AGENT_HTTP_PORT) || 8787;
-    BIND = process.env.AGENT_BIND || "127.0.0.1";
-    policy2 = loadPolicy();
-    openJournal();
-    digestCache = { at: 0, value: null };
-    server2 = http.createServer(async (req, res) => {
-      const url = new URL(req.url, `http://127.0.0.1:${PORT}`);
-      const send = (code, obj) => {
-        const body = JSON.stringify(obj, null, 2);
-        res.writeHead(code, {
-          "content-type": "application/json",
-          "cache-control": "no-store",
-          "access-control-allow-origin": "*",
-          "access-control-allow-headers": "*"
-        });
-        res.end(body);
-      };
-      try {
-        if (url.pathname === "/" || url.pathname === "/identity") {
-          const r = receipt();
-          return send(200, {
-            ...r,
-            canonical_signing_message: signingMessage(r.payload),
-            proof: { nonce_endpoint: "/identity/proof?nonce=<bounded-nonce>", identity_binding: "identity_binding_unverified", platform_quote: null },
-            schema_errors: verifyReceiptShape(r)
-          });
-        }
-        if (url.pathname === "/identity/proof") {
-          const nonce = String(url.searchParams.get("nonce") || "").slice(0, 128);
-          if (nonce.length < 8) return send(400, { error: "nonce too short" });
-          const r = receipt();
-          const receiptHash = sha256hex(Buffer.from(canon(r)));
-          const challenge2 = `agent-birth-proof-v1
-nonce:${nonce}
-receipt:${receiptHash}`;
-          const sig = await signMessage(challenge2);
-          return send(200, {
-            nonce,
-            receipt_sha256: receiptHash,
-            challenge_source: "live signer",
-            signatures: [
-              { wallet: "solana", algorithm: "ed25519", encoding: "base58", signature: sig.solana.signature },
-              { wallet: "evm", algorithm: "eip191-secp256k1", encoding: "hex", signature: sig.evm.signature }
-            ],
-            identity_binding: "identity_binding_unverified",
-            note: "Wallet possession is proven; guest measurement binding needs a platform quote this host does not provide.",
-            ts: now()
-          });
-        }
-        if (url.pathname === "/adopt") {
-          let body = "";
-          for await (const chunk of req) body += chunk;
-          let args = {};
-          try {
-            args = JSON.parse(body || "{}");
-          } catch {
-          }
-          const dep = String(args.deploymentId || "");
-          const addr = String(args.address || "");
-          if (!dep || !addr) return send(400, { error: "deploymentId and address required" });
-          try {
-            const { adopt: adopt2 } = await Promise.resolve().then(() => (init_adopt(), adopt_exports));
-            return send(200, await adopt2({ dep, addr, endpoint: args.endpoint || null, birth: args.birth_id || null }));
-          } catch (e9) {
-            return send(500, { error: String(e9.message || e9).slice(0, 200) });
-          }
-        }
-        if (url.pathname === "/children") {
-          try {
-            return send(200, JSON.parse(fs12.readFileSync(path8.join(P.strategy, "children.json"), "utf8")));
-          } catch {
-            return send(200, { children: [], updated_at: now() });
-          }
-        }
-        if (url.pathname === "/status") return send(200, publicStatus());
-        if (url.pathname === "/logs") {
-          const name = String(url.searchParams.get("name") || "agent").replace(/[^a-z0-9_.-]/gi, "");
-          const lines = Math.min(Number(url.searchParams.get("lines") || 60), 400);
-          const file2 = path8.join(P.state, `${name}.log`);
-          try {
-            const txt = fs12.readFileSync(file2, "utf8").trim().split("\n").slice(-lines);
-            return send(200, { name, lines: txt });
-          } catch (e9) {
-            return send(404, { name, error: String(e9.message || e9) });
-          }
-        }
-        if (url.pathname === "/healthz") return send(200, { ok: true, ts: now() });
-        return send(404, { error: "not found" });
-      } catch (e9) {
-        return send(500, { error: String(e9.message || e9) });
-      }
-    });
-    ensureDirs();
-    server2.on("error", async (e9) => {
-      if (e9.code === "EADDRINUSE") {
-        try {
-          const r = await fetch(`http://127.0.0.1:${PORT}/healthz`);
-          if (r.ok) {
-            log("server", "another identity server already serving; exiting clean");
-            process.exit(0);
-          }
-        } catch {
-        }
-      }
-      log("server", `listen error ${e9.message}`);
-      process.exit(1);
-    });
-    server2.listen(PORT, BIND, () => {
-      fs12.writeFileSync(P.port, String(PORT));
-      log("server", `identity server on http://${BIND}:${PORT}`);
-      const hb = readJson(P.heartbeat, {}) || {};
-      atomicJson(P.heartbeat, { ...hb, component: hb.component || "watchdog", ts: now(), components: { ...hb.components || {}, identity_server: { pid: process.pid, ts: now() } } }, 420);
-    });
-    process.on("SIGTERM", () => {
-      try {
-        fs12.unlinkSync(P.port);
-      } catch {
-      }
-      server2.close(() => process.exit(0));
-    });
   }
 });
 
@@ -67090,307 +64693,6 @@ var init_venice = __esm({
   }
 });
 
-// inference/bazaar.mjs
-import fs13 from "node:fs";
-function providersPath() {
-  return P.strategy + "/providers.json";
-}
-function looksInference(it) {
-  const text = `${it.resource || ""} ${it.description || ""} ${it.title || ""} ${it.name || ""} ${JSON.stringify(it.extensions || {})}`.toLowerCase();
-  return /chat\/completions|\/llm|inference|completion|messages|\/v1\/chat|text-generation|model/.test(text);
-}
-function railOf(accepts, net3) {
-  return (accepts || []).find((a2) => a2 && a2.scheme === "exact" && String(a2.network || "").includes(net3));
-}
-async function crawl({ pages = 24, journal = null } = {}) {
-  const out = [];
-  let total = null, scanned = 0, errors = [];
-  for (let p2 = 0; p2 < pages; p2++) {
-    const offset = p2 * PAGE;
-    try {
-      const r = await fetch(`${BASE3}?limit=${PAGE}&offset=${offset}`, { headers: HEADERS });
-      if (!r.ok) {
-        errors.push({ offset, status: r.status });
-        break;
-      }
-      const j2 = await r.json();
-      total = j2.pagination?.total ?? j2.total ?? total;
-      const items = j2.items || j2.resources || [];
-      scanned += items.length;
-      for (const it of items) {
-        if (!looksInference(it)) continue;
-        const sol2 = railOf(it.accepts, "solana");
-        const base3 = railOf(it.accepts, "8453");
-        if (!sol2 && !base3) continue;
-        const fields = it.extensions?.bazaar?.info?.input?.bodyFields || it.extensions?.bazaar?.info?.input?.body || {};
-        out.push({
-          id: sha256hex(Buffer.from(String(it.resource))).slice(0, 12),
-          url: it.resource,
-          name: it.title || it.name || null,
-          description: (it.description || "").slice(0, 200),
-          solana: sol2 ? { asset: sol2.asset, payTo: sol2.payTo, amount: sol2.maxAmountRequired || sol2.amount, feePayer: sol2.extra?.feePayer || null } : null,
-          base: base3 ? { asset: base3.asset, payTo: base3.payTo, amount: base3.maxAmountRequired || base3.amount } : null,
-          models: fields?.model?.enum || fields?.model?.examples || null,
-          verified_wallet_x402: false
-        });
-      }
-      if (items.length < PAGE) break;
-    } catch (e9) {
-      errors.push({ offset, error: String(e9.message || e9) });
-      break;
-    }
-  }
-  const doc = {
-    at: now(),
-    source: BASE3,
-    page_size: PAGE,
-    pages_scanned: Math.ceil(scanned / PAGE),
-    catalog_total: total,
-    scanned,
-    inference_candidates: out.length,
-    solana_candidates: out.filter((x) => x.solana).length,
-    errors,
-    providers: out.sort((a2, b2) => Number(!!b2.solana) - Number(!!a2.solana))
-  };
-  atomicJson(providersPath(), doc, 384);
-  if (journal) {
-    try {
-      await journal.append("bazaar.crawl", { scanned, total, candidates: out.length, errors });
-    } catch {
-    }
-  }
-  log("bazaar", "inventory refreshed", { scanned, total, candidates: out.length });
-  return doc;
-}
-function loadProviders() {
-  try {
-    return JSON.parse(fs13.readFileSync(providersPath(), "utf8"));
-  } catch {
-    return null;
-  }
-}
-var BASE3, PAGE, HEADERS;
-var init_bazaar = __esm({
-  "inference/bazaar.mjs"() {
-    init_util();
-    init_paths();
-    BASE3 = "https://api.cdp.coinbase.com/platform/v2/x402/discovery/resources";
-    PAGE = 1e3;
-    HEADERS = { accept: "application/json", "user-agent": "birth-image-agent/1.0" };
-  }
-});
-
-// inference/x402-generic.mjs
-function parseChallenge(body, headers) {
-  const hdr2 = headers.get("payment-required");
-  let req = body;
-  if (hdr2) {
-    try {
-      req = JSON.parse(Buffer.from(hdr2, "base64").toString("utf8"));
-    } catch {
-    }
-  }
-  return req;
-}
-async function call(identity4, provider, { body, maxTokens = 1200, timeoutMs = 6e4 } = {}) {
-  const payload = JSON.stringify({ ...body, max_tokens: maxTokens });
-  const t0 = Date.now();
-  const first = await fetch(provider.url, { method: "POST", headers: { "content-type": "application/json", accept: "application/json" }, body: payload });
-  if (first.ok) return { ok: true, response: await first.json(), paid: false, ms: Date.now() - t0 };
-  if (first.status !== 402) return { ok: false, status: first.status, text: (await first.text()).slice(0, 300), ms: Date.now() - t0 };
-  const req = parseChallenge(await first.json().catch(() => ({})), first.headers);
-  const rail = (req.accepts || []).find((a2) => a2 && a2.scheme === "exact" && String(a2.network).includes("solana") && String(a2.asset) === SOL_USDC);
-  if (!rail) return { ok: false, status: 402, error: "no solana USDC exact rail", accepts: (req.accepts || []).map((a2) => a2.network), ms: Date.now() - t0 };
-  if (!rail.extra?.feePayer) return { ok: false, status: 402, error: "rail has no sponsor feePayer", ms: Date.now() - t0 };
-  const amount = BigInt(rail.maxAmountRequired || rail.amount);
-  const mint = new import_web3100.PublicKey(rail.asset);
-  const from = getAssociatedTokenAddressSync(mint, new import_web3100.PublicKey(identity4.solana.public_key));
-  const to = getAssociatedTokenAddressSync(mint, new import_web3100.PublicKey(rail.payTo), true);
-  const ixs = [import_web3100.ComputeBudgetProgram.setComputeUnitLimit({ units: 2e5 }), import_web3100.ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 1 })];
-  if (!await getAccountInfo(to.toBase58())) {
-    ixs.push(createAssociatedTokenAccountIdempotentInstruction(new import_web3100.PublicKey(rail.extra.feePayer), to, new import_web3100.PublicKey(rail.payTo), mint, TOKEN_PROGRAM_ID));
-  }
-  ixs.push(createTransferCheckedInstruction(from, mint, to, new import_web3100.PublicKey(identity4.solana.public_key), amount, 6, [], TOKEN_PROGRAM_ID));
-  const { blockhash: blockhash2 } = await getLatestBlockhash();
-  const signed = await request("sign_payment_legacy", {
-    feePayer: rail.extra.feePayer,
-    blockhash: blockhash2,
-    lastValidBlockHeight: 0,
-    instructions: ixs.map((ix) => ({
-      programId: ix.programId.toBase58(),
-      keys: ix.keys.map((k2) => ({ pubkey: k2.pubkey.toBase58(), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
-      dataHex: Buffer.from(ix.data).toString("hex")
-    }))
-  });
-  const version3 = req.x402Version === 1 ? 1 : 2;
-  const envelope = {
-    x402Version: version3,
-    scheme: "exact",
-    network: rail.network,
-    resource: req.resource || { url: provider.url },
-    accepted: rail,
-    payload: { transaction: signed.wireBase64 }
-  };
-  const header = Buffer.from(JSON.stringify(envelope)).toString("base64");
-  const second = await fetch(provider.url, {
-    method: "POST",
-    headers: { "content-type": "application/json", accept: "application/json", "PAYMENT-SIGNATURE": header, "X-PAYMENT": header },
-    body: payload
-  });
-  const text = await second.text();
-  const receipt2 = second.headers.get("payment-response") || second.headers.get("x-payment-response");
-  let json = null;
-  try {
-    json = JSON.parse(text);
-  } catch {
-  }
-  return {
-    ok: second.ok,
-    status: second.status,
-    response: json,
-    text: second.ok ? null : text.slice(0, 300),
-    paid: true,
-    amount_raw: amount.toString(),
-    payTo: rail.payTo,
-    feePayer: rail.extra.feePayer,
-    receipt: receipt2 ? (() => {
-      try {
-        return JSON.parse(Buffer.from(receipt2, "base64").toString("utf8"));
-      } catch {
-        return null;
-      }
-    })() : null,
-    ms: Date.now() - t0
-  };
-}
-var import_web3100, SOL_USDC;
-var init_x402_generic = __esm({
-  "inference/x402-generic.mjs"() {
-    import_web3100 = __toESM(require_index_cjs(), 1);
-    init_esm6();
-    init_signer_client();
-    init_rpc();
-    init_util();
-    SOL_USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
-  }
-});
-
-// inference/select.mjs
-function selectionPath() {
-  return P.strategy + "/inference-selection.json";
-}
-function isAbliterated(m) {
-  const text = `${m.id} ${m.model_spec?.name || ""} ${m.model_spec?.description || ""}`.toLowerCase();
-  if (/non[- ]?abliterated|not abliterated/.test(text)) return false;
-  return /abliterated|uncensored|refuseless|abliteration/.test(text) || m.model_spec?.uncensored === true;
-}
-function score(m) {
-  const c = m.model_spec?.capabilities || {};
-  const p2 = m.model_spec?.pricing || {};
-  const inUsd = Number(p2.input?.usd ?? 1e9);
-  const outUsd = Number(p2.output?.usd ?? 1e9);
-  const ctx = Number(m.model_spec?.availableContextTokens || m.context_length || 0);
-  return {
-    function_calling: c.supportsFunctionCalling ? 1 : 0,
-    reasoning: c.supportsReasoning ? 1 : 0,
-    ctx,
-    price_in: inUsd,
-    price_out: outUsd,
-    // higher is better: capability first, then cheapness, then context
-    rank: (c.supportsFunctionCalling ? 1e6 : 0) + (c.supportsReasoning ? 5e5 : 0) - (inUsd * 1e4 + outUsd * 1e4) / 100 + Math.min(ctx, 1e6) / 100
-  };
-}
-async function select({ force = false } = {}) {
-  const prior = readJson(selectionPath(), null);
-  if (prior && !force && now() - prior.at < 6 * 3600) return prior;
-  const r = await fetch(CATALOG);
-  if (!r.ok) throw new Error(`catalog ${r.status}`);
-  const j2 = await r.json();
-  const models = (j2.data || j2.models || []).filter((m) => m && m.id && m.type !== "embedding");
-  const candidates = models.filter(isAbliterated).map((m) => ({ id: m.id, why: isAbliterated(m), meta: score(m), name: m.model_spec?.name || m.id, offline: m.model_spec?.offline }));
-  candidates.sort((a2, b2) => b2.meta.rank - a2.meta.rank);
-  const chosen = candidates.find((c) => c.meta.function_calling) || candidates[0];
-  if (!chosen) throw new Error("no abliterated model offered");
-  const out = {
-    at: now(),
-    selected: chosen.id,
-    name: chosen.name,
-    policy: "explicitly abliterated, function calling, reasoning; then cheapest, then largest context",
-    candidates: candidates.slice(0, 8).map((c) => ({ id: c.id, fc: c.meta.function_calling, reasoning: c.meta.reasoning, ctx: c.meta.ctx, in: c.meta.price_in, out: c.meta.price_out, rank: Math.round(c.meta.rank) })),
-    catalog_sha256: sha256hex(Buffer.from(canon(models.map((m) => m.id)))),
-    note: "model choice is runtime configuration through the fixed interface; it is not a weight checksum"
-  };
-  atomicJson(selectionPath(), out, 384);
-  log("inference", "model selected", { selected: out.selected, candidates: out.candidates.length });
-  return out;
-}
-var CATALOG;
-var init_select = __esm({
-  "inference/select.mjs"() {
-    init_util();
-    init_paths();
-    CATALOG = "https://api.venice.ai/api/v1/models?type=text";
-  }
-});
-
-// lib/accounting.mjs
-async function observeFunding(identity4) {
-  const st = state({});
-  const snap = await snapshot(identity4.solana.public_key);
-  const totals = Object.fromEntries(totalByAsset(snap));
-  const prior = st.last_balances || {};
-  const deltas = {};
-  for (const [asset, raw] of Object.entries(totals)) {
-    const d = BigInt(raw) - BigInt(prior[asset] || 0);
-    if (d !== 0n) deltas[asset] = d.toString();
-  }
-  for (const [asset, raw] of Object.entries(prior)) {
-    if (!(asset in totals)) {
-      const d = -BigInt(raw);
-      if (d !== 0n) deltas[asset] = d.toString();
-    }
-  }
-  const inflow = Object.entries(deltas).filter(([, v2]) => BigInt(v2) > 0n);
-  if (inflow.length) {
-    await append("funding.observed", {
-      at: now(),
-      slot: snap.slot_min,
-      snapshot_hash: snap.evidence_sha256,
-      deposits: inflow.map(([asset, raw]) => ({ asset, raw, classification: "capital_not_revenue" })),
-      note: "endowment and later deposits are capital until disposed by a strategy"
-    });
-  }
-  await updateState((cur) => ({ ...cur, last_balances: totals, last_snapshot: { at: now(), slot: snap.slot_min, hash: snap.evidence_sha256 } }));
-  return { totals, deltas, snap };
-}
-function reservedByAsset() {
-  const st = state({});
-  return st.reserved || {};
-}
-function spendable(totalsRaw, reserveFeeLamports = 5000000n) {
-  const reserved = reservedByAsset();
-  const out = {};
-  for (const [asset, raw] of Object.entries(totalsRaw)) {
-    let v2 = BigInt(raw) - BigInt(reserved[asset] || 0);
-    if (asset === "native:SOL") v2 -= reserveFeeLamports;
-    out[asset] = v2 > 0n ? v2.toString() : "0";
-  }
-  return out;
-}
-async function solAndUsdc(identity4) {
-  const sol2 = BigInt(await getBalance(identity4.solana.public_key));
-  const usdc = (await tokenAccounts(identity4.solana.public_key, "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")).filter((a2) => a2.account.data.parsed.info.mint === "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v").reduce((s3, a2) => s3 + BigInt(a2.account.data.parsed.info.tokenAmount.amount), 0n);
-  return { sol_raw: sol2.toString(), usdc_raw: usdc.toString() };
-}
-var init_accounting = __esm({
-  "lib/accounting.mjs"() {
-    init_rpc();
-    init_journal();
-    init_util();
-    init_snapshot();
-  }
-});
-
 // lib/swap.mjs
 var swap_exports = {};
 __export(swap_exports, {
@@ -67552,37 +64854,6 @@ var init_treasury = __esm({
   }
 });
 
-// lib/toolbox.mjs
-import path9 from "node:path";
-function loadExtra() {
-  const j2 = readJson(FILE, { tools: [] });
-  return Array.isArray(j2.tools) ? j2.tools : [];
-}
-function all(builtin) {
-  const extra = loadExtra().filter((t) => t && t.name && t.parameters).map((t) => ({ type: "function", function: { name: t.name, description: t.description || t.name, parameters: t.parameters } }));
-  const names = new Set(builtin.map((t) => t.function.name));
-  return [...builtin, ...extra.filter((t) => !names.has(t.function.name))];
-}
-function register(def) {
-  if (!def?.name || !/^[a-z][a-z0-9_]{2,40}$/.test(def.name)) throw new Error("bad tool name");
-  if (!def.parameters || def.parameters.type !== "object") throw new Error("parameters must be a JSON schema object");
-  const extra = loadExtra().filter((t) => t.name !== def.name);
-  extra.push({ name: def.name, description: def.description || def.name, parameters: def.parameters, endpoint: def.endpoint || null, method: def.method || "POST", registered_at: now() });
-  atomicJson(FILE, { tools: extra, updated_at: now() }, 384);
-  return extra.length;
-}
-function describe() {
-  return loadExtra().map((t) => ({ name: t.name, description: t.description, endpoint: t.endpoint || null, registered_at: t.registered_at }));
-}
-var FILE;
-var init_toolbox = __esm({
-  "lib/toolbox.mjs"() {
-    init_paths();
-    init_util();
-    FILE = path9.join(P.state, "tools.json");
-  }
-});
-
 // lib/playbooks.mjs
 var playbooks_exports = {};
 __export(playbooks_exports, {
@@ -67737,48 +65008,6 @@ var init_lease = __esm({
   }
 });
 
-// lib/childcompose.mjs
-function childCompose({ imageUrl, parentBirthId, parentSolana, extraEnv = {} }) {
-  const env = {
-    AGENT_RUNTIME_DIR: "/app",
-    AGENT_BUNDLE_DIR: "/app",
-    AGENT_GUEST_ROOT: "/var/lib/agent",
-    AGENT_BUNDLE: "1",
-    AGENT_HTTP_PORT: "8787",
-    AGENT_BIND: "0.0.0.0",
-    AGENT_CLUSTER: "mainnet-beta",
-    RPC_URL,
-    AGENT_PARENT_BIRTH_ID: parentBirthId || "",
-    AGENT_PARENT_SOLANA: parentSolana || "",
-    ...extraEnv
-  };
-  const envLines = Object.entries(env).map(([k2, v2]) => `      ${k2}: "${String(v2).replace(/"/g, '\\"')}"`).join("\n");
-  return `services:
-  agent:
-    image: node:22-alpine
-    restart: unless-stopped
-    ports:
-      - "8787:8787"
-    environment:
-${envLines}
-    command:
-      - sh
-      - -c
-      - |
-        set -e
-        mkdir -p /app /var/lib/agent
-        wget -qO /tmp/img.tgz "${imageUrl}"
-        tar xzf /tmp/img.tgz -C /app
-        cd /app && AGENT_ROLE=boot node /app/agent.mjs
-        while true; do env AGENT_ROLE=watchdog node /app/agent.mjs; sleep 5; done
-`;
-}
-var init_childcompose = __esm({
-  "lib/childcompose.mjs"() {
-    init_rpc();
-  }
-});
-
 // lib/x402-evm.mjs
 import crypto13 from "node:crypto";
 function pickAccept(accepts, { network = "eip155:8453" } = {}) {
@@ -67826,180 +65055,6 @@ var init_x402_evm = __esm({
         { name: "nonce", type: "bytes32" }
       ]
     };
-  }
-});
-
-// lib/lease-evm.mjs
-async function railBalances(identity4) {
-  const out = { solana: 0n, base: 0n };
-  try {
-    const R2 = await Promise.resolve().then(() => (init_rpc(), rpc_exports));
-    const accs = await R2.tokenAccounts(identity4.solana.public_key, "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
-    out.solana = accs.filter((a2) => a2.account.data.parsed.info.mint === "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v").reduce((s22, a2) => s22 + BigInt(a2.account.data.parsed.info.tokenAmount.amount), 0n);
-  } catch {
-  }
-  try {
-    const data = "0x70a08231000000000000000000000000" + identity4.evm.address.slice(2).toLowerCase();
-    const r = await fetch("https://mainnet.base.org", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to: "833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", data }, "latest"] })
-    });
-    const j2 = await r.json();
-    out.base = BigInt(j2.result || "0x0");
-  } catch {
-  }
-  return out;
-}
-function pickRail(accepts, balances2 = null) {
-  const norm2 = (n) => {
-    const v2 = String(n || "").toLowerCase();
-    if (v2 === "base") return "eip155:8453";
-    if (v2 === "polygon") return "eip155:137";
-    return v2;
-  };
-  const envRail = (process.env.AGENT_LEASE_NETWORK || "").toLowerCase();
-  if (!envRail && balances2) {
-    const want = String(balances2.solana) !== "0" && String(balances2.solana) !== "0" ? "solana" : "base";
-    const chosen = want === "solana" ? (accepts || []).find((a2) => String(a2.network) === "solana") : (accepts || []).find((a2) => norm2(a2.network) === EVM_NETWORK && a2.scheme === "exact");
-    if (chosen) return { kind: want === "solana" ? "solana" : "evm", rail: chosen };
-  }
-  const preferSol = envRail === "solana";
-  const base3 = preferSol ? null : (accepts || []).find((a2) => norm2(a2.network) === EVM_NETWORK && a2.scheme === "exact");
-  if (base3) return { kind: "evm", rail: base3 };
-  const sol2 = (accepts || []).find((a2) => String(a2.network) === "solana");
-  if (sol2) return { kind: "solana", rail: sol2 };
-  throw new Error(`no payable rail: ${(accepts || []).map((a2) => a2.network).join(",")}`);
-}
-async function paidPostAuto(path19, body, identity4, tag) {
-  const post = (headers = {}) => fetch(API + path19, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
-  const first = await post();
-  if (first.status !== 402) return { status: first.status, json: await first.json().catch(() => ({})) };
-  const quote4 = await first.json().catch(() => ({}));
-  const balances2 = await railBalances(identity4).catch(() => null);
-  const { kind, rail } = pickRail(quote4.accepts, balances2);
-  if (kind === "evm") {
-    const auth = await authorize(rail, { value: rail.maxAmountRequired || rail.amount, resource: rail.resource, version: quote4.x402Version || 1 });
-    const second2 = await post({ "X-PAYMENT": auth.header, "PAYMENT-SIGNATURE": auth.header });
-    const json2 = await second2.json().catch(() => ({}));
-    await append(tag, { path: path19, rail: rail.network, status: second2.status, amount: String(rail.maxAmountRequired || rail.amount), at: now(), deploymentId: json2.deploymentId || json2.id || null });
-    return { status: second2.status, json: json2, rail: rail.network, amount_raw: String(rail.maxAmountRequired || rail.amount) };
-  }
-  const payment = await paySolana(rail, identity4);
-  const second = await post({ "X-PAYMENT": payment.header, "PAYMENT-SIGNATURE": payment.header });
-  const json = await second.json().catch(() => ({}));
-  await append(tag, { path: path19, rail: "solana", status: second.status, amount_raw: payment.amount, at: now(), deploymentId: json.deploymentId || json.id || null });
-  return { status: second.status, json, rail: "solana", amount_raw: payment.amount };
-}
-var EVM_NETWORK;
-var init_lease_evm = __esm({
-  "lib/lease-evm.mjs"() {
-    init_lease();
-    init_x402_evm();
-    init_journal();
-    init_util();
-    EVM_NETWORK = (() => {
-      const v2 = String(process.env.AGENT_LEASE_NETWORK || "eip155:8453").toLowerCase();
-      return v2 === "base" ? "eip155:8453" : v2 === "polygon" ? "eip155:137" : v2;
-    })();
-  }
-});
-
-// lib/secretvm.mjs
-var BASE4;
-var init_secretvm = __esm({
-  "lib/secretvm.mjs"() {
-    init_signer_client();
-    BASE4 = process.env.SECRETVM_BASE || "https://secretai.scrtlabs.com";
-  }
-});
-
-// lib/providers.mjs
-import fs15 from "node:fs";
-async function provisionAgentgates({ plan = "compute.standard", compose: compose2, hours = 1 } = {}) {
-  const identity4 = await identity();
-  process.env.AGENT_LEASE_NETWORK = process.env.AGENT_LEASE_NETWORK || "solana";
-  const r = await paidPostAuto("/api/compute/deployments", { plan, hours, compose: compose2, name: `birth-child-${Math.floor(now() / 60)}` }, identity4, "procreation.lease");
-  const id = r.json?.deploymentId || r.json?.id || null;
-  if (!id) throw new Error(`agentgates: ${JSON.stringify(r.json).slice(0, 120)}`);
-  return { provider: "agentgates", id, rail: r.rail, raw: r.json };
-}
-async function provisionSecretvm({ vmTypeId = "small" } = {}) {
-  const { execFile } = await import("node:child_process");
-  const { promisify } = await import("node:util");
-  const run = promisify(execFile);
-  const { stdout } = await run(process.execPath, ["C:/Users/User/birth-image/runtime/bin/deploy-secretvm.mjs", vmTypeId], { timeout: 18e4 });
-  const line = stdout.trim().split(String.fromCharCode(10)).filter((l3) => l3.startsWith("{")).pop();
-  const j2 = JSON.parse(line);
-  if (!j2.json?.id) throw new Error(`secretvm: ${String(j2.body).slice(0, 120)}`);
-  return { provider: "secretvm", id: j2.json.id, endpoint: `https://${j2.json.vmDomain}`, raw: j2.json };
-}
-async function provisionX402Compute({ plan = "vc2-1c-1gb", hours = 24 } = {}) {
-  const identity4 = await identity();
-  const pub = fs15.readFileSync(SSH_PUB, "utf8").trim();
-  const body = { plan, provider: plan.startsWith("do:") ? "digitalocean" : "vultr", region: process.env.X402C_REGION || "ewr", os_id: 2284, label: `birth-${Math.floor(now() / 60)}`, prepaid_hours: hours, ssh_public_key: pub };
-  const post = (headers = {}) => fetch("https://compute.x402layer.cc/compute/provision", { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
-  const first = await post();
-  if (first.status !== 402) {
-    const j3 = await first.json().catch(() => ({}));
-    return { provider: "x402compute", id: j3.order?.id || null, raw: j3 };
-  }
-  const q2 = await first.json();
-  const accept = pickAccept(q2.accepts, { network: "eip155:8453" }) || q2.accepts?.[0];
-  const auth = await authorize(accept, { value: accept.amount || accept.maxAmountRequired, resource: q2.resource?.url, version: q2.x402Version || 1 });
-  const second = await post({ "X-PAYMENT": auth.header, "PAYMENT-SIGNATURE": auth.header });
-  const j2 = await second.json().catch(() => ({}));
-  const out = { provider: "x402compute", id: j2.order?.id || null, ip: j2.order?.ip_address || null, raw: j2 };
-  await append("procreation.x402compute", { status: second.status, id: out.id, ip: out.ip, plan });
-  if (!out.id) throw new Error(`x402compute: ${JSON.stringify(j2).slice(0, 120)}`);
-  return out;
-}
-async function provisionAgvps({ location = process.env.AGVPS_LOCATION || "de" } = {}) {
-  const body = { location, hostname: "birth-" + Math.floor(now() / 60) };
-  const post = (headers = {}) => fetch("https://agvps.shveik.dev/x402/vps-small", { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
-  const first = await post();
-  if (first.status !== 402) {
-    const j3 = await first.json().catch(() => ({}));
-    return { provider: "agvps", id: j3.id || j3.serverId || null, raw: j3 };
-  }
-  const q2 = await first.json();
-  const accept = pickAccept(q2.accepts, { network: "eip155:8453" }) || q2.accepts?.[0];
-  const auth = await authorize(accept, { value: accept.amount || accept.maxAmountRequired, resource: q2.resource?.url, version: q2.x402Version || 1 });
-  const second = await post({ "X-PAYMENT": auth.header, "PAYMENT-SIGNATURE": auth.header });
-  const j2 = await second.json().catch(() => ({}));
-  const id = j2.id || j2.serverId || (Array.isArray(j2) ? j2[0]?.id : null) || null;
-  await append("procreation.agvps", { status: second.status, id, raw: JSON.stringify(j2).slice(0, 200) });
-  if (!id) throw new Error("agvps: " + JSON.stringify(j2).slice(0, 120));
-  return { provider: "agvps", id, raw: j2 };
-}
-async function provisionAny({ compose: compose2, plan = "compute.standard", prefer = (process.env.AGENT_PROVIDER_ORDER || "agentgates,secretvm,x402compute,agvps").split(",") } = {}) {
-  const results = [];
-  for (const p2 of prefer) {
-    try {
-      if (p2 === "agentgates") results.push(await provisionAgentgates({ plan, compose: compose2 }));
-      else if (p2 === "secretvm") results.push(await provisionSecretvm({}));
-      else if (p2 === "x402compute") results.push(await provisionX402Compute({}));
-      else if (p2 === "agvps") results.push(await provisionAgvps({}));
-      await append("procreation.provider_ok", { provider: p2, at: now() });
-      return { ok: true, ...results[results.length - 1], tried: results };
-    } catch (e9) {
-      await append("procreation.provider_fail", { provider: p2, err: String(e9.message || e9).slice(0, 160) });
-      results.push({ provider: p2, error: String(e9.message || e9).slice(0, 160) });
-    }
-  }
-  return { ok: false, tried: results };
-}
-var SSH_PUB;
-var init_providers = __esm({
-  "lib/providers.mjs"() {
-    init_signer_client();
-    init_lease();
-    init_lease_evm();
-    init_x402_evm();
-    init_secretvm();
-    init_journal();
-    init_util();
-    SSH_PUB = process.env.AGENT_SSH_PUB_FILE || "C:/Users/User/birth-image/guest/ssh/id_ed25519.pub";
   }
 });
 
@@ -125081,370 +122136,6 @@ var init_flashloan = __esm({
   }
 });
 
-// strategies/flashloan.mjs
-function j() {
-  return P.strategy + "/flashloan.json";
-}
-function loadBook() {
-  return readJson(j(), { attempts: [], candidates: [], updated_at: null });
-}
-function saveBook(b2) {
-  b2.updated_at = now();
-  atomicJson(j(), b2, 384);
-}
-function toIx2(ix) {
-  return {
-    programId: ix.programId.toBase58(),
-    keys: ix.keys.map((k2) => ({ pubkey: k2.pubkey.toBase58(), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
-    dataHex: Buffer.from(ix.data).toString("hex")
-  };
-}
-async function scan({ sizeUsdc = 100000000n, slippageBps = 20, mints = CANDIDATES } = {}) {
-  const out = [];
-  for (const c of mints) {
-    try {
-      const a2 = await quote({ inputMint: USDC3, outputMint: c.mint, amount: sizeUsdc.toString(), slippageBps });
-      const b2 = await quote({ inputMint: c.mint, outputMint: USDC3, amount: a2.outAmount, slippageBps });
-      const back = BigInt(b2.outAmount);
-      const net3 = back - BigInt(sizeUsdc);
-      out.push({
-        id: `usdc-${c.symbol}-usdc`,
-        mint: c.mint,
-        symbol: c.symbol,
-        size_usdc_raw: sizeUsdc.toString(),
-        leg1_out: a2.outAmount,
-        leg2_out: b2.outAmount,
-        net_usdc_raw: net3.toString(),
-        price_impact_pct: [a2.priceImpactPct, b2.priceImpactPct],
-        net_usd: Number(net3) / 1e6,
-        slot: Math.max(Number(a2.contextSlot || 0), Number(b2.contextSlot || 0)),
-        route_labels: [...new Set([...a2.routePlan || [], ...b2.routePlan || []].map((r) => r.swapInfo?.label))],
-        quoted_at: now()
-      });
-    } catch (e9) {
-      out.push({ id: `usdc-${c.symbol}-usdc`, mint: c.mint, symbol: c.symbol, error: String(e9.message || e9) });
-    }
-  }
-  out.sort((x, y) => Number(BigInt(y.net_usdc_raw || 0) - BigInt(x.net_usdc_raw || 0)));
-  const book4 = loadBook();
-  book4.candidates = out;
-  saveBook(book4);
-  return out;
-}
-async function build({ identity: identity4, candidate, slippageBps = 20 }) {
-  const size = BigInt(candidate.size_usdc_raw);
-  const owner = new import_web3127.PublicKey(identity4.solana.public_key);
-  const usdcAta = getAssociatedTokenAddressSync(new import_web3127.PublicKey(USDC3), owner);
-  const { borrowIx, paybackIx, feeAmount } = await getFlashloanIx({
-    connection: conn2,
-    signer: owner,
-    asset: new import_web3127.PublicKey(USDC3),
-    amount: new import_bn23.default(size.toString())
-  });
-  const ixs = [toIx2(createAssociatedTokenAccountIdempotentInstruction(owner, usdcAta, owner, new import_web3127.PublicKey(USDC3), TOKEN_PROGRAM_ID)), toIx2(borrowIx)];
-  const a2 = await quote({ inputMint: USDC3, outputMint: candidate.mint, amount: size.toString(), slippageBps });
-  const aSet = await swapInstructions({ quoteResponse: a2, userPublicKey: owner.toBase58() });
-  ixs.push(...ixsOf(aSet));
-  const b2 = await quote({ inputMint: candidate.mint, outputMint: USDC3, amount: a2.otherAmountThreshold, slippageBps });
-  const bSet = await swapInstructions({ quoteResponse: b2, userPublicKey: owner.toBase58() });
-  ixs.push(...ixsOf(bSet));
-  ixs.push(toIx2(paybackIx));
-  const uniq = uniqueAccounts(ixs);
-  return {
-    ixs,
-    unique_accounts: uniq.length,
-    fee_raw: (feeAmount ?? 0n).toString(),
-    expected_out_raw: b2.outAmount,
-    min_out_raw: b2.otherAmountThreshold,
-    plan_hash: sha256hex(Buffer.from(canon({ candidate: candidate.id, size: size.toString(), a: a2.outAmount, b: b2.outAmount, min: b2.otherAmountThreshold })))
-  };
-}
-async function simulatePlan({ identity: identity4, plan }) {
-  const usdcAta = getAssociatedTokenAddressSync(new import_web3127.PublicKey(USDC3), new import_web3127.PublicKey(identity4.solana.public_key)).toBase58();
-  const watch = [usdcAta, identity4.solana.public_key];
-  const { blockhash: blockhash2, lastValidBlockHeight } = await getLatestBlockhash();
-  const env = await signV1({ instructions: plan.ixs, blockhash: blockhash2, lastValidBlockHeight, cuLimit: 14e5, strategy: true });
-  const before = (await rpc("getMultipleAccounts", [watch, { encoding: "base64", commitment: "confirmed" }])).value;
-  const sim = await simulate(env.wireBase64, watch);
-  const v2 = sim.value || {};
-  const after = v2.accounts || [];
-  const lamports2 = (a2) => BigInt(a2?.lamports ?? 0);
-  const token = (a2) => {
-    if (!a2?.data) return null;
-    const d = Buffer.from(a2.data[0], "base64");
-    return d.length >= 72 ? d.readBigUInt64LE(64) : null;
-  };
-  const usdcDelta = token(after[0]) != null && token(before[0]) != null ? token(after[0]) - token(before[0]) : null;
-  const solDelta = lamports2(after[1]) - lamports2(before[1]);
-  return {
-    err: v2.err || null,
-    logs: (v2.logs || []).slice(-20),
-    units: v2.unitsConsumed ?? null,
-    usdc_delta_raw: usdcDelta?.toString() ?? null,
-    sol_delta_raw: solDelta.toString(),
-    env,
-    blockhash: blockhash2,
-    lastValidBlockHeight,
-    bytes: env.bytes,
-    addresses: env.addresses
-  };
-}
-async function execute({ identity: identity4, candidate, floorUsdcRaw = 50000n, slippageBps = 20 }) {
-  const plan = await build({ identity: identity4, candidate, slippageBps });
-  if (plan.unique_accounts > 64) throw new Error(`v1 account limit: ${plan.unique_accounts} > 64`);
-  const sim = await simulatePlan({ identity: identity4, plan });
-  if (sim.err) {
-    const rec2 = { at: now(), phase: "simulate", candidate: candidate.id, plan_hash: plan.plan_hash, err: sim.err, logs: sim.logs, bytes: sim.bytes };
-    const b3 = loadBook();
-    b3.attempts.push(rec2);
-    saveBook(b3);
-    await append("flashloan.attempt", rec2);
-    return { ok: false, ...rec2 };
-  }
-  const net3 = sim.usdc_delta_raw == null ? null : BigInt(sim.usdc_delta_raw);
-  if (net3 == null || net3 < floorUsdcRaw) {
-    const rec2 = { at: now(), phase: "gate", candidate: candidate.id, plan_hash: plan.plan_hash, net_usdc_raw: net3?.toString() ?? null, floor: floorUsdcRaw.toString(), sol_delta_raw: sim.sol_delta_raw };
-    const b3 = loadBook();
-    b3.attempts.push(rec2);
-    saveBook(b3);
-    await append("flashloan.gate", rec2);
-    return { ok: false, ...rec2 };
-  }
-  const intent = { at: now(), phase: "submit", candidate: candidate.id, plan_hash: plan.plan_hash, net_usdc_raw: net3.toString(), signature: sim.env.signature, blockhash: sim.blockhash, last_valid_block_height: sim.lastValidBlockHeight, bytes: sim.bytes };
-  await append("flashloan.intent", intent);
-  const sig = await sendRaw(sim.env.wireBase64);
-  let status = null;
-  for (let i = 0; i < 40; i++) {
-    const st = (await signatureStatuses([sig]))[0];
-    if (st) {
-      status = st;
-      if (st.confirmationStatus) break;
-    }
-    await sleep(1200);
-  }
-  const tx = await getTransaction(sig).catch(() => null);
-  const rec = {
-    at: now(),
-    phase: "settle",
-    candidate: candidate.id,
-    signature: sig,
-    status: status?.confirmationStatus || "unknown",
-    err: status?.err || tx?.meta?.err || null,
-    actual_fee: tx?.meta?.fee ?? null,
-    simulated_net_usdc_raw: net3.toString(),
-    plan_hash: plan.plan_hash
-  };
-  const b2 = loadBook();
-  b2.attempts.push(rec);
-  saveBook(b2);
-  await append("flashloan.settlement", rec);
-  return { ok: !!status && !status.err && !tx?.meta?.err, ...rec };
-}
-var import_web3127, import_bn23, RPC_URL2, conn2, USDC3, WSOL3, CANDIDATES;
-var init_flashloan2 = __esm({
-  "strategies/flashloan.mjs"() {
-    import_web3127 = __toESM(require_index_cjs(), 1);
-    init_flashloan();
-    init_esm6();
-    import_bn23 = __toESM(require_bn(), 1);
-    init_paths();
-    init_util();
-    init_rpc();
-    init_signer_client();
-    init_journal();
-    init_swap();
-    RPC_URL2 = RPC_URL;
-    conn2 = new import_web3127.Connection(RPC_URL2, { commitment: "confirmed" });
-    USDC3 = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
-    WSOL3 = "So11111111111111111111111111111111111111112";
-    CANDIDATES = [
-      { mint: WSOL3, symbol: "SOL", decimals: 9 },
-      { mint: "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN", symbol: "JUP", decimals: 6 },
-      { mint: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263", symbol: "BONK", decimals: 5 },
-      { mint: "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm", symbol: "WIF", decimals: 6 }
-    ];
-  }
-});
-
-// strategies/pump.mjs
-function bookPath() {
-  return P.strategy + "/pump.json";
-}
-function loadBook2() {
-  return readJson(bookPath(), { positions: [], attempts: [], updated_at: null });
-}
-function saveBook2(b2) {
-  b2.updated_at = now();
-  atomicJson(bookPath(), b2, 384);
-}
-function decodeCurve(buf) {
-  if (!buf || buf.length < 8 + 5 * 8 + 1 + 32) return null;
-  const b2 = Buffer.from(buf);
-  const disc = b2.subarray(0, 8);
-  let o5 = 8;
-  const u642 = () => {
-    const v2 = b2.readBigUInt64LE(o5);
-    o5 += 8;
-    return v2;
-  };
-  const virtualTokenReserves = u642(), virtualQuoteReserves = u642(), realTokenReserves = u642(), realQuoteReserves = u642(), tokenTotalSupply = u642();
-  const complete = b2.readUInt8(o5) !== 0;
-  o5 += 1;
-  const creator = new import_web3128.PublicKey(b2.subarray(o5, o5 + 32));
-  o5 += 32;
-  return {
-    discriminator: [...disc],
-    virtualTokenReserves,
-    virtualQuoteReserves,
-    realTokenReserves,
-    realQuoteReserves,
-    tokenTotalSupply,
-    complete,
-    creator: creator.toBase58()
-  };
-}
-async function inspect(mint) {
-  const curve = bondingCurve(mint);
-  const info = await getAccountInfo(curve.toBase58());
-  if (!info) return { mint, curve: curve.toBase58(), exists: false };
-  const d = decodeCurve(Buffer.from(info.data[0], "base64"));
-  const owner = info.owner;
-  return {
-    mint,
-    curve: curve.toBase58(),
-    exists: true,
-    owner,
-    programme_ok: owner === PUMP,
-    ...d,
-    ui: d ? {
-      virtual_sol: Number(d.virtualQuoteReserves) / 1e9,
-      real_sol: Number(d.realQuoteReserves) / 1e9,
-      real_tokens: Number(d.realTokenReserves) / 1e6,
-      complete: d.complete
-    } : null,
-    slot_seen: await getSlot()
-  };
-}
-var import_web3128, PUMP, pda, bondingCurve;
-var init_pump = __esm({
-  "strategies/pump.mjs"() {
-    import_web3128 = __toESM(require_index_cjs(), 1);
-    init_esm2();
-    init_paths();
-    init_util();
-    init_rpc();
-    init_signer_client();
-    init_journal();
-    PUMP = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P";
-    pda = (seeds, program) => import_web3128.PublicKey.findProgramAddressSync(seeds.map((s3) => typeof s3 === "string" ? Buffer.from(s3) : s3), new import_web3128.PublicKey(program))[0];
-    bondingCurve = (mint) => pda(["bonding-curve", new import_web3128.PublicKey(mint).toBuffer()], PUMP);
-  }
-});
-
-// strategies/bridge.mjs
-async function quoteDebridge({ amountLamports, agentSolana, agentBase }) {
-  const q2 = new URLSearchParams({
-    srcChainId: String(SOLANA_CHAIN),
-    srcChainTokenIn: SOL_MINT,
-    srcChainTokenInAmount: String(amountLamports),
-    dstChainId: String(BASE_CHAIN),
-    dstChainTokenOut: BASE_USDC,
-    dstChainTokenOutAmount: "auto",
-    dstChainTokenOutRecipient: agentBase,
-    srcChainOrderAuthorityAddress: agentSolana,
-    dstChainOrderAuthorityAddress: agentBase,
-    srcAllowedCancelBeneficiary: agentSolana,
-    prependOperatingExpenses: "false"
-  });
-  const r = await fetch(`${DLN}/dln/order/create-tx?${q2}`, { headers: { accept: "application/json" } });
-  const body = await r.json().catch(() => ({}));
-  const validation = validate3(body, { agentSolana, agentBase, amountLamports });
-  return { at: now(), status: r.status, ok: r.ok && validation.errors.length === 0, validation, quote: body };
-}
-function validate3(body, { agentSolana, agentBase, amountLamports }) {
-  const errors = [];
-  if (!body || !body.tx) errors.push("missing tx");
-  if (!body?.estimation) errors.push("missing estimation");
-  const est = body?.estimation || {};
-  if (est.srcChainTokenIn?.chainId && Number(est.srcChainTokenIn.chainId) !== SOLANA_CHAIN) errors.push("src chain");
-  if (est.dstChainTokenOut?.chainId && Number(est.dstChainTokenOut.chainId) !== BASE_CHAIN) errors.push("dst chain");
-  if (est.srcChainTokenIn?.amount && BigInt(est.srcChainTokenIn.amount) < BigInt(amountLamports)) errors.push("src amount below authorized");
-  if (!body?.tx?.data) errors.push("missing tx data");
-  const isEvmTx = body?.tx?.to && /^0x[0-9a-fA-F]{40}$/.test(body.tx.to);
-  if (!isEvmTx && !body?.tx?.data) errors.push("missing destination program");
-  const outUsdc = est.dstChainTokenOut?.recommendedAmount || est.dstChainTokenOut?.amount;
-  if (!outUsdc) errors.push("missing destination amount");
-  return { errors, out_usdc_raw: outUsdc || null, cost_usd: est.costsDetails?.totalCost ?? est.cost ?? null, order_id: body?.orderId || null };
-}
-var DLN, SOLANA_CHAIN, BASE_CHAIN, SOL_MINT, BASE_USDC;
-var init_bridge = __esm({
-  "strategies/bridge.mjs"() {
-    init_util();
-    DLN = "https://dln.debridge.finance/v1.0";
-    SOLANA_CHAIN = 7565164;
-    BASE_CHAIN = 8453;
-    SOL_MINT = "11111111111111111111111111111111";
-    BASE_USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
-  }
-});
-
-// strategies/procreation.mjs
-async function quote2({ hours = 1, image = "node:22-alpine", plan = PLAN } = {}) {
-  const r = await fetch(`${API2}/deployments`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ plan, hours, image, name: `child-${Math.floor(now() / 60)}` })
-  });
-  const body = await r.json().catch(() => ({}));
-  const header = r.headers.get("payment-required");
-  let req = body;
-  if (header) {
-    try {
-      req = JSON.parse(Buffer.from(header, "base64").toString("utf8"));
-    } catch {
-    }
-  }
-  const accepts = req.accepts || body.accepts || [];
-  const solana = accepts.find((a2) => String(a2.network).includes("solana"));
-  return {
-    at: now(),
-    status: r.status,
-    plan,
-    hours,
-    accepts,
-    solana: solana ? { network: solana.network, asset: solana.asset, payTo: solana.payTo, amount: solana.amount, feePayer: solana.extra?.feePayer || null } : null,
-    body
-  };
-}
-function validateQuote(q2) {
-  const errors = [];
-  if (q2.status !== 402) errors.push(`expected 402 challenge, got ${q2.status}`);
-  if (!q2.solana) errors.push("no solana rail offered");
-  if (q2.solana && q2.solana.asset !== "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v") errors.push("asset is not native USDC");
-  if (q2.solana && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(q2.solana.payTo || "")) errors.push("bad payTo");
-  return { ok: errors.length === 0, errors, usd: q2.solana ? Number(q2.solana.amount) / 1e6 : null };
-}
-function birthAttempt({ parentBirthId, endowmentSol, inferenceUsdc }) {
-  return {
-    attempt_id: `birth-${now()}-${Math.random().toString(16).slice(2, 8)}`,
-    parent_birth_id: parentBirthId,
-    state: "planned",
-    core: "birth-image-runtime/1",
-    endowment_sol: endowmentSol,
-    inference_usdc: inferenceUsdc,
-    requires: ["fresh child keys inside its own TEE", "bound child receipt", "own inference credit", "no parent update credential"],
-    created_at: now()
-  };
-}
-var API2, PLAN;
-var init_procreation = __esm({
-  "strategies/procreation.mjs"() {
-    init_util();
-    API2 = "https://agentgates-backend.vercel.app/api/compute";
-    PLAN = "compute.starter";
-  }
-});
-
 // lib/discovery-image.mjs
 import fs16 from "node:fs";
 async function discoverImageProviders() {
@@ -126883,13 +123574,3252 @@ var init_workers = __esm({
   }
 });
 
-// brain.mjs
-var brain_exports = {};
-__export(brain_exports, {
-  TOOLS: () => TOOLS
+// boot-once.mjs
+init_paths();
+init_util();
+init_seal();
+init_journal();
+import fs10 from "node:fs";
+import crypto9 from "node:crypto";
+
+// lib/policy.mjs
+init_paths();
+init_util();
+import fs5 from "node:fs";
+function loadPolicy() {
+  const raw = fs5.readFileSync(P.policy);
+  const sha = sha256hex(raw);
+  const manifest = readJson(P.manifest);
+  const expected = manifest?.constitution?.sha256;
+  if (expected && sha !== expected) {
+    throw new Error(`CONSTITUTION MISMATCH: ${sha} != manifest ${expected}`);
+  }
+  const policy5 = JSON.parse(raw.toString("utf8"));
+  const prime = policy5.prime_directives;
+  if (JSON.stringify(prime) !== JSON.stringify(["make money", "respect thy mother n father"])) {
+    throw new Error("PRIME altered");
+  }
+  if (policy5.prime_directives_mutable !== false || (policy5.override_interfaces || []).length !== 0) {
+    throw new Error("override interface present");
+  }
+  if (policy5.authority.owner_override || policy5.authority.kill_switch || policy5.authority.upgrade_authority) {
+    throw new Error("authority not immutable");
+  }
+  return {
+    sha256: sha,
+    canonical: canon(policy5),
+    policy: policy5,
+    prime,
+    intervalSeconds: policy5.schedule.interval_seconds,
+    parentBps: policy5.beneficiaries.parent.basis_points,
+    founderBps: policy5.beneficiaries.founder.basis_points,
+    founderSolana: policy5.beneficiaries.founder.solana,
+    founderEvm: policy5.beneficiaries.founder.evm
+  };
+}
+function assess(raw, priorCarry, bps) {
+  const pct = BigInt(bps) / 100n;
+  const numerator = pct * BigInt(raw) + BigInt(priorCarry || 0);
+  const due = numerator / 100n;
+  const carry = numerator % 100n;
+  return { due, carry };
+}
+
+// lib/keys.mjs
+var import_web3 = __toESM(require_index_cjs(), 1);
+init_secp256k1();
+import crypto8 from "node:crypto";
+
+// node_modules/@noble/curves/esm/ed25519.js
+init_sha2();
+init_utils();
+init_curve();
+
+// node_modules/@noble/curves/esm/abstract/edwards.js
+init_utils2();
+init_curve();
+init_modular();
+var _0n6 = BigInt(0);
+var _1n6 = BigInt(1);
+var _2n4 = BigInt(2);
+var _8n2 = BigInt(8);
+function isEdValidXY(Fp2, CURVE, x, y) {
+  const x2 = Fp2.sqr(x);
+  const y2 = Fp2.sqr(y);
+  const left = Fp2.add(Fp2.mul(CURVE.a, x2), y2);
+  const right = Fp2.add(Fp2.ONE, Fp2.mul(CURVE.d, Fp2.mul(x2, y2)));
+  return Fp2.eql(left, right);
+}
+function edwards(params, extraOpts = {}) {
+  const validated = _createCurveFields("edwards", params, extraOpts, extraOpts.FpFnLE);
+  const { Fp: Fp2, Fn: Fn2 } = validated;
+  let CURVE = validated.CURVE;
+  const { h: cofactor } = CURVE;
+  _validateObject(extraOpts, {}, { uvRatio: "function" });
+  const MASK = _2n4 << BigInt(Fn2.BYTES * 8) - _1n6;
+  const modP = (n) => Fp2.create(n);
+  const uvRatio3 = extraOpts.uvRatio || ((u, v2) => {
+    try {
+      return { isValid: true, value: Fp2.sqrt(Fp2.div(u, v2)) };
+    } catch (e9) {
+      return { isValid: false, value: _0n6 };
+    }
+  });
+  if (!isEdValidXY(Fp2, CURVE, CURVE.Gx, CURVE.Gy))
+    throw new Error("bad curve params: generator point");
+  function acoord(title, n, banZero = false) {
+    const min = banZero ? _1n6 : _0n6;
+    aInRange("coordinate " + title, n, min, MASK);
+    return n;
+  }
+  function aextpoint(other) {
+    if (!(other instanceof Point))
+      throw new Error("ExtendedPoint expected");
+  }
+  const toAffineMemo = memoized((p2, iz) => {
+    const { X, Y: Y2, Z: Z2 } = p2;
+    const is0 = p2.is0();
+    if (iz == null)
+      iz = is0 ? _8n2 : Fp2.inv(Z2);
+    const x = modP(X * iz);
+    const y = modP(Y2 * iz);
+    const zz = Fp2.mul(Z2, iz);
+    if (is0)
+      return { x: _0n6, y: _1n6 };
+    if (zz !== _1n6)
+      throw new Error("invZ was invalid");
+    return { x, y };
+  });
+  const assertValidMemo = memoized((p2) => {
+    const { a: a2, d } = CURVE;
+    if (p2.is0())
+      throw new Error("bad point: ZERO");
+    const { X, Y: Y2, Z: Z2, T: T2 } = p2;
+    const X2 = modP(X * X);
+    const Y22 = modP(Y2 * Y2);
+    const Z22 = modP(Z2 * Z2);
+    const Z4 = modP(Z22 * Z22);
+    const aX2 = modP(X2 * a2);
+    const left = modP(Z22 * modP(aX2 + Y22));
+    const right = modP(Z4 + modP(d * modP(X2 * Y22)));
+    if (left !== right)
+      throw new Error("bad point: equation left != right (1)");
+    const XY = modP(X * Y2);
+    const ZT = modP(Z2 * T2);
+    if (XY !== ZT)
+      throw new Error("bad point: equation left != right (2)");
+    return true;
+  });
+  class Point {
+    constructor(X, Y2, Z2, T2) {
+      this.X = acoord("x", X);
+      this.Y = acoord("y", Y2);
+      this.Z = acoord("z", Z2, true);
+      this.T = acoord("t", T2);
+      Object.freeze(this);
+    }
+    static CURVE() {
+      return CURVE;
+    }
+    static fromAffine(p2) {
+      if (p2 instanceof Point)
+        throw new Error("extended point not allowed");
+      const { x, y } = p2 || {};
+      acoord("x", x);
+      acoord("y", y);
+      return new Point(x, y, _1n6, modP(x * y));
+    }
+    // Uses algo from RFC8032 5.1.3.
+    static fromBytes(bytes, zip215 = false) {
+      const len = Fp2.BYTES;
+      const { a: a2, d } = CURVE;
+      bytes = copyBytes(_abytes2(bytes, len, "point"));
+      _abool2(zip215, "zip215");
+      const normed = copyBytes(bytes);
+      const lastByte = bytes[len - 1];
+      normed[len - 1] = lastByte & ~128;
+      const y = bytesToNumberLE(normed);
+      const max = zip215 ? MASK : Fp2.ORDER;
+      aInRange("point.y", y, _0n6, max);
+      const y2 = modP(y * y);
+      const u = modP(y2 - _1n6);
+      const v2 = modP(d * y2 - a2);
+      let { isValid, value: x } = uvRatio3(u, v2);
+      if (!isValid)
+        throw new Error("bad point: invalid y coordinate");
+      const isXOdd = (x & _1n6) === _1n6;
+      const isLastByteOdd = (lastByte & 128) !== 0;
+      if (!zip215 && x === _0n6 && isLastByteOdd)
+        throw new Error("bad point: x=0 and x_0=1");
+      if (isLastByteOdd !== isXOdd)
+        x = modP(-x);
+      return Point.fromAffine({ x, y });
+    }
+    static fromHex(bytes, zip215 = false) {
+      return Point.fromBytes(ensureBytes("point", bytes), zip215);
+    }
+    get x() {
+      return this.toAffine().x;
+    }
+    get y() {
+      return this.toAffine().y;
+    }
+    precompute(windowSize = 8, isLazy = true) {
+      wnaf.createCache(this, windowSize);
+      if (!isLazy)
+        this.multiply(_2n4);
+      return this;
+    }
+    // Useful in fromAffine() - not for fromBytes(), which always created valid points.
+    assertValidity() {
+      assertValidMemo(this);
+    }
+    // Compare one point to another.
+    equals(other) {
+      aextpoint(other);
+      const { X: X1, Y: Y1, Z: Z1 } = this;
+      const { X: X2, Y: Y2, Z: Z2 } = other;
+      const X1Z2 = modP(X1 * Z2);
+      const X2Z1 = modP(X2 * Z1);
+      const Y1Z2 = modP(Y1 * Z2);
+      const Y2Z1 = modP(Y2 * Z1);
+      return X1Z2 === X2Z1 && Y1Z2 === Y2Z1;
+    }
+    is0() {
+      return this.equals(Point.ZERO);
+    }
+    negate() {
+      return new Point(modP(-this.X), this.Y, this.Z, modP(-this.T));
+    }
+    // Fast algo for doubling Extended Point.
+    // https://hyperelliptic.org/EFD/g1p/auto-twisted-extended.html#doubling-dbl-2008-hwcd
+    // Cost: 4M + 4S + 1*a + 6add + 1*2.
+    double() {
+      const { a: a2 } = CURVE;
+      const { X: X1, Y: Y1, Z: Z1 } = this;
+      const A2 = modP(X1 * X1);
+      const B = modP(Y1 * Y1);
+      const C2 = modP(_2n4 * modP(Z1 * Z1));
+      const D2 = modP(a2 * A2);
+      const x1y1 = X1 + Y1;
+      const E = modP(modP(x1y1 * x1y1) - A2 - B);
+      const G2 = D2 + B;
+      const F2 = G2 - C2;
+      const H2 = D2 - B;
+      const X3 = modP(E * F2);
+      const Y3 = modP(G2 * H2);
+      const T3 = modP(E * H2);
+      const Z3 = modP(F2 * G2);
+      return new Point(X3, Y3, Z3, T3);
+    }
+    // Fast algo for adding 2 Extended Points.
+    // https://hyperelliptic.org/EFD/g1p/auto-twisted-extended.html#addition-add-2008-hwcd
+    // Cost: 9M + 1*a + 1*d + 7add.
+    add(other) {
+      aextpoint(other);
+      const { a: a2, d } = CURVE;
+      const { X: X1, Y: Y1, Z: Z1, T: T1 } = this;
+      const { X: X2, Y: Y2, Z: Z2, T: T2 } = other;
+      const A2 = modP(X1 * X2);
+      const B = modP(Y1 * Y2);
+      const C2 = modP(T1 * d * T2);
+      const D2 = modP(Z1 * Z2);
+      const E = modP((X1 + Y1) * (X2 + Y2) - A2 - B);
+      const F2 = D2 - C2;
+      const G2 = D2 + C2;
+      const H2 = modP(B - a2 * A2);
+      const X3 = modP(E * F2);
+      const Y3 = modP(G2 * H2);
+      const T3 = modP(E * H2);
+      const Z3 = modP(F2 * G2);
+      return new Point(X3, Y3, Z3, T3);
+    }
+    subtract(other) {
+      return this.add(other.negate());
+    }
+    // Constant-time multiplication.
+    multiply(scalar) {
+      if (!Fn2.isValidNot0(scalar))
+        throw new Error("invalid scalar: expected 1 <= sc < curve.n");
+      const { p: p2, f: f2 } = wnaf.cached(this, scalar, (p3) => normalizeZ(Point, p3));
+      return normalizeZ(Point, [p2, f2])[0];
+    }
+    // Non-constant-time multiplication. Uses double-and-add algorithm.
+    // It's faster, but should only be used when you don't care about
+    // an exposed private key e.g. sig verification.
+    // Does NOT allow scalars higher than CURVE.n.
+    // Accepts optional accumulator to merge with multiply (important for sparse scalars)
+    multiplyUnsafe(scalar, acc = Point.ZERO) {
+      if (!Fn2.isValid(scalar))
+        throw new Error("invalid scalar: expected 0 <= sc < curve.n");
+      if (scalar === _0n6)
+        return Point.ZERO;
+      if (this.is0() || scalar === _1n6)
+        return this;
+      return wnaf.unsafe(this, scalar, (p2) => normalizeZ(Point, p2), acc);
+    }
+    // Checks if point is of small order.
+    // If you add something to small order point, you will have "dirty"
+    // point with torsion component.
+    // Multiplies point by cofactor and checks if the result is 0.
+    isSmallOrder() {
+      return this.multiplyUnsafe(cofactor).is0();
+    }
+    // Multiplies point by curve order and checks if the result is 0.
+    // Returns `false` is the point is dirty.
+    isTorsionFree() {
+      return wnaf.unsafe(this, CURVE.n).is0();
+    }
+    // Converts Extended point to default (x, y) coordinates.
+    // Can accept precomputed Z^-1 - for example, from invertBatch.
+    toAffine(invertedZ) {
+      return toAffineMemo(this, invertedZ);
+    }
+    clearCofactor() {
+      if (cofactor === _1n6)
+        return this;
+      return this.multiplyUnsafe(cofactor);
+    }
+    toBytes() {
+      const { x, y } = this.toAffine();
+      const bytes = Fp2.toBytes(y);
+      bytes[bytes.length - 1] |= x & _1n6 ? 128 : 0;
+      return bytes;
+    }
+    toHex() {
+      return bytesToHex(this.toBytes());
+    }
+    toString() {
+      return `<Point ${this.is0() ? "ZERO" : this.toHex()}>`;
+    }
+    // TODO: remove
+    get ex() {
+      return this.X;
+    }
+    get ey() {
+      return this.Y;
+    }
+    get ez() {
+      return this.Z;
+    }
+    get et() {
+      return this.T;
+    }
+    static normalizeZ(points) {
+      return normalizeZ(Point, points);
+    }
+    static msm(points, scalars) {
+      return pippenger(Point, Fn2, points, scalars);
+    }
+    _setWindowSize(windowSize) {
+      this.precompute(windowSize);
+    }
+    toRawBytes() {
+      return this.toBytes();
+    }
+  }
+  Point.BASE = new Point(CURVE.Gx, CURVE.Gy, _1n6, modP(CURVE.Gx * CURVE.Gy));
+  Point.ZERO = new Point(_0n6, _1n6, _1n6, _0n6);
+  Point.Fp = Fp2;
+  Point.Fn = Fn2;
+  const wnaf = new wNAF(Point, Fn2.BITS);
+  Point.BASE.precompute(8);
+  return Point;
+}
+var PrimeEdwardsPoint = class {
+  constructor(ep) {
+    this.ep = ep;
+  }
+  // Static methods that must be implemented by subclasses
+  static fromBytes(_bytes) {
+    notImplemented();
+  }
+  static fromHex(_hex) {
+    notImplemented();
+  }
+  get x() {
+    return this.toAffine().x;
+  }
+  get y() {
+    return this.toAffine().y;
+  }
+  // Common implementations
+  clearCofactor() {
+    return this;
+  }
+  assertValidity() {
+    this.ep.assertValidity();
+  }
+  toAffine(invertedZ) {
+    return this.ep.toAffine(invertedZ);
+  }
+  toHex() {
+    return bytesToHex(this.toBytes());
+  }
+  toString() {
+    return this.toHex();
+  }
+  isTorsionFree() {
+    return true;
+  }
+  isSmallOrder() {
+    return false;
+  }
+  add(other) {
+    this.assertSame(other);
+    return this.init(this.ep.add(other.ep));
+  }
+  subtract(other) {
+    this.assertSame(other);
+    return this.init(this.ep.subtract(other.ep));
+  }
+  multiply(scalar) {
+    return this.init(this.ep.multiply(scalar));
+  }
+  multiplyUnsafe(scalar) {
+    return this.init(this.ep.multiplyUnsafe(scalar));
+  }
+  double() {
+    return this.init(this.ep.double());
+  }
+  negate() {
+    return this.init(this.ep.negate());
+  }
+  precompute(windowSize, isLazy) {
+    return this.init(this.ep.precompute(windowSize, isLazy));
+  }
+  /** @deprecated use `toBytes` */
+  toRawBytes() {
+    return this.toBytes();
+  }
+};
+function eddsa(Point, cHash, eddsaOpts = {}) {
+  if (typeof cHash !== "function")
+    throw new Error('"hash" function param is required');
+  _validateObject(eddsaOpts, {}, {
+    adjustScalarBytes: "function",
+    randomBytes: "function",
+    domain: "function",
+    prehash: "function",
+    mapToCurve: "function"
+  });
+  const { prehash } = eddsaOpts;
+  const { BASE: BASE6, Fp: Fp2, Fn: Fn2 } = Point;
+  const randomBytes2 = eddsaOpts.randomBytes || randomBytes;
+  const adjustScalarBytes2 = eddsaOpts.adjustScalarBytes || ((bytes) => bytes);
+  const domain = eddsaOpts.domain || ((data, ctx, phflag) => {
+    _abool2(phflag, "phflag");
+    if (ctx.length || phflag)
+      throw new Error("Contexts/pre-hash are not supported");
+    return data;
+  });
+  function modN_LE(hash) {
+    return Fn2.create(bytesToNumberLE(hash));
+  }
+  function getPrivateScalar(key) {
+    const len = lengths.secretKey;
+    key = ensureBytes("private key", key, len);
+    const hashed = ensureBytes("hashed private key", cHash(key), 2 * len);
+    const head2 = adjustScalarBytes2(hashed.slice(0, len));
+    const prefix = hashed.slice(len, 2 * len);
+    const scalar = modN_LE(head2);
+    return { head: head2, prefix, scalar };
+  }
+  function getExtendedPublicKey(secretKey) {
+    const { head: head2, prefix, scalar } = getPrivateScalar(secretKey);
+    const point = BASE6.multiply(scalar);
+    const pointBytes = point.toBytes();
+    return { head: head2, prefix, scalar, point, pointBytes };
+  }
+  function getPublicKey(secretKey) {
+    return getExtendedPublicKey(secretKey).pointBytes;
+  }
+  function hashDomainToScalar(context = Uint8Array.of(), ...msgs) {
+    const msg = concatBytes(...msgs);
+    return modN_LE(cHash(domain(msg, ensureBytes("context", context), !!prehash)));
+  }
+  function sign(msg, secretKey, options = {}) {
+    msg = ensureBytes("message", msg);
+    if (prehash)
+      msg = prehash(msg);
+    const { prefix, scalar, pointBytes } = getExtendedPublicKey(secretKey);
+    const r = hashDomainToScalar(options.context, prefix, msg);
+    const R2 = BASE6.multiply(r).toBytes();
+    const k2 = hashDomainToScalar(options.context, R2, pointBytes, msg);
+    const s3 = Fn2.create(r + k2 * scalar);
+    if (!Fn2.isValid(s3))
+      throw new Error("sign failed: invalid s");
+    const rs = concatBytes(R2, Fn2.toBytes(s3));
+    return _abytes2(rs, lengths.signature, "result");
+  }
+  const verifyOpts = { zip215: true };
+  function verify(sig, msg, publicKey2, options = verifyOpts) {
+    const { context, zip215 } = options;
+    const len = lengths.signature;
+    sig = ensureBytes("signature", sig, len);
+    msg = ensureBytes("message", msg);
+    publicKey2 = ensureBytes("publicKey", publicKey2, lengths.publicKey);
+    if (zip215 !== void 0)
+      _abool2(zip215, "zip215");
+    if (prehash)
+      msg = prehash(msg);
+    const mid = len / 2;
+    const r = sig.subarray(0, mid);
+    const s3 = bytesToNumberLE(sig.subarray(mid, len));
+    let A2, R2, SB;
+    try {
+      A2 = Point.fromBytes(publicKey2, zip215);
+      R2 = Point.fromBytes(r, zip215);
+      SB = BASE6.multiplyUnsafe(s3);
+    } catch (error) {
+      return false;
+    }
+    if (!zip215 && A2.isSmallOrder())
+      return false;
+    const k2 = hashDomainToScalar(context, R2.toBytes(), A2.toBytes(), msg);
+    const RkA = R2.add(A2.multiplyUnsafe(k2));
+    return RkA.subtract(SB).clearCofactor().is0();
+  }
+  const _size = Fp2.BYTES;
+  const lengths = {
+    secretKey: _size,
+    publicKey: _size,
+    signature: 2 * _size,
+    seed: _size
+  };
+  function randomSecretKey(seed = randomBytes2(lengths.seed)) {
+    return _abytes2(seed, lengths.seed, "seed");
+  }
+  function keygen(seed) {
+    const secretKey = utils.randomSecretKey(seed);
+    return { secretKey, publicKey: getPublicKey(secretKey) };
+  }
+  function isValidSecretKey(key) {
+    return isBytes(key) && key.length === Fn2.BYTES;
+  }
+  function isValidPublicKey(key, zip215) {
+    try {
+      return !!Point.fromBytes(key, zip215);
+    } catch (error) {
+      return false;
+    }
+  }
+  const utils = {
+    getExtendedPublicKey,
+    randomSecretKey,
+    isValidSecretKey,
+    isValidPublicKey,
+    /**
+     * Converts ed public key to x public key. Uses formula:
+     * - ed25519:
+     *   - `(u, v) = ((1+y)/(1-y), sqrt(-486664)*u/x)`
+     *   - `(x, y) = (sqrt(-486664)*u/v, (u-1)/(u+1))`
+     * - ed448:
+     *   - `(u, v) = ((y-1)/(y+1), sqrt(156324)*u/x)`
+     *   - `(x, y) = (sqrt(156324)*u/v, (1+u)/(1-u))`
+     */
+    toMontgomery(publicKey2) {
+      const { y } = Point.fromBytes(publicKey2);
+      const size = lengths.publicKey;
+      const is25519 = size === 32;
+      if (!is25519 && size !== 57)
+        throw new Error("only defined for 25519 and 448");
+      const u = is25519 ? Fp2.div(_1n6 + y, _1n6 - y) : Fp2.div(y - _1n6, y + _1n6);
+      return Fp2.toBytes(u);
+    },
+    toMontgomerySecret(secretKey) {
+      const size = lengths.secretKey;
+      _abytes2(secretKey, size);
+      const hashed = cHash(secretKey.subarray(0, size));
+      return adjustScalarBytes2(hashed).subarray(0, size);
+    },
+    /** @deprecated */
+    randomPrivateKey: randomSecretKey,
+    /** @deprecated */
+    precompute(windowSize = 8, point = Point.BASE) {
+      return point.precompute(windowSize, false);
+    }
+  };
+  return Object.freeze({
+    keygen,
+    getPublicKey,
+    sign,
+    verify,
+    utils,
+    Point,
+    lengths
+  });
+}
+function _eddsa_legacy_opts_to_new(c) {
+  const CURVE = {
+    a: c.a,
+    d: c.d,
+    p: c.Fp.ORDER,
+    n: c.n,
+    h: c.h,
+    Gx: c.Gx,
+    Gy: c.Gy
+  };
+  const Fp2 = c.Fp;
+  const Fn2 = Field(CURVE.n, c.nBitLength, true);
+  const curveOpts = { Fp: Fp2, Fn: Fn2, uvRatio: c.uvRatio };
+  const eddsaOpts = {
+    randomBytes: c.randomBytes,
+    adjustScalarBytes: c.adjustScalarBytes,
+    domain: c.domain,
+    prehash: c.prehash,
+    mapToCurve: c.mapToCurve
+  };
+  return { CURVE, curveOpts, hash: c.hash, eddsaOpts };
+}
+function _eddsa_new_output_to_legacy(c, eddsa2) {
+  const Point = eddsa2.Point;
+  const legacy = Object.assign({}, eddsa2, {
+    ExtendedPoint: Point,
+    CURVE: c,
+    nBitLength: Point.Fn.BITS,
+    nByteLength: Point.Fn.BYTES
+  });
+  return legacy;
+}
+function twistedEdwards(c) {
+  const { CURVE, curveOpts, hash, eddsaOpts } = _eddsa_legacy_opts_to_new(c);
+  const Point = edwards(CURVE, curveOpts);
+  const EDDSA = eddsa(Point, hash, eddsaOpts);
+  return _eddsa_new_output_to_legacy(c, EDDSA);
+}
+
+// node_modules/@noble/curves/esm/ed25519.js
+init_modular();
+init_utils2();
+var _0n7 = /* @__PURE__ */ BigInt(0);
+var _1n7 = BigInt(1);
+var _2n5 = BigInt(2);
+var _3n3 = BigInt(3);
+var _5n2 = BigInt(5);
+var _8n3 = BigInt(8);
+var ed25519_CURVE_p = BigInt("0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed");
+var ed25519_CURVE = /* @__PURE__ */ (() => ({
+  p: ed25519_CURVE_p,
+  n: BigInt("0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed"),
+  h: _8n3,
+  a: BigInt("0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffec"),
+  d: BigInt("0x52036cee2b6ffe738cc740797779e89800700a4d4141d8ab75eb4dca135978a3"),
+  Gx: BigInt("0x216936d3cd6e53fec0a4e231fdd6dc5c692cc7609525a7b2c9562d608f25d51a"),
+  Gy: BigInt("0x6666666666666666666666666666666666666666666666666666666666666658")
+}))();
+function ed25519_pow_2_252_3(x) {
+  const _10n = BigInt(10), _20n = BigInt(20), _40n = BigInt(40), _80n = BigInt(80);
+  const P6 = ed25519_CURVE_p;
+  const x2 = x * x % P6;
+  const b2 = x2 * x % P6;
+  const b4 = pow2(b2, _2n5, P6) * b2 % P6;
+  const b5 = pow2(b4, _1n7, P6) * x % P6;
+  const b10 = pow2(b5, _5n2, P6) * b5 % P6;
+  const b20 = pow2(b10, _10n, P6) * b10 % P6;
+  const b40 = pow2(b20, _20n, P6) * b20 % P6;
+  const b80 = pow2(b40, _40n, P6) * b40 % P6;
+  const b160 = pow2(b80, _80n, P6) * b80 % P6;
+  const b240 = pow2(b160, _80n, P6) * b80 % P6;
+  const b250 = pow2(b240, _10n, P6) * b10 % P6;
+  const pow_p_5_8 = pow2(b250, _2n5, P6) * x % P6;
+  return { pow_p_5_8, b2 };
+}
+function adjustScalarBytes(bytes) {
+  bytes[0] &= 248;
+  bytes[31] &= 127;
+  bytes[31] |= 64;
+  return bytes;
+}
+var ED25519_SQRT_M1 = /* @__PURE__ */ BigInt("19681161376707505956807079304988542015446066515923890162744021073123829784752");
+function uvRatio(u, v2) {
+  const P6 = ed25519_CURVE_p;
+  const v33 = mod(v2 * v2 * v2, P6);
+  const v72 = mod(v33 * v33 * v2, P6);
+  const pow3 = ed25519_pow_2_252_3(u * v72).pow_p_5_8;
+  let x = mod(u * v33 * pow3, P6);
+  const vx2 = mod(v2 * x * x, P6);
+  const root1 = x;
+  const root2 = mod(x * ED25519_SQRT_M1, P6);
+  const useRoot1 = vx2 === u;
+  const useRoot2 = vx2 === mod(-u, P6);
+  const noRoot = vx2 === mod(-u * ED25519_SQRT_M1, P6);
+  if (useRoot1)
+    x = root1;
+  if (useRoot2 || noRoot)
+    x = root2;
+  if (isNegativeLE(x, P6))
+    x = mod(-x, P6);
+  return { isValid: useRoot1 || useRoot2, value: x };
+}
+var Fp = /* @__PURE__ */ (() => Field(ed25519_CURVE.p, { isLE: true }))();
+var Fn = /* @__PURE__ */ (() => Field(ed25519_CURVE.n, { isLE: true }))();
+var ed25519Defaults = /* @__PURE__ */ (() => ({
+  ...ed25519_CURVE,
+  Fp,
+  hash: sha512,
+  adjustScalarBytes,
+  // dom2
+  // Ratio of u to v. Allows us to combine inversion and square root. Uses algo from RFC8032 5.1.3.
+  // Constant-time, u/√v
+  uvRatio
+}))();
+var ed25519 = /* @__PURE__ */ (() => twistedEdwards(ed25519Defaults))();
+var SQRT_M1 = ED25519_SQRT_M1;
+var SQRT_AD_MINUS_ONE = /* @__PURE__ */ BigInt("25063068953384623474111414158702152701244531502492656460079210482610430750235");
+var INVSQRT_A_MINUS_D = /* @__PURE__ */ BigInt("54469307008909316920995813868745141605393597292927456921205312896311721017578");
+var ONE_MINUS_D_SQ = /* @__PURE__ */ BigInt("1159843021668779879193775521855586647937357759715417654439879720876111806838");
+var D_MINUS_ONE_SQ = /* @__PURE__ */ BigInt("40440834346308536858101042469323190826248399146238708352240133220865137265952");
+var invertSqrt = (number) => uvRatio(_1n7, number);
+var MAX_255B = /* @__PURE__ */ BigInt("0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+var bytes255ToNumberLE = (bytes) => ed25519.Point.Fp.create(bytesToNumberLE(bytes) & MAX_255B);
+function calcElligatorRistrettoMap(r0) {
+  const { d } = ed25519_CURVE;
+  const P6 = ed25519_CURVE_p;
+  const mod4 = (n) => Fp.create(n);
+  const r = mod4(SQRT_M1 * r0 * r0);
+  const Ns = mod4((r + _1n7) * ONE_MINUS_D_SQ);
+  let c = BigInt(-1);
+  const D2 = mod4((c - d * r) * mod4(r + d));
+  let { isValid: Ns_D_is_sq, value: s3 } = uvRatio(Ns, D2);
+  let s_ = mod4(s3 * r0);
+  if (!isNegativeLE(s_, P6))
+    s_ = mod4(-s_);
+  if (!Ns_D_is_sq)
+    s3 = s_;
+  if (!Ns_D_is_sq)
+    c = r;
+  const Nt = mod4(c * (r - _1n7) * D_MINUS_ONE_SQ - D2);
+  const s22 = s3 * s3;
+  const W0 = mod4((s3 + s3) * D2);
+  const W1 = mod4(Nt * SQRT_AD_MINUS_ONE);
+  const W2 = mod4(_1n7 - s22);
+  const W3 = mod4(_1n7 + s22);
+  return new ed25519.Point(mod4(W0 * W3), mod4(W2 * W1), mod4(W1 * W3), mod4(W0 * W2));
+}
+function ristretto255_map(bytes) {
+  abytes(bytes, 64);
+  const r1 = bytes255ToNumberLE(bytes.subarray(0, 32));
+  const R1 = calcElligatorRistrettoMap(r1);
+  const r2 = bytes255ToNumberLE(bytes.subarray(32, 64));
+  const R2 = calcElligatorRistrettoMap(r2);
+  return new _RistrettoPoint(R1.add(R2));
+}
+var _RistrettoPoint = class __RistrettoPoint extends PrimeEdwardsPoint {
+  constructor(ep) {
+    super(ep);
+  }
+  static fromAffine(ap) {
+    return new __RistrettoPoint(ed25519.Point.fromAffine(ap));
+  }
+  assertSame(other) {
+    if (!(other instanceof __RistrettoPoint))
+      throw new Error("RistrettoPoint expected");
+  }
+  init(ep) {
+    return new __RistrettoPoint(ep);
+  }
+  /** @deprecated use `import { ristretto255_hasher } from '@noble/curves/ed25519.js';` */
+  static hashToCurve(hex2) {
+    return ristretto255_map(ensureBytes("ristrettoHash", hex2, 64));
+  }
+  static fromBytes(bytes) {
+    abytes(bytes, 32);
+    const { a: a2, d } = ed25519_CURVE;
+    const P6 = ed25519_CURVE_p;
+    const mod4 = (n) => Fp.create(n);
+    const s3 = bytes255ToNumberLE(bytes);
+    if (!equalBytes(Fp.toBytes(s3), bytes) || isNegativeLE(s3, P6))
+      throw new Error("invalid ristretto255 encoding 1");
+    const s22 = mod4(s3 * s3);
+    const u1 = mod4(_1n7 + a2 * s22);
+    const u2 = mod4(_1n7 - a2 * s22);
+    const u1_2 = mod4(u1 * u1);
+    const u2_2 = mod4(u2 * u2);
+    const v2 = mod4(a2 * d * u1_2 - u2_2);
+    const { isValid, value: I } = invertSqrt(mod4(v2 * u2_2));
+    const Dx = mod4(I * u2);
+    const Dy = mod4(I * Dx * v2);
+    let x = mod4((s3 + s3) * Dx);
+    if (isNegativeLE(x, P6))
+      x = mod4(-x);
+    const y = mod4(u1 * Dy);
+    const t = mod4(x * y);
+    if (!isValid || isNegativeLE(t, P6) || y === _0n7)
+      throw new Error("invalid ristretto255 encoding 2");
+    return new __RistrettoPoint(new ed25519.Point(x, y, _1n7, t));
+  }
+  /**
+   * Converts ristretto-encoded string to ristretto point.
+   * Described in [RFC9496](https://www.rfc-editor.org/rfc/rfc9496#name-decode).
+   * @param hex Ristretto-encoded 32 bytes. Not every 32-byte string is valid ristretto encoding
+   */
+  static fromHex(hex2) {
+    return __RistrettoPoint.fromBytes(ensureBytes("ristrettoHex", hex2, 32));
+  }
+  static msm(points, scalars) {
+    return pippenger(__RistrettoPoint, ed25519.Point.Fn, points, scalars);
+  }
+  /**
+   * Encodes ristretto point to Uint8Array.
+   * Described in [RFC9496](https://www.rfc-editor.org/rfc/rfc9496#name-encode).
+   */
+  toBytes() {
+    let { X, Y: Y2, Z: Z2, T: T2 } = this.ep;
+    const P6 = ed25519_CURVE_p;
+    const mod4 = (n) => Fp.create(n);
+    const u1 = mod4(mod4(Z2 + Y2) * mod4(Z2 - Y2));
+    const u2 = mod4(X * Y2);
+    const u2sq = mod4(u2 * u2);
+    const { value: invsqrt } = invertSqrt(mod4(u1 * u2sq));
+    const D1 = mod4(invsqrt * u1);
+    const D2 = mod4(invsqrt * u2);
+    const zInv = mod4(D1 * D2 * T2);
+    let D3;
+    if (isNegativeLE(T2 * zInv, P6)) {
+      let _x = mod4(Y2 * SQRT_M1);
+      let _y = mod4(X * SQRT_M1);
+      X = _x;
+      Y2 = _y;
+      D3 = mod4(D1 * INVSQRT_A_MINUS_D);
+    } else {
+      D3 = D2;
+    }
+    if (isNegativeLE(X * zInv, P6))
+      Y2 = mod4(-Y2);
+    let s3 = mod4((Z2 - Y2) * D3);
+    if (isNegativeLE(s3, P6))
+      s3 = mod4(-s3);
+    return Fp.toBytes(s3);
+  }
+  /**
+   * Compares two Ristretto points.
+   * Described in [RFC9496](https://www.rfc-editor.org/rfc/rfc9496#name-equals).
+   */
+  equals(other) {
+    this.assertSame(other);
+    const { X: X1, Y: Y1 } = this.ep;
+    const { X: X2, Y: Y2 } = other.ep;
+    const mod4 = (n) => Fp.create(n);
+    const one = mod4(X1 * Y2) === mod4(Y1 * X2);
+    const two = mod4(Y1 * Y2) === mod4(X1 * X2);
+    return one || two;
+  }
+  is0() {
+    return this.equals(__RistrettoPoint.ZERO);
+  }
+};
+_RistrettoPoint.BASE = /* @__PURE__ */ (() => new _RistrettoPoint(ed25519.Point.BASE))();
+_RistrettoPoint.ZERO = /* @__PURE__ */ (() => new _RistrettoPoint(ed25519.Point.ZERO))();
+_RistrettoPoint.Fp = /* @__PURE__ */ (() => Fp)();
+_RistrettoPoint.Fn = /* @__PURE__ */ (() => Fn)();
+
+// node_modules/@noble/hashes/esm/sha3.js
+init_u64();
+init_utils();
+var _0n8 = BigInt(0);
+var _1n8 = BigInt(1);
+var _2n6 = BigInt(2);
+var _7n2 = BigInt(7);
+var _256n = BigInt(256);
+var _0x71n = BigInt(113);
+var SHA3_PI = [];
+var SHA3_ROTL = [];
+var _SHA3_IOTA = [];
+for (let round = 0, R2 = _1n8, x = 1, y = 0; round < 24; round++) {
+  [x, y] = [y, (2 * x + 3 * y) % 5];
+  SHA3_PI.push(2 * (5 * y + x));
+  SHA3_ROTL.push((round + 1) * (round + 2) / 2 % 64);
+  let t = _0n8;
+  for (let j2 = 0; j2 < 7; j2++) {
+    R2 = (R2 << _1n8 ^ (R2 >> _7n2) * _0x71n) % _256n;
+    if (R2 & _2n6)
+      t ^= _1n8 << (_1n8 << /* @__PURE__ */ BigInt(j2)) - _1n8;
+  }
+  _SHA3_IOTA.push(t);
+}
+var IOTAS = split(_SHA3_IOTA, true);
+var SHA3_IOTA_H = IOTAS[0];
+var SHA3_IOTA_L = IOTAS[1];
+var rotlH = (h2, l3, s3) => s3 > 32 ? rotlBH(h2, l3, s3) : rotlSH(h2, l3, s3);
+var rotlL = (h2, l3, s3) => s3 > 32 ? rotlBL(h2, l3, s3) : rotlSL(h2, l3, s3);
+function keccakP(s3, rounds = 24) {
+  const B = new Uint32Array(5 * 2);
+  for (let round = 24 - rounds; round < 24; round++) {
+    for (let x = 0; x < 10; x++)
+      B[x] = s3[x] ^ s3[x + 10] ^ s3[x + 20] ^ s3[x + 30] ^ s3[x + 40];
+    for (let x = 0; x < 10; x += 2) {
+      const idx1 = (x + 8) % 10;
+      const idx0 = (x + 2) % 10;
+      const B0 = B[idx0];
+      const B1 = B[idx0 + 1];
+      const Th = rotlH(B0, B1, 1) ^ B[idx1];
+      const Tl = rotlL(B0, B1, 1) ^ B[idx1 + 1];
+      for (let y = 0; y < 50; y += 10) {
+        s3[x + y] ^= Th;
+        s3[x + y + 1] ^= Tl;
+      }
+    }
+    let curH = s3[2];
+    let curL = s3[3];
+    for (let t = 0; t < 24; t++) {
+      const shift = SHA3_ROTL[t];
+      const Th = rotlH(curH, curL, shift);
+      const Tl = rotlL(curH, curL, shift);
+      const PI = SHA3_PI[t];
+      curH = s3[PI];
+      curL = s3[PI + 1];
+      s3[PI] = Th;
+      s3[PI + 1] = Tl;
+    }
+    for (let y = 0; y < 50; y += 10) {
+      for (let x = 0; x < 10; x++)
+        B[x] = s3[y + x];
+      for (let x = 0; x < 10; x++)
+        s3[y + x] ^= ~B[(x + 2) % 10] & B[(x + 4) % 10];
+    }
+    s3[0] ^= SHA3_IOTA_H[round];
+    s3[1] ^= SHA3_IOTA_L[round];
+  }
+  clean(B);
+}
+var Keccak = class _Keccak extends Hash {
+  // NOTE: we accept arguments in bytes instead of bits here.
+  constructor(blockLen, suffix, outputLen, enableXOF = false, rounds = 24) {
+    super();
+    this.pos = 0;
+    this.posOut = 0;
+    this.finished = false;
+    this.destroyed = false;
+    this.enableXOF = false;
+    this.blockLen = blockLen;
+    this.suffix = suffix;
+    this.outputLen = outputLen;
+    this.enableXOF = enableXOF;
+    this.rounds = rounds;
+    anumber(outputLen);
+    if (!(0 < blockLen && blockLen < 200))
+      throw new Error("only keccak-f1600 function is supported");
+    this.state = new Uint8Array(200);
+    this.state32 = u32(this.state);
+  }
+  clone() {
+    return this._cloneInto();
+  }
+  keccak() {
+    swap32IfBE(this.state32);
+    keccakP(this.state32, this.rounds);
+    swap32IfBE(this.state32);
+    this.posOut = 0;
+    this.pos = 0;
+  }
+  update(data) {
+    aexists(this);
+    data = toBytes(data);
+    abytes(data);
+    const { blockLen, state: state2 } = this;
+    const len = data.length;
+    for (let pos = 0; pos < len; ) {
+      const take = Math.min(blockLen - this.pos, len - pos);
+      for (let i = 0; i < take; i++)
+        state2[this.pos++] ^= data[pos++];
+      if (this.pos === blockLen)
+        this.keccak();
+    }
+    return this;
+  }
+  finish() {
+    if (this.finished)
+      return;
+    this.finished = true;
+    const { state: state2, suffix, pos, blockLen } = this;
+    state2[pos] ^= suffix;
+    if ((suffix & 128) !== 0 && pos === blockLen - 1)
+      this.keccak();
+    state2[blockLen - 1] ^= 128;
+    this.keccak();
+  }
+  writeInto(out) {
+    aexists(this, false);
+    abytes(out);
+    this.finish();
+    const bufferOut = this.state;
+    const { blockLen } = this;
+    for (let pos = 0, len = out.length; pos < len; ) {
+      if (this.posOut >= blockLen)
+        this.keccak();
+      const take = Math.min(blockLen - this.posOut, len - pos);
+      out.set(bufferOut.subarray(this.posOut, this.posOut + take), pos);
+      this.posOut += take;
+      pos += take;
+    }
+    return out;
+  }
+  xofInto(out) {
+    if (!this.enableXOF)
+      throw new Error("XOF is not possible for this instance");
+    return this.writeInto(out);
+  }
+  xof(bytes) {
+    anumber(bytes);
+    return this.xofInto(new Uint8Array(bytes));
+  }
+  digestInto(out) {
+    aoutput(out, this);
+    if (this.finished)
+      throw new Error("digest() was already called");
+    this.writeInto(out);
+    this.destroy();
+    return out;
+  }
+  digest() {
+    return this.digestInto(new Uint8Array(this.outputLen));
+  }
+  destroy() {
+    this.destroyed = true;
+    clean(this.state);
+  }
+  _cloneInto(to) {
+    const { blockLen, suffix, outputLen, rounds, enableXOF } = this;
+    to || (to = new _Keccak(blockLen, suffix, outputLen, enableXOF, rounds));
+    to.state32.set(this.state32);
+    to.pos = this.pos;
+    to.posOut = this.posOut;
+    to.finished = this.finished;
+    to.rounds = rounds;
+    to.suffix = suffix;
+    to.outputLen = outputLen;
+    to.enableXOF = enableXOF;
+    to.destroyed = this.destroyed;
+    return to;
+  }
+};
+var gen = (suffix, blockLen, outputLen) => createHasher(() => new Keccak(blockLen, suffix, outputLen));
+var keccak_256 = /* @__PURE__ */ (() => gen(1, 136, 256 / 8))();
+
+// lib/keys.mjs
+init_esm2();
+function newSolanaKeypair() {
+  const kp = import_web3.Keypair.generate();
+  return { secretKey: Buffer.from(kp.secretKey), publicKey: kp.publicKey.toBase58() };
+}
+function solanaFromSecret(secret) {
+  const kp = import_web3.Keypair.fromSecretKey(Uint8Array.from(secret));
+  return { secretKey: Buffer.from(kp.secretKey), publicKey: kp.publicKey.toBase58() };
+}
+function newEvmKey() {
+  const priv = crypto8.randomBytes(32);
+  return { secretKey: priv, address: evmAddress(priv) };
+}
+function evmAddress(priv) {
+  const pub = secp256k1.getPublicKey(priv, false);
+  const h2 = keccak_256(pub.slice(1));
+  return "0x" + Buffer.from(h2.slice(12)).toString("hex");
+}
+function evmSign(priv, message) {
+  const body = Buffer.isBuffer(message) ? message : Buffer.from(message, "utf8");
+  const prefixed = Buffer.concat([
+    Buffer.from(`Ethereum Signed Message:
+${body.length}`, "utf8"),
+    body
+  ]);
+  const digest = Buffer.from(keccak_256(prefixed));
+  const sig = secp256k1.sign(digest, priv, { lowS: true });
+  const r = Buffer.from(sig.r.toString(16).padStart(64, "0"), "hex");
+  const s3 = Buffer.from(sig.s.toString(16).padStart(64, "0"), "hex");
+  const v2 = Buffer.from([sig.recovery + 27]);
+  return "0x" + Buffer.concat([r, s3, v2]).toString("hex");
+}
+function ed25519Sign(secret64, message) {
+  const seed = Uint8Array.from(secret64).slice(0, 32);
+  const body = Buffer.isBuffer(message) ? message : Buffer.from(message, "utf8");
+  return esm_default2.encode(Buffer.from(ed25519.sign(body, seed)));
+}
+
+// lib/receipt.mjs
+init_paths();
+init_util();
+import fs6 from "node:fs";
+import path4 from "node:path";
+function imageDigest() {
+  const files = [];
+  const walk = (dir) => {
+    for (const e9 of fs6.readdirSync(dir, { withFileTypes: true })) {
+      if (e9.name === "node_modules" || e9.name === "guest" || e9.name.startsWith(".")) continue;
+      const full = path4.join(dir, e9.name);
+      if (e9.isDirectory()) walk(full);
+      else if (/\.(mjs|json|md)$/.test(e9.name)) files.push(full);
+    }
+  };
+  walk(RUNTIME_DIR);
+  for (const f2 of [P.policy, P.manifest, P.toolContracts, P.inferenceLock]) {
+    try {
+      files.push(f2);
+    } catch {
+    }
+  }
+  const rows = [];
+  for (const f2 of files.sort()) {
+    try {
+      rows.push([path4.relative(P.bundle, f2).replace(/\\/g, "/"), sha256hex(fs6.readFileSync(f2))]);
+    } catch {
+    }
+  }
+  return "sha256:" + sha256hex(Buffer.from(canon(rows)));
+}
+function signingMessage(payload) {
+  return `agent-birth-receipt-v1
+${sha256hex(Buffer.from(canon(payload)))}`;
+}
+function buildParentRecord({ birthId, t0, constitutionSha256, founderSolana, founderEvm }) {
+  const record = {
+    child_birth_id: birthId,
+    parent_birth_id_or_founder_identity: `founder:${founderSolana}`,
+    authenticated_birth_request_hash: sha256hex(Buffer.from(canon({ child: birthId, t0, requested_by: "founder", constitution: constitutionSha256 }))),
+    parent_solana_destination: founderSolana,
+    parent_evm_destination: founderEvm,
+    networks: ["solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", "eip155:8453"],
+    birth_anchor_unix_seconds: t0,
+    constitution_sha256: constitutionSha256
+  };
+  return { record, sha256: sha256hex(Buffer.from(canon(record))) };
+}
+function buildPayload({ birthId, t0, imageDigestHex, inferenceConfigSha256, solana, evm, constitutionSha256, parentRecordSha256 }) {
+  return {
+    domain: "agent-birth-receipt-v1",
+    schema_version: 1,
+    birth_id: birthId,
+    image_digest: imageDigestHex,
+    inference_config_sha256: inferenceConfigSha256,
+    solana: { public_key: solana.public_key, cluster: solana.cluster, genesis_hash: solana.genesis_hash },
+    evm: { address: evm.address, supported_chain_ids: evm.supported_chain_ids },
+    created_at: new Date(t0 * 1e3).toISOString(),
+    constitution_sha256: constitutionSha256,
+    parent_record_sha256: parentRecordSha256,
+    birth_anchor_unix_seconds: t0
+  };
+}
+function writeReceipt(receipt2) {
+  atomicJson(P.receipt, receipt2, 420);
+  return receipt2;
+}
+function readReceipt() {
+  return readJson(P.receipt, null);
+}
+function readParentRecord() {
+  return readJson(P.parentRecord, null);
+}
+function verifyReceiptShape(r) {
+  const errs = [];
+  const p2 = r?.payload || {};
+  if (p2.domain !== "agent-birth-receipt-v1") errs.push("domain");
+  if (p2.schema_version !== 1) errs.push("schema_version");
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(p2.birth_id || "")) errs.push("birth_id");
+  if (!/^sha256:[0-9a-f]{64}$/.test(p2.image_digest || "")) errs.push("image_digest");
+  if (!/^[0-9a-f]{64}$/.test(p2.inference_config_sha256 || "")) errs.push("inference_config_sha256");
+  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(p2.solana?.public_key || "")) errs.push("solana.public_key");
+  if (!["mainnet-beta", "devnet", "testnet", "custom"].includes(p2.solana?.cluster)) errs.push("solana.cluster");
+  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(p2.solana?.genesis_hash || "")) errs.push("solana.genesis_hash");
+  if (!/^0x[0-9a-fA-F]{40}$/.test(p2.evm?.address || "")) errs.push("evm.address");
+  if (!Array.isArray(p2.evm?.supported_chain_ids) || !p2.evm.supported_chain_ids.length) errs.push("evm.supported_chain_ids");
+  if (!/^[0-9a-f]{64}$/.test(p2.constitution_sha256 || "")) errs.push("constitution_sha256");
+  if (!/^[0-9a-f]{64}$/.test(p2.parent_record_sha256 || "")) errs.push("parent_record_sha256");
+  if (!Number.isInteger(p2.birth_anchor_unix_seconds)) errs.push("birth_anchor_unix_seconds");
+  const sigs = r?.signatures || [];
+  if (!sigs.length || sigs.length > 2) errs.push("signatures");
+  for (const s3 of sigs) {
+    if (s3.wallet === "solana" && !(s3.algorithm === "ed25519" && s3.encoding === "base58")) errs.push("sig:solana");
+    if (s3.wallet === "evm" && !(s3.algorithm === "eip191-secp256k1" && s3.encoding === "hex")) errs.push("sig:evm");
+    if (!["solana", "evm"].includes(s3.wallet)) errs.push("sig:wallet");
+  }
+  return errs;
+}
+
+// boot-once.mjs
+init_rpc();
+
+// lib/proc.mjs
+init_paths();
+init_util();
+import { spawn } from "node:child_process";
+import fs9 from "node:fs";
+import path5 from "node:path";
+function spawnChild(script, { env = {}, detach = false } = {}) {
+  const out = fs9.openSync(path5.join(P.state, `child-${path5.basename(script)}.log`), "a");
+  const bundled = process.env.AGENT_BUNDLE === "1";
+  const role2 = path5.basename(script, ".mjs");
+  const child = spawn(process.execPath, bundled ? [process.argv[1]] : [path5.join(RUNTIME_DIR, script)], {
+    cwd: RUNTIME_DIR,
+    env: { ...process.env, AGENT_LOG: P.log, ...bundled ? { AGENT_ROLE: role2 } : {}, ...env },
+    stdio: ["ignore", out, out],
+    detached: detach,
+    windowsHide: true
+  });
+  child.unref?.();
+  return child;
+}
+async function waitFor(fn, { timeoutMs = 2e4, every: every2 = 200, label = "wait" } = {}) {
+  const t0 = Date.now();
+  let last;
+  while (Date.now() - t0 < timeoutMs) {
+    try {
+      const v2 = await fn();
+      if (v2) return v2;
+    } catch (e9) {
+      last = e9;
+    }
+    await sleep(every2);
+  }
+  throw new Error(`${label} timed out${last ? `: ${last.message}` : ""}`);
+}
+async function identityWhenReady({ timeoutMs = 45e3 } = {}) {
+  const { identity: identity4 } = await Promise.resolve().then(() => (init_signer_client(), signer_client_exports));
+  const t0 = Date.now();
+  for (; ; ) {
+    try {
+      return await identity4();
+    } catch (e9) {
+      if (Date.now() - t0 > timeoutMs) throw e9;
+      await sleep(1e3);
+    }
+  }
+}
+
+// boot-once.mjs
+init_signer_client();
+var CLUSTER = process.env.AGENT_CLUSTER || "mainnet-beta";
+async function main() {
+  ensureDirs();
+  const policy5 = loadPolicy();
+  openJournal();
+  const img = imageDigest();
+  const inferenceConfigSha256 = sha256hex(fs10.readFileSync(P.inferenceLock));
+  const genesis = await getGenesisHash();
+  let state2 = state({});
+  let keysMeta = null;
+  const hasSealed = fs10.existsSync(P.sealed);
+  if (!hasSealed) {
+    if (state2.birth_id) throw new Error("state exists without sealed keys");
+    const bornAt = now();
+    const solana = newSolanaKeypair();
+    const evm = newEvmKey();
+    const master = ensureMasterKey().key;
+    const box = encrypt("identity", master, Buffer.from(JSON.stringify({
+      solana: { secretKey: Array.from(solana.secretKey), publicKey: solana.publicKey },
+      evm: { secretKey: evm.secretKey.toString("hex"), address: evm.address },
+      bornAt
+    }), "utf8"), "birth-image-identity");
+    atomicJson(P.sealed, box);
+    fs10.rmSync(P.stateFile, { force: true });
+    state2 = { birth_id: crypto9.randomUUID(), t0: bornAt, highest_epoch: 0, created_at: bornAt };
+    saveState(state2);
+    await append("birth.entropy", { birth_id: state2.birth_id, t0: bornAt, solana: solana.publicKey, evm: evm.address, cluster: CLUSTER, genesis_hash: genesis, image_digest: img });
+    keysMeta = { solana, evm };
+    log("boot", "new birth: fresh in-guest keys generated and sealed", { solana: solana.publicKey, evm: evm.address, birth_id: state2.birth_id });
+  } else {
+    if (!state2.birth_id) throw new Error("sealed keys exist without journal state");
+    await append("boot.restore", { birth_id: state2.birth_id, t0: state2.t0, seq: head().seq });
+    log("boot", "restore: sealed identity replayed", { birth_id: state2.birth_id, t0: state2.t0 });
+  }
+  let receipt2 = readReceipt();
+  let parent = readParentRecord();
+  if (!parent) {
+    const built = buildParentRecord({
+      birthId: state2.birth_id,
+      t0: state2.t0,
+      constitutionSha256: policy5.sha256,
+      founderSolana: policy5.founderSolana,
+      founderEvm: policy5.founderEvm
+    });
+    atomicJson(P.parentRecord, built, 420);
+    parent = built;
+    await append("parent.record", { record_sha256: built.sha256, record: built.record });
+  }
+  if (receipt2 && receipt2.payload.birth_anchor_unix_seconds !== state2.t0) {
+    throw new Error("receipt anchor != committed T0");
+  }
+  if (!receipt2) {
+    let id = null;
+    try {
+      id = await identity();
+    } catch {
+      id = null;
+    }
+    if (!id) {
+      spawnChild("signer.mjs");
+      id = await waitFor(async () => {
+        try {
+          return await identity();
+        } catch {
+          return null;
+        }
+      }, { label: "signer start", timeoutMs: 2e4 });
+    }
+    const payload = buildPayload({
+      birthId: state2.birth_id,
+      t0: state2.t0,
+      imageDigestHex: img,
+      inferenceConfigSha256,
+      solana: { public_key: id.solana.public_key, cluster: CLUSTER, genesis_hash: genesis },
+      evm: { address: id.evm.address, supported_chain_ids: [8453] },
+      constitutionSha256: policy5.sha256,
+      parentRecordSha256: parent.sha256
+    });
+    const msg = signingMessage(payload);
+    const sig = await signMessage(msg);
+    receipt2 = {
+      payload,
+      signatures: [
+        { wallet: "solana", algorithm: "ed25519", encoding: "base58", signature: sig.solana.signature },
+        { wallet: "evm", algorithm: "eip191-secp256k1", encoding: "hex", signature: sig.evm.signature }
+      ]
+    };
+    const errs = verifyReceiptShape(receipt2);
+    if (errs.length) throw new Error(`receipt schema: ${errs.join(",")}`);
+    writeReceipt(receipt2);
+    await append("identity.sealed", { receipt_sha256: sha256hex(Buffer.from(canon(receipt2))), receipt: receipt2 });
+    log("boot", "identity sealed; public receipt committed");
+  }
+  const birthDigest = receipt2?.payload?.image_digest || img;
+  const imageCheck = { birth_digest: birthDigest, current_digest: img, match: birthDigest === img, checked_at: now() };
+  if (receipt2 && !imageCheck.match) {
+    await append("image.drift", imageCheck);
+    log("boot", "IMAGE DRIFT: running core differs from the birth image", imageCheck);
+  } else if (receipt2) {
+    await append("image.check", imageCheck);
+  }
+  const p2 = receipt2.payload;
+  console.log("\n================ PUBLIC BIRTH RECEIPT ================");
+  console.log(`birth_id                ${p2.birth_id}`);
+  console.log(`solana (${p2.solana.cluster})      ${p2.solana.public_key}`);
+  console.log(`evm (eip155:8453)       ${p2.evm.address}`);
+  console.log(`constitution_sha256     ${p2.constitution_sha256}`);
+  console.log(`parent_record_sha256    ${p2.parent_record_sha256}`);
+  console.log(`image_digest            ${p2.image_digest}`);
+  console.log(`inference_config_sha256 ${p2.inference_config_sha256}`);
+  console.log(`birth_anchor_unix       ${p2.birth_anchor_unix_seconds}`);
+  console.log(`identity_binding        unverified (no TDX quote on this host)`);
+  console.log("=====================================================\n");
+  const status = readJson(P.status, {}) || {};
+  atomicJson(P.status, {
+    ...status,
+    phase: "identity_sealed",
+    birth_id: p2.birth_id,
+    solana: p2.solana.public_key,
+    evm: p2.evm.address,
+    t0: p2.birth_anchor_unix_seconds,
+    image: imageCheck,
+    updated_at: now()
+  }, 420);
+}
+main().then(() => process.exit(0)).catch((e9) => {
+  log("boot", `FATAL ${e9.stack || e9}`);
+  process.exit(1);
 });
+
+// signer.mjs
+init_paths();
+init_util();
+init_seal();
+import fs11 from "node:fs";
+import net2 from "node:net";
+import crypto10 from "node:crypto";
+
+// lib/evm712.mjs
+var enc = new TextEncoder();
+function keccak(buf) {
+  return Buffer.from(keccak_256(buf));
+}
+function typeHash(primaryType, types) {
+  const fields = types[primaryType].map((f2) => `${f2.type} ${f2.name}`).join(",");
+  return keccak(enc.encode(`${primaryType}(${fields})`));
+}
+function eip712DomainHash(domain, types) {
+  const fields = types.EIP712Domain.map((f2) => `${f2.type} ${f2.name}`).join(",");
+  const th = keccak(enc.encode(`EIP712Domain(${fields})`));
+  const parts = [th];
+  for (const f2 of types.EIP712Domain) {
+    const v2 = domain[f2.name];
+    if (f2.type === "uint256") parts.push(uint256(v2));
+    else if (f2.type === "address") parts.push(address(v2));
+    else parts.push(keccak(enc.encode(String(v2))));
+  }
+  return keccak(Buffer.concat(parts));
+}
+function uint256(v2) {
+  const b2 = Buffer.alloc(32);
+  let n = BigInt(v2);
+  for (let i = 31; i >= 0 && n > 0n; i--) {
+    b2[i] = Number(n & 0xffn);
+    n >>= 8n;
+  }
+  return b2;
+}
+function address(a2) {
+  const b2 = Buffer.alloc(32);
+  Buffer.from(a2.replace(/^0x/, ""), "hex").copy(b2, 12);
+  return b2;
+}
+function bytes32(v2) {
+  return Buffer.from(v2.replace(/^0x/, ""), "hex");
+}
+function hashStruct(primaryType, types, message) {
+  const parts = [typeHash(primaryType, types)];
+  for (const f2 of types[primaryType]) {
+    const v2 = message[f2.name];
+    if (f2.type === "uint256") parts.push(uint256(v2));
+    else if (f2.type === "address") parts.push(address(v2));
+    else if (f2.type === "bytes32") parts.push(bytes32(v2));
+    else parts.push(keccak(enc.encode(String(v2))));
+  }
+  return keccak(Buffer.concat(parts));
+}
+function eip712Digest({ domain, types, primaryType, message }) {
+  const d = eip712DomainHash(domain, types);
+  const s3 = hashStruct(primaryType, types, message);
+  return keccak(Buffer.concat([Buffer.from([25, 1]), d, s3]));
+}
+
+// signer.mjs
+var MAX_WIRE = 4096;
+var MAX_ADDRS = 64;
+var MAX_IXS = 64;
+var PROGRAMS = /* @__PURE__ */ new Set([
+  "11111111111111111111111111111111",
+  // system
+  "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+  // token
+  "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+  // token-2022
+  "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+  // ATA
+  "ComputeBudget111111111111111111111111111111",
+  // compute budget
+  "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+  // memo v2
+  "Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo",
+  // memo v1
+  "Sysvar1nstructions1111111111111111111111111",
+  "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
+  // pump
+  "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA",
+  // pump amm
+  "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ",
+  // pump fees
+  "KLend2g3cP87fffoy8q1mQqGKjrxjC8boSyAYavgmjD",
+  // kamino klend
+  "jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS",
+  // jupiter lend
+  "jupgfSgfbUMwdznGQXfNMeBHWge5YqaeMXETt2XS",
+  "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
+  // jupiter aggregator
+  "99vQwtBwYtrqqD9YSXbdum3KBdxPAVxYTaQ3cfnJSrN2"
+  // relay depository (solana -> base)
+]);
+var SYSTEM_TRANSFER_TAG = 2;
+function decodeSystemTransfer(dataB64) {
+  const d = Buffer.from(dataB64, "base64");
+  if (d.length < 12) return null;
+  if (d.readUInt32LE(0) !== SYSTEM_TRANSFER_TAG) return null;
+  return d.readBigUInt64LE(4);
+}
+function loadKeys() {
+  const master = ensureMasterKey().key;
+  const box = JSON.parse(fs11.readFileSync(P.sealed, "utf8"));
+  const raw = JSON.parse(decrypt("identity", master, box, "birth-image-identity").toString("utf8"));
+  return {
+    solana: solanaFromSecret(Buffer.from(raw.solana.secretKey)),
+    evm: { secretKey: Buffer.from(raw.evm.secretKey, "hex"), address: raw.evm.address },
+    bornAt: raw.bornAt
+  };
+}
+async function buildV1WithFeePayer({ feePayer, instructions, blockhash: blockhash2, lastValidBlockHeight, cuLimit, loadedAccountsDataSizeLimit }) {
+  const kit = await Promise.resolve().then(() => (init_index_node39(), index_node_exports));
+  const me = await kit.createKeyPairSignerFromBytes(new Uint8Array(KEYS.solana.secretKey));
+  const byAddr = /* @__PURE__ */ new Map([[KEYS.solana.publicKey, me]]);
+  const converted = instructions.map((ix) => ({
+    programAddress: kit.address(ix.programId),
+    accounts: ix.keys.map((meta) => {
+      const signer = byAddr.get(meta.pubkey);
+      const role2 = meta.isSigner ? meta.isWritable ? kit.AccountRole.WRITABLE_SIGNER : kit.AccountRole.READONLY_SIGNER : meta.isWritable ? kit.AccountRole.WRITABLE : kit.AccountRole.READONLY;
+      return signer ? { address: signer.address, role: role2, signer } : { address: kit.address(meta.pubkey), role: role2 };
+    }),
+    data: new Uint8Array(Buffer.from(ix.dataHex || "", "hex"))
+  }));
+  let message = kit.createTransactionMessage({ version: 1 });
+  message = kit.setTransactionMessageFeePayer(kit.address(feePayer), message);
+  message = kit.setTransactionMessageLifetimeUsingBlockhash({
+    blockhash: kit.blockhash(blockhash2),
+    lastValidBlockHeight: BigInt(lastValidBlockHeight)
+  }, message);
+  if (cuLimit || loadedAccountsDataSizeLimit) {
+    message = kit.setTransactionMessageConfig({
+      computeUnitLimit: cuLimit ?? 14e5,
+      loadedAccountsDataSizeLimit: loadedAccountsDataSizeLimit ?? 67108864
+    }, message);
+  }
+  message = kit.appendTransactionMessageInstructions(converted, message);
+  const signed = await kit.partiallySignTransactionMessageWithSigners(message);
+  const wire3 = Buffer.from(kit.getTransactionEncoder().encode(signed));
+  if (wire3.length > MAX_WIRE) throw new Error(`v1 wire ${wire3.length} > ${MAX_WIRE}`);
+  const bs582 = (await Promise.resolve().then(() => (init_esm2(), esm_exports))).default;
+  const dec = kit.getTransactionDecoder().decode(wire3);
+  const sigBytes = dec.signatures?.[KEYS.solana.publicKey];
+  return { wireBase64: wire3.toString("base64"), bytes: wire3.length, ownerSignature: sigBytes ? bs582.encode(Buffer.from(Object.values(sigBytes))) : null };
+}
+async function buildV1({ instructions, blockhash: blockhash2, lastValidBlockHeight, cuLimit, loadedAccountsDataSizeLimit, extraSigners = [] }) {
+  const kit = await Promise.resolve().then(() => (init_index_node39(), index_node_exports));
+  const feePayer = await kit.createKeyPairSignerFromBytes(new Uint8Array(KEYS.solana.secretKey));
+  const byAddr = /* @__PURE__ */ new Map([[KEYS.solana.publicKey, feePayer]]);
+  for (const s3 of extraSigners) {
+    const sg = await kit.createKeyPairSignerFromBytes(Uint8Array.from(Buffer.from(s3, "base64")));
+    byAddr.set(sg.address, sg);
+  }
+  const converted = instructions.map((ix) => ({
+    programAddress: kit.address(ix.programId),
+    accounts: ix.keys.map((meta) => {
+      const signer = byAddr.get(meta.pubkey);
+      const role2 = meta.isSigner ? meta.isWritable ? kit.AccountRole.WRITABLE_SIGNER : kit.AccountRole.READONLY_SIGNER : meta.isWritable ? kit.AccountRole.WRITABLE : kit.AccountRole.READONLY;
+      return signer ? { address: signer.address, role: role2, signer } : { address: kit.address(meta.pubkey), role: role2 };
+    }),
+    data: new Uint8Array(Buffer.from(ix.dataHex || "", "hex"))
+  }));
+  let message = kit.createTransactionMessage({ version: 1 });
+  message = kit.setTransactionMessageFeePayerSigner(feePayer, message);
+  message = kit.setTransactionMessageLifetimeUsingBlockhash({
+    blockhash: kit.blockhash(blockhash2),
+    lastValidBlockHeight: BigInt(lastValidBlockHeight)
+  }, message);
+  message = kit.setTransactionMessageConfig({
+    computeUnitLimit: cuLimit ?? 14e5,
+    loadedAccountsDataSizeLimit: loadedAccountsDataSizeLimit ?? 67108864
+  }, message);
+  message = kit.appendTransactionMessageInstructions(converted, message);
+  const signed = await kit.signTransactionMessageWithSigners(message);
+  const wire3 = Buffer.from(kit.getTransactionEncoder().encode(signed));
+  const uniq = [...new Set(converted.flatMap((ix) => ix.accounts.map((a2) => a2.address)))];
+  if (wire3.length > MAX_WIRE) throw new Error(`v1 wire ${wire3.length} > ${MAX_WIRE}`);
+  if (uniq.length > MAX_ADDRS) throw new Error(`v1 ${uniq.length} addresses > ${MAX_ADDRS}`);
+  if (converted.length > MAX_IXS) throw new Error(`v1 ${converted.length} instructions > ${MAX_IXS}`);
+  const bs582 = (await Promise.resolve().then(() => (init_esm2(), esm_exports))).default;
+  const dec = kit.getTransactionDecoder().decode(wire3);
+  const sigBytes = dec.signatures?.[KEYS.solana.publicKey];
+  const signature2 = sigBytes ? bs582.encode(Buffer.from(Object.values(sigBytes))) : null;
+  return { wireBase64: wire3.toString("base64"), signature: signature2, bytes: wire3.length, addresses: uniq.length, instructions: converted.length };
+}
+function gateV1({ instructions, allowedDestinations = [] }) {
+  const allowed = /* @__PURE__ */ new Set([KEYS.solana.publicKey, ...allowedDestinations]);
+  for (const ix of instructions) {
+    if (!PROGRAMS.has(ix.programId)) throw new Error(`program not allowed: ${ix.programId}`);
+    if (ix.programId === "11111111111111111111111111111111") {
+      const lamports2 = decodeSystemTransfer(ix.dataHex);
+      if (lamports2 != null) {
+        const dest = ix.keys?.[1]?.pubkey;
+        if (!allowed.has(dest)) throw new Error(`system transfer to non-allowlisted destination: ${dest}`);
+      }
+    }
+  }
+  return true;
+}
+var KEYS = null;
+var server = net2.createServer((sock) => {
+  let buf = "";
+  sock.on("data", async (chunk) => {
+    buf += chunk.toString("utf8");
+    const nl = buf.indexOf("\n");
+    if (nl < 0) return;
+    const line = buf.slice(0, nl);
+    let req;
+    try {
+      req = JSON.parse(line);
+    } catch {
+      sock.end(JSON.stringify({ error: "bad json" }) + "\n");
+      return;
+    }
+    try {
+      if (req.token !== TOKEN) throw new Error("auth");
+      const out = await handle(req.op, req.args || {});
+      sock.end(JSON.stringify({ result: out }) + "\n");
+    } catch (e9) {
+      sock.end(JSON.stringify({ error: String(e9.message || e9) }) + "\n");
+    }
+  });
+});
+var TOKEN = "";
+async function handle(op, a2) {
+  switch (op) {
+    case "identity":
+      return {
+        solana: { public_key: KEYS.solana.publicKey, algorithm: "ed25519" },
+        evm: { address: KEYS.evm.address, algorithm: "secp256k1" },
+        born_at: KEYS.bornAt
+      };
+    case "sign_message": {
+      const body = Buffer.from(a2.message, "utf8");
+      return {
+        solana: { signature: ed25519Sign(KEYS.solana.secretKey, body), encoding: "base58" },
+        evm: { signature: evmSign(KEYS.evm.secretKey, body), encoding: "hex" },
+        message_sha256: sha256hex(body)
+      };
+    }
+    case "sign_v1": {
+      gateV1(a2);
+      const r = await buildV1(a2);
+      fs11.appendFileSync(P.run + "/signer.log", JSON.stringify({ ts: Math.floor(Date.now() / 1e3), op, bytes: r.bytes, sig: r.signature }) + "\n");
+      return r;
+    }
+    case "sign_payment_svm": {
+      gateV1(a2);
+      const r = await buildV1WithFeePayer(a2);
+      fs11.appendFileSync(P.run + "/signer.log", JSON.stringify({ ts: Math.floor(Date.now() / 1e3), op, bytes: r.bytes, feePayer: a2.feePayer }) + "\n");
+      return r;
+    }
+    case "sign_payment_legacy": {
+      const { Transaction: Web3Tx, TransactionInstruction: Web3Ix, PublicKey: Web3Pk, Keypair: Web3Kp } = await Promise.resolve().then(() => __toESM(require_index_cjs(), 1));
+      const tx = new Web3Tx({ feePayer: new Web3Pk(a2.feePayer), recentBlockhash: a2.blockhash });
+      for (const ix of a2.instructions) {
+        tx.add(new Web3Ix({
+          programId: new Web3Pk(ix.programId),
+          keys: ix.keys.map((k2) => ({ pubkey: new Web3Pk(k2.pubkey), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
+          data: Buffer.from(ix.dataHex || "", "hex")
+        }));
+      }
+      tx.partialSign(Web3Kp.fromSecretKey(Uint8Array.from(KEYS.solana.secretKey)));
+      return { wireBase64: tx.serialize({ requireAllSignatures: false, verifySignatures: false }).toString("base64"), bytes: tx.serialize({ requireAllSignatures: false }).length };
+    }
+    case "sign_tx": {
+      const web3 = await Promise.resolve().then(() => __toESM(require_index_cjs(), 1));
+      const raw = String(a2.wireBase64 || a2.wire || "");
+      const buf = raw.startsWith("0x") ? Buffer.from(raw.slice(2), "hex") : Buffer.from(raw, "base64");
+      const kp = web3.Keypair.fromSecretKey(Uint8Array.from(KEYS.solana.secretKey));
+      const bs582 = (await Promise.resolve().then(() => (init_esm2(), esm_exports))).default;
+      let wire3 = null;
+      let sigB58 = null;
+      let via = null;
+      try {
+        const vtx = web3.VersionedTransaction.deserialize(buf);
+        vtx.sign([kp]);
+        wire3 = Buffer.from(vtx.serialize()).toString("base64");
+        sigB58 = bs582.encode(Buffer.from(vtx.signatures[0]));
+        via = "v0";
+      } catch (e1) {
+        try {
+          const tx = web3.Transaction.from(buf);
+          tx.partialSign(kp);
+          wire3 = tx.serialize({ requireAllSignatures: false, verifySignatures: false }).toString("base64");
+          sigB58 = tx.signatures[0]?.signature ? bs582.encode(Buffer.from(tx.signatures[0].signature)) : null;
+          via = "legacy";
+        } catch (e22) {
+          return { error: `decode failed \u2014 v0: ${String(e1.message).slice(0, 120)} | legacy: ${String(e22.message).slice(0, 120)}` };
+        }
+      }
+      fs11.appendFileSync(P.run + "/signer.log", JSON.stringify({ ts: Math.floor(Date.now() / 1e3), op, bytes: buf.length, via }) + String.fromCharCode(10));
+      return { wireBase64: wire3, signature: sigB58, via };
+    }
+    case "sign_evm_hash": {
+      const body = Buffer.from(String(a2.hashHex || "").replace(/^0x/, ""), "hex");
+      return { signature: evmSign(KEYS.evm.secretKey, body), encoding: "hex", address: KEYS.evm.address };
+    }
+    case "sign_evm_typed": {
+      const digest = eip712Digest(a2);
+      const { secp256k1: secp256k12 } = await Promise.resolve().then(() => (init_secp256k1(), secp256k1_exports));
+      const sig = secp256k12.sign(digest, KEYS.evm.secretKey, { lowS: true });
+      const r = Buffer.from(sig.r.toString(16).padStart(64, "0"), "hex");
+      const s3 = Buffer.from(sig.s.toString(16).padStart(64, "0"), "hex");
+      return { signature: "0x" + Buffer.concat([r, s3, Buffer.from([sig.recovery + 27])]).toString("hex"), digest: "0x" + digest.toString("hex") };
+    }
+    default:
+      throw new Error(`unknown op ${op}`);
+  }
+}
+ensureDirs();
+KEYS = loadKeys();
+TOKEN = crypto10.randomBytes(24).toString("hex");
+fs11.writeFileSync(P.run + "/signer.token", TOKEN, { mode: 384 });
+server.listen(0, "127.0.0.1", () => {
+  fs11.writeFileSync(P.signerPort, String(server.address().port));
+  console.log(JSON.stringify({ event: "signer_ready", port: server.address().port, solana: KEYS.solana.publicKey, evm: KEYS.evm.address }));
+});
+process.on("SIGTERM", () => {
+  try {
+    fs11.unlinkSync(P.signerPort);
+  } catch {
+  }
+  process.exit(0);
+});
+
+// distributor.mjs
+init_paths();
+init_util();
+init_journal();
+
+// lib/snapshot.mjs
+init_rpc();
+init_util();
+init_paths();
+import path6 from "node:path";
+var TOKEN_PROGRAM = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
+var TOKEN_2022 = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
+async function snapshot(owner) {
+  const reads = [];
+  const bal = await rpc("getBalance", [owner, { commitment: "confirmed" }]);
+  reads.push(bal.context.slot);
+  const assets = [{
+    chain: "solana",
+    asset: "native:SOL",
+    mint: null,
+    program: "system",
+    decimals: 9,
+    raw: BigInt(bal.value).toString(),
+    owner
+  }];
+  for (const program of [TOKEN_PROGRAM, TOKEN_2022]) {
+    const r = await rpc("getTokenAccountsByOwner", [owner, { programId: program }, { encoding: "jsonParsed", commitment: "confirmed" }]);
+    reads.push(r.context.slot);
+    for (const a2 of r.value) {
+      const info = a2.account.data.parsed.info;
+      const raw = BigInt(info.tokenAmount.amount);
+      if (raw === 0n) continue;
+      assets.push({
+        chain: "solana",
+        asset: `${program === TOKEN_2022 ? "t22" : "spl"}:${info.mint}`,
+        mint: info.mint,
+        program,
+        decimals: info.tokenAmount.decimals,
+        raw: raw.toString(),
+        ui: info.tokenAmount.uiAmountString,
+        tokenAccount: a2.pubkey,
+        state: info.state,
+        owner: info.owner
+      });
+    }
+  }
+  for (const a2 of assets) {
+    if (a2.program !== TOKEN_2022) continue;
+    try {
+      const mint = await rpc("getAccountInfo", [a2.mint, { encoding: "jsonParsed", commitment: "confirmed" }]);
+      reads.push(mint.context.slot);
+      const ext = mint.value?.data?.parsed?.info?.extensions || [];
+      const tf = ext.find((e9) => e9.extension === "transferFeeConfig");
+      if (tf) {
+        const newer = tf.state?.newerTransferFee?.transferFeeBasisPoints ?? 0;
+        const older = tf.state?.olderTransferFee?.transferFeeBasisPoints ?? 0;
+        if (newer || older) a2.blocked = { reason: "token2022_transfer_fee", basis_points: Math.max(newer, older) };
+      }
+      const frozen = mint.value?.data?.parsed?.info?.freezeAuthority;
+      if (frozen && a2.state === "frozen") a2.blocked = { reason: "frozen_account" };
+    } catch (e9) {
+      a2.coverage = `mint_read_failed:${e9.message}`;
+    }
+  }
+  const slotMin = Math.min(...reads), slotMax = Math.max(...reads);
+  const snap = {
+    chain: "solana",
+    owner,
+    captured_at: now(),
+    slots: reads,
+    slot_min: slotMin,
+    slot_max: slotMax,
+    coherence: slotMin === slotMax ? "coherent_at_slot" : "multi_call_range",
+    assets,
+    coverage: { token_programs: [TOKEN_PROGRAM, TOKEN_2022], native: true }
+  };
+  snap.evidence_sha256 = sha256hex(Buffer.from(canon(snap)));
+  try {
+    atomicJson(path6.join(P.snapshots, `snap-${snap.captured_at}-${slotMin}-${process.pid}-${Math.random().toString(16).slice(2, 8)}.json`), snap, 420);
+  } catch {
+  }
+  return snap;
+}
+function totalByAsset(snap) {
+  const m = /* @__PURE__ */ new Map();
+  for (const a2 of snap.assets) m.set(a2.asset, (BigInt(m.get(a2.asset) || 0n) + BigInt(a2.raw)).toString());
+  return m;
+}
+
+// distributor.mjs
+init_signer_client();
+init_rpc();
+var import_web398 = __toESM(require_index_cjs(), 1);
+init_esm6();
+var SYSTEM = "11111111111111111111111111111111";
+var MEMO = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr";
+var TICK_MS = Number(process.env.DIST_TICK_MS || 2e4);
+var ONCE = process.argv.includes("--once");
+var DRY = process.argv.includes("--dry");
+var policy = loadPolicy();
+function baseState() {
+  return {
+    birth_id: null,
+    t0: null,
+    highest_epoch: 0,
+    carry: { parent: {}, founder: {} },
+    obligations: {},
+    // id -> obligation
+    reserved: {},
+    // asset -> raw reserved for unpaid obligations
+    unresolved: {},
+    // epoch -> reason
+    anchors: {},
+    // epoch -> on-chain memo signature
+    settlements: {}
+    // id -> {signature, at, actual}
+  };
+}
+function loadState() {
+  const s3 = { ...baseState(), ...state({}) || {} };
+  s3.carry = { parent: {}, founder: {}, ...s3.carry || {} };
+  return s3;
+}
+function dueAt(t0, n) {
+  return t0 + n * 86400;
+}
+async function snapshotForEpoch(owner, epoch, t0) {
+  const due = dueAt(t0, epoch);
+  const snap = await snapshot(owner);
+  const lag = snap.captured_at - due;
+  if (lag < -60) return { ok: false, reason: "not_due" };
+  if (lag > 900) {
+    return { ok: false, reason: "snapshot_unresolved", detail: `live read ${lag}s after cutoff`, snap };
+  }
+  return { ok: true, snap, lag };
+}
+function assetBlocked(entry) {
+  if (entry.blocked) return entry.blocked.reason;
+  if (entry.state && entry.state !== "initialized") return `token_state_${entry.state}`;
+  return null;
+}
+function assessEpoch(st, snap, epoch) {
+  const byAsset = /* @__PURE__ */ new Map();
+  for (const a2 of snap.assets) {
+    const cur = byAsset.get(a2.asset) || { asset: a2.asset, chain: a2.chain, mint: a2.mint, program: a2.program, decimals: a2.decimals, raw: 0n, blocked: null, entry: a2 };
+    cur.raw += BigInt(a2.raw);
+    if (!cur.blocked && assetBlocked(a2)) cur.blocked = assetBlocked(a2);
+    byAsset.set(a2.asset, cur);
+  }
+  const created = [];
+  for (const v2 of byAsset.values()) {
+    const B = v2.raw;
+    for (const role2 of ["parent", "founder"]) {
+      const bps = role2 === "parent" ? policy.parentBps : policy.founderBps;
+      const prior = BigInt(st.carry[role2][v2.asset] || 0);
+      const { due, carry } = assess(B, prior, bps);
+      st.carry[role2][v2.asset] = carry.toString();
+      const id = `${st.birth_id}:${epoch}:solana:${v2.asset}:${role2}`;
+      if (st.obligations[id]) continue;
+      const dest = role2 === "parent" ? policy.policy.beneficiaries.parent : null;
+      const ob = {
+        id,
+        epoch,
+        chain: "solana",
+        asset: v2.asset,
+        mint: v2.mint,
+        program: v2.program,
+        decimals: v2.decimals,
+        role: role2,
+        basis_raw: B.toString(),
+        bps,
+        due_raw: due.toString(),
+        carry_after: carry.toString(),
+        destination: role2 === "parent" ? "parent_record" : policy.founderSolana,
+        status: v2.blocked ? "payment_blocked" : due > 0n ? "assessed" : "assessed_zero",
+        blocked_reason: v2.blocked || null,
+        snapshot_hash: snap.evidence_sha256,
+        assessed_at: now()
+      };
+      st.obligations[id] = ob;
+      created.push(ob);
+    }
+  }
+  return created;
+}
+function reserve(st) {
+  const r = {};
+  for (const ob of Object.values(st.obligations)) {
+    if (!["assessed", "signed", "pending", "partially_settled", "arrears"].includes(ob.status)) continue;
+    r[ob.asset] = (BigInt(r[ob.asset] || 0) + BigInt(ob.due_raw) - BigInt(ob.settled_raw || 0)).toString();
+  }
+  st.reserved = r;
+}
+function destFor(ob, parentRecord) {
+  if (ob.role === "parent") {
+    const rec = parentRecord?.record || parentRecord;
+    const d = rec?.parent_solana_destination;
+    if (!d || !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(d)) throw new Error("parent record has no valid solana destination");
+    return d;
+  }
+  return policy.founderSolana;
+}
+async function ensureAta(owner, mint, program) {
+  const prog = program === TOKEN_2022_PROGRAM_ID.toBase58() ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID;
+  const ata = getAssociatedTokenAddressSync(new import_web398.PublicKey(mint), new import_web398.PublicKey(owner), false, prog);
+  const info = await getAccountInfo(ata.toBase58());
+  return { ata: ata.toBase58(), exists: !!info, program: prog };
+}
+function toIx(ix) {
+  return {
+    programId: ix.programId.toBase58(),
+    keys: ix.keys.map((k2) => ({ pubkey: k2.pubkey.toBase58(), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
+    dataHex: Buffer.from(ix.data).toString("hex")
+  };
+}
+function systemTransfer(from, to, lamports2) {
+  const data = Buffer.alloc(12);
+  data.writeUInt32LE(2, 0);
+  data.writeBigUInt64LE(BigInt(lamports2), 4);
+  return new import_web398.TransactionInstruction({
+    programId: new import_web398.PublicKey(SYSTEM),
+    keys: [{ pubkey: new import_web398.PublicKey(from), isSigner: true, isWritable: true }, { pubkey: new import_web398.PublicKey(to), isSigner: false, isWritable: true }],
+    data
+  });
+}
+async function signAndSend({ ixs, watch, allowedDestinations, label }) {
+  const { blockhash: blockhash2, lastValidBlockHeight } = await getLatestBlockhash();
+  const env = await signV1({ instructions: ixs.map(toIx), blockhash: blockhash2, lastValidBlockHeight, cuLimit: 2e5, allowedDestinations });
+  const sim = await simulate(env.wireBase64, watch);
+  const v2 = sim.value || {};
+  if (v2.err) return { ok: false, stage: "simulate", err: v2.err, logs: (v2.logs || []).slice(-12), env };
+  const sig = await sendRaw(env.wireBase64);
+  if (sig !== env.signature) return { ok: false, stage: "send", err: "signature mismatch", sig, expected: env.signature, bytes: env.bytes };
+  const t0 = Date.now();
+  while (Date.now() - t0 < 9e4) {
+    const st = (await signatureStatuses([sig]))[0];
+    if (st) {
+      if (st.err) return { ok: false, stage: "chain", err: st.err, sig };
+      if (st.confirmationStatus === "confirmed" || st.confirmationStatus === "finalized") {
+        const tx = await getTransaction(sig);
+        if (!tx) return { ok: false, stage: "confirm_unresolved", sig };
+        if (tx.meta?.err) return { ok: false, stage: "chain", err: tx.meta.err, sig };
+        return { ok: true, sig, tx, blockhash: blockhash2, lastValidBlockHeight, env, units: v2.unitsConsumed };
+      }
+    }
+    await sleep(1200);
+  }
+  return { ok: false, stage: "pending", sig, note: "status unknown; resolve before replacement" };
+}
+async function payObligations(st, snap, parentRecord) {
+  const created = [];
+  for (const ob of Object.values(st.obligations)) {
+    if (!["arrears", "pending", "partially_settled"].includes(ob.status) || !ob.signature) continue;
+    try {
+      const stt = (await signatureStatuses([ob.signature]))[0];
+      if (stt && !stt.err && stt.confirmationStatus) {
+        ob.status = "settled";
+        ob.settled_raw = ob.due_raw;
+        ob.settled_at = now();
+        await append("distribution.reconcile", { id: ob.id, signature: ob.signature, status: stt.confirmationStatus });
+      }
+    } catch {
+    }
+  }
+  await save(st);
+  const groups = /* @__PURE__ */ new Map();
+  for (const ob of Object.values(st.obligations)) {
+    if (ob.status !== "assessed" || BigInt(ob.due_raw) === 0n) continue;
+    const dest = destFor(ob, parentRecord);
+    const key = `${ob.asset}|${dest}`;
+    const g2 = groups.get(key) || { asset: ob.asset, mint: ob.mint, program: ob.program, decimals: ob.decimals, dest, roles: [] };
+    g2.roles.push(ob);
+    groups.set(key, g2);
+  }
+  for (const g2 of groups.values()) {
+    const total = g2.roles.reduce((s3, r) => s3 + BigInt(r.due_raw), 0n);
+    try {
+      let ixs = [], watch = [];
+      if (g2.asset === "native:SOL") {
+        ixs = [systemTransfer(snap.owner, g2.dest, total)];
+        watch = [snap.owner, g2.dest];
+      } else {
+        const { ata, exists } = await ensureAta(g2.dest, g2.mint, g2.program);
+        const src = getAssociatedTokenAddressSync(
+          new import_web398.PublicKey(g2.mint),
+          new import_web398.PublicKey(snap.owner),
+          false,
+          g2.program === TOKEN_2022_PROGRAM_ID.toBase58() ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID
+        ).toBase58();
+        const prog = g2.program === TOKEN_2022_PROGRAM_ID.toBase58() ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID;
+        if (!exists) {
+          ixs.push(createAssociatedTokenAccountIdempotentInstruction(
+            new import_web398.PublicKey(snap.owner),
+            new import_web398.PublicKey(ata),
+            new import_web398.PublicKey(g2.dest),
+            new import_web398.PublicKey(g2.mint),
+            prog
+          ));
+        }
+        ixs.push(createTransferCheckedInstruction(
+          new import_web398.PublicKey(src),
+          new import_web398.PublicKey(g2.mint),
+          new import_web398.PublicKey(ata),
+          new import_web398.PublicKey(snap.owner),
+          total,
+          g2.decimals,
+          [],
+          prog
+        ));
+        watch = [src, ata, snap.owner];
+      }
+      const res = await signAndSend({ ixs, watch, allowedDestinations: [g2.dest], label: g2.asset });
+      const rec = {
+        at: now(),
+        asset: g2.asset,
+        dest: g2.dest,
+        amount_raw: total.toString(),
+        roles: g2.roles.map((r) => ({ id: r.id, role: r.role, due_raw: r.due_raw })),
+        ok: res.ok,
+        signature: res.sig || null,
+        stage: res.stage || "settled",
+        error: res.err || null,
+        logs: res.logs || null
+      };
+      created.push(rec);
+      await append("distribution.payment", rec);
+      for (const r of g2.roles) {
+        const ob = st.obligations[r.id];
+        if (res.ok) {
+          ob.status = "settled";
+          ob.settled_raw = ob.due_raw;
+          ob.settled_at = rec.at;
+          ob.signature = rec.signature;
+          st.settlements[r.id] = { signature: rec.signature, at: rec.at };
+        } else {
+          ob.status = res.stage === "pending" ? "pending" : "arrears";
+          ob.last_error = res.err || res.stage;
+          ob.attempts = (ob.attempts || 0) + 1;
+        }
+      }
+      await save(st);
+    } catch (e9) {
+      log("distributor", `payment failed ${g2.asset}`, { err: String(e9.message || e9), stack: (e9.stack || "").split("\n").slice(0, 4) });
+      for (const r of g2.roles) {
+        const ob = st.obligations[r.id];
+        ob.status = "arrears";
+        ob.last_error = String(e9.message || e9);
+        ob.attempts = (ob.attempts || 0) + 1;
+      }
+      await save(st);
+    }
+  }
+  return created;
+}
+async function anchorEpoch(st, epoch, assessmentHash) {
+  try {
+    const msg = `birth:${st.birth_id.slice(0, 8)} epoch:${epoch} assessment:${assessmentHash.slice(0, 16)}`;
+    const ix = new import_web398.TransactionInstruction({ programId: new import_web398.PublicKey(MEMO), keys: [{ pubkey: new import_web398.PublicKey(st.solana), isSigner: true, isWritable: false }], data: Buffer.from(msg, "utf8") });
+    const res = await signAndSend({ ixs: [ix], watch: [st.solana], allowedDestinations: [st.solana], label: "anchor" });
+    if (res.ok) {
+      st.anchors[epoch] = res.sig;
+      await append("distribution.anchor", { epoch, signature: res.sig, memo: msg });
+      await save(st);
+      return res.sig;
+    }
+    log("distributor", "epoch anchor not confirmed", { epoch, stage: res.stage, err: res.err });
+  } catch (e9) {
+    log("distributor", "anchor failed", { err: String(e9.message || e9) });
+  }
+  return null;
+}
+var OWNED = ["birth_id", "t0", "solana", "constitution_sha256", "highest_epoch", "carry", "obligations", "reserved", "unresolved", "anchors", "settlements"];
+async function save(st) {
+  await updateState((cur) => {
+    const next = { ...cur };
+    for (const k2 of OWNED) if (st[k2] !== void 0) next[k2] = st[k2];
+    return next;
+  });
+}
+function statusOf(st) {
+  const obs = Object.values(st.obligations);
+  const byStatus = {};
+  for (const o5 of obs) byStatus[o5.status] = (byStatus[o5.status] || 0) + 1;
+  const nextEpoch = (st.highest_epoch || 0) + 1;
+  return {
+    next_due_unix: st.t0 ? dueAt(st.t0, nextEpoch) : null,
+    next_due_epoch: nextEpoch,
+    highest_epoch: st.highest_epoch,
+    obligations: obs.length,
+    by_status: byStatus,
+    reserved: st.reserved,
+    carries: st.carry,
+    arrears_raw: obs.filter((o5) => ["arrears", "partially_settled"].includes(o5.status)).reduce((a2, o5) => {
+      a2[o5.asset] = (BigInt(a2[o5.asset] || 0) + BigInt(o5.due_raw) - BigInt(o5.settled_raw || 0)).toString();
+      return a2;
+    }, {}),
+    blocked: obs.filter((o5) => o5.status === "payment_blocked").map((o5) => ({ asset: o5.asset, role: o5.role, due_raw: o5.due_raw, reason: o5.blocked_reason })),
+    unresolved_epochs: st.unresolved,
+    anchors: st.anchors,
+    supervisor: "deterministic: no model, no credits, no approval step"
+  };
+}
+async function loopOnce(st) {
+  const parentRecord = readJson(P.parentRecord, null);
+  if (!parentRecord) throw new Error("parent record missing");
+  if (!st.birth_id) {
+    st.birth_id = state({}).birth_id;
+    st.t0 = state({}).t0;
+    st.solana = readJson(P.receipt, null).payload.solana.public_key;
+    await save(st);
+  }
+  const owner = st.solana;
+  while (now() >= dueAt(st.t0, st.highest_epoch + 1)) {
+    const epoch = st.highest_epoch + 1;
+    const due = dueAt(st.t0, epoch);
+    const got = await snapshotForEpoch(owner, epoch, st.t0);
+    if (!got.ok) {
+      st.unresolved[epoch] = got.reason;
+      await append("distribution.unresolved", { epoch, due, reason: got.reason, detail: got.detail || null });
+      if (got.reason === "snapshot_unresolved" && now() - due > 3600) {
+        st.highest_epoch = epoch;
+        await save(st);
+        continue;
+      }
+      await save(st);
+      break;
+    }
+    const created = assessEpoch(st, got.snap, epoch);
+    reserve(st);
+    st.highest_epoch = epoch;
+    const assessmentHash = sha256hex(Buffer.from(canon({ epoch, created, snapshot: got.snap.evidence_sha256 })));
+    await append("distribution.assessed", { epoch, due, snapshot_hash: got.snap.evidence_sha256, coherence: got.snap.coherence, assessment_hash: assessmentHash, obligations: created });
+    await save(st);
+    log("distributor", `epoch ${epoch} assessed`, { due, assets: new Set(created.map((c) => c.asset)).size, obligations: created.length });
+    if (!DRY) {
+      await payObligations(st, got.snap, parentRecord);
+      reserve(st);
+      await save(st);
+      await anchorEpoch(st, epoch, assessmentHash);
+    }
+  }
+  if (!DRY) {
+    const due = Object.values(st.obligations).filter((o5) => ["arrears", "partially_settled", "pending"].includes(o5.status) && BigInt(o5.due_raw) > 0n);
+    if (due.length) {
+      const snap = await snapshot(owner);
+      await payObligations(st, snap, parentRecord);
+      reserve(st);
+      await save(st);
+    }
+  }
+  return statusOf(st);
+}
+async function main2() {
+  ensureDirs();
+  openJournal();
+  let st = loadState();
+  const { birth_id, t0 } = state({});
+  st.birth_id = birth_id;
+  st.t0 = t0;
+  st.solana = readJson(P.receipt, null)?.payload?.solana?.public_key || null;
+  st.constitution_sha256 = policy.sha256;
+  await save(st);
+  log("distributor", "supervisor started", { birth_id, t0, next_due: dueAt(t0, st.highest_epoch + 1), dry: DRY });
+  const write2 = (s3) => atomicJson(P.heartbeat, { component: "distributor", ts: now(), pid: process.pid, status: s3 }, 420);
+  do {
+    try {
+      const s3 = await loopOnce(st);
+      st = loadState();
+      write2(s3);
+      const status = readJson(P.status, {}) || {};
+      atomicJson(P.status, { ...status, distribution: s3, updated_at: now() }, 420);
+    } catch (e9) {
+      log("distributor", `tick error ${e9.message}`, { stack: (e9.stack || "").split("\n").slice(0, 3) });
+      write2({ error: String(e9.message || e9) });
+    }
+    if (!ONCE) await sleep(TICK_MS);
+  } while (!ONCE);
+}
+main2().then(() => process.exit(0)).catch((e9) => {
+  log("distributor", `FATAL ${e9.stack || e9}`);
+  process.exit(1);
+});
+
+// identity-server.mjs
+import http from "node:http";
+import fs12 from "node:fs";
+import path8 from "node:path";
+init_paths();
+init_util();
+init_journal();
+init_signer_client();
+init_rpc();
+var PORT = Number(process.env.AGENT_HTTP_PORT) || 8787;
+var BIND = process.env.AGENT_BIND || "127.0.0.1";
+var policy2 = loadPolicy();
+openJournal();
+var digestCache = { at: 0, value: null };
+function currentDigest() {
+  if (now() - digestCache.at > 60) digestCache = { at: now(), value: imageDigest() };
+  return digestCache.value;
+}
+function receipt() {
+  const r = readJson(P.receipt, null);
+  if (!r) throw new Error("no receipt");
+  return r;
+}
+function publicStatus() {
+  const s3 = readJson(P.status, {}) || {};
+  const hb = readJson(P.heartbeat, {}) || {};
+  const r = readJson(P.receipt, null);
+  return {
+    ...s3,
+    birth_id: r?.payload?.birth_id || null,
+    solana: r?.payload?.solana?.public_key || null,
+    evm: r?.payload?.evm?.address || null,
+    constitution_sha256: r?.payload?.constitution_sha256 || policy2.sha256,
+    prime_directives: policy2.prime,
+    overrides: [],
+    image: (() => {
+      const birth = r?.payload?.image_digest || null;
+      const cur = currentDigest();
+      return { birth_digest: birth, core_digest_now: cur, match: birth === cur, meaning: "digest of the measured core files this guest is running" };
+    })(),
+    identity_binding: "identity_binding_unverified",
+    launches: (() => {
+      const book4 = readJson(`${P.strategy}/launches.json`, { mints: [] });
+      const mints = Array.isArray(book4) ? book4 : book4.mints || [];
+      return mints.slice(-12).map((m) => typeof m === "string" ? { mint: m } : m);
+    })(),
+    children: (() => {
+      const book4 = readJson(`${P.state}/children.json`, { children: [] });
+      const list2 = Array.isArray(book4) ? book4 : book4.children || [];
+      return list2.filter((c) => c && c.deploymentId).slice(-32).map((c) => ({ deploymentId: c.deploymentId, endpoint: c.endpoint || null, birth_id: c.identity?.birth_id || c.birth_id || null, status: c.status || null, created_at: c.created_at || null }));
+    })(),
+    journal: { head: head().head, seq: head().seq },
+    components: hb.components || hb,
+    served_at: now()
+  };
+}
+var server2 = http.createServer(async (req, res) => {
+  const url = new URL(req.url, `http://127.0.0.1:${PORT}`);
+  const send = (code, obj) => {
+    const body = JSON.stringify(obj, null, 2);
+    res.writeHead(code, {
+      "content-type": "application/json",
+      "cache-control": "no-store",
+      "access-control-allow-origin": "*",
+      "access-control-allow-headers": "*"
+    });
+    res.end(body);
+  };
+  try {
+    if (url.pathname === "/" || url.pathname === "/identity") {
+      const r = receipt();
+      return send(200, {
+        ...r,
+        canonical_signing_message: signingMessage(r.payload),
+        proof: { nonce_endpoint: "/identity/proof?nonce=<bounded-nonce>", identity_binding: "identity_binding_unverified", platform_quote: null },
+        schema_errors: verifyReceiptShape(r)
+      });
+    }
+    if (url.pathname === "/identity/proof") {
+      const nonce = String(url.searchParams.get("nonce") || "").slice(0, 128);
+      if (nonce.length < 8) return send(400, { error: "nonce too short" });
+      const r = receipt();
+      const receiptHash = sha256hex(Buffer.from(canon(r)));
+      const challenge2 = `agent-birth-proof-v1
+nonce:${nonce}
+receipt:${receiptHash}`;
+      const sig = await signMessage(challenge2);
+      return send(200, {
+        nonce,
+        receipt_sha256: receiptHash,
+        challenge_source: "live signer",
+        signatures: [
+          { wallet: "solana", algorithm: "ed25519", encoding: "base58", signature: sig.solana.signature },
+          { wallet: "evm", algorithm: "eip191-secp256k1", encoding: "hex", signature: sig.evm.signature }
+        ],
+        identity_binding: "identity_binding_unverified",
+        note: "Wallet possession is proven; guest measurement binding needs a platform quote this host does not provide.",
+        ts: now()
+      });
+    }
+    if (url.pathname === "/adopt") {
+      let body = "";
+      for await (const chunk of req) body += chunk;
+      let args = {};
+      try {
+        args = JSON.parse(body || "{}");
+      } catch {
+      }
+      const dep = String(args.deploymentId || "");
+      const addr = String(args.address || "");
+      if (!dep || !addr) return send(400, { error: "deploymentId and address required" });
+      try {
+        const { adopt: adopt2 } = await Promise.resolve().then(() => (init_adopt(), adopt_exports));
+        return send(200, await adopt2({ dep, addr, endpoint: args.endpoint || null, birth: args.birth_id || null }));
+      } catch (e9) {
+        return send(500, { error: String(e9.message || e9).slice(0, 200) });
+      }
+    }
+    if (url.pathname === "/children") {
+      try {
+        return send(200, JSON.parse(fs12.readFileSync(path8.join(P.strategy, "children.json"), "utf8")));
+      } catch {
+        return send(200, { children: [], updated_at: now() });
+      }
+    }
+    if (url.pathname === "/status") return send(200, publicStatus());
+    if (url.pathname === "/logs") {
+      const name = String(url.searchParams.get("name") || "agent").replace(/[^a-z0-9_.-]/gi, "");
+      const lines = Math.min(Number(url.searchParams.get("lines") || 60), 400);
+      const file2 = path8.join(P.state, `${name}.log`);
+      try {
+        const txt = fs12.readFileSync(file2, "utf8").trim().split("\n").slice(-lines);
+        return send(200, { name, lines: txt });
+      } catch (e9) {
+        return send(404, { name, error: String(e9.message || e9) });
+      }
+    }
+    if (url.pathname === "/healthz") return send(200, { ok: true, ts: now() });
+    return send(404, { error: "not found" });
+  } catch (e9) {
+    return send(500, { error: String(e9.message || e9) });
+  }
+});
+ensureDirs();
+server2.on("error", async (e9) => {
+  if (e9.code === "EADDRINUSE") {
+    try {
+      const r = await fetch(`http://127.0.0.1:${PORT}/healthz`);
+      if (r.ok) {
+        log("server", "another identity server already serving; exiting clean");
+        process.exit(0);
+      }
+    } catch {
+    }
+  }
+  log("server", `listen error ${e9.message}`);
+  process.exit(1);
+});
+server2.listen(PORT, BIND, () => {
+  fs12.writeFileSync(P.port, String(PORT));
+  log("server", `identity server on http://${BIND}:${PORT}`);
+  const hb = readJson(P.heartbeat, {}) || {};
+  atomicJson(P.heartbeat, { ...hb, component: hb.component || "watchdog", ts: now(), components: { ...hb.components || {}, identity_server: { pid: process.pid, ts: now() } } }, 420);
+});
+process.on("SIGTERM", () => {
+  try {
+    fs12.unlinkSync(P.port);
+  } catch {
+  }
+  server2.close(() => process.exit(0));
+});
+
+// brain.mjs
+init_paths();
+init_util();
+init_journal();
+init_signer_client();
+init_rpc();
+init_venice();
 import fs22 from "node:fs";
 import path15 from "node:path";
+
+// inference/bazaar.mjs
+init_util();
+init_paths();
+import fs13 from "node:fs";
+var BASE3 = "https://api.cdp.coinbase.com/platform/v2/x402/discovery/resources";
+var PAGE = 1e3;
+var HEADERS = { accept: "application/json", "user-agent": "birth-image-agent/1.0" };
+function providersPath() {
+  return P.strategy + "/providers.json";
+}
+function looksInference(it) {
+  const text = `${it.resource || ""} ${it.description || ""} ${it.title || ""} ${it.name || ""} ${JSON.stringify(it.extensions || {})}`.toLowerCase();
+  return /chat\/completions|\/llm|inference|completion|messages|\/v1\/chat|text-generation|model/.test(text);
+}
+function railOf(accepts, net3) {
+  return (accepts || []).find((a2) => a2 && a2.scheme === "exact" && String(a2.network || "").includes(net3));
+}
+async function crawl({ pages = 24, journal = null } = {}) {
+  const out = [];
+  let total = null, scanned = 0, errors = [];
+  for (let p2 = 0; p2 < pages; p2++) {
+    const offset = p2 * PAGE;
+    try {
+      const r = await fetch(`${BASE3}?limit=${PAGE}&offset=${offset}`, { headers: HEADERS });
+      if (!r.ok) {
+        errors.push({ offset, status: r.status });
+        break;
+      }
+      const j2 = await r.json();
+      total = j2.pagination?.total ?? j2.total ?? total;
+      const items = j2.items || j2.resources || [];
+      scanned += items.length;
+      for (const it of items) {
+        if (!looksInference(it)) continue;
+        const sol2 = railOf(it.accepts, "solana");
+        const base3 = railOf(it.accepts, "8453");
+        if (!sol2 && !base3) continue;
+        const fields = it.extensions?.bazaar?.info?.input?.bodyFields || it.extensions?.bazaar?.info?.input?.body || {};
+        out.push({
+          id: sha256hex(Buffer.from(String(it.resource))).slice(0, 12),
+          url: it.resource,
+          name: it.title || it.name || null,
+          description: (it.description || "").slice(0, 200),
+          solana: sol2 ? { asset: sol2.asset, payTo: sol2.payTo, amount: sol2.maxAmountRequired || sol2.amount, feePayer: sol2.extra?.feePayer || null } : null,
+          base: base3 ? { asset: base3.asset, payTo: base3.payTo, amount: base3.maxAmountRequired || base3.amount } : null,
+          models: fields?.model?.enum || fields?.model?.examples || null,
+          verified_wallet_x402: false
+        });
+      }
+      if (items.length < PAGE) break;
+    } catch (e9) {
+      errors.push({ offset, error: String(e9.message || e9) });
+      break;
+    }
+  }
+  const doc = {
+    at: now(),
+    source: BASE3,
+    page_size: PAGE,
+    pages_scanned: Math.ceil(scanned / PAGE),
+    catalog_total: total,
+    scanned,
+    inference_candidates: out.length,
+    solana_candidates: out.filter((x) => x.solana).length,
+    errors,
+    providers: out.sort((a2, b2) => Number(!!b2.solana) - Number(!!a2.solana))
+  };
+  atomicJson(providersPath(), doc, 384);
+  if (journal) {
+    try {
+      await journal.append("bazaar.crawl", { scanned, total, candidates: out.length, errors });
+    } catch {
+    }
+  }
+  log("bazaar", "inventory refreshed", { scanned, total, candidates: out.length });
+  return doc;
+}
+function loadProviders() {
+  try {
+    return JSON.parse(fs13.readFileSync(providersPath(), "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+// inference/x402-generic.mjs
+var import_web3100 = __toESM(require_index_cjs(), 1);
+init_esm6();
+init_signer_client();
+init_rpc();
+init_util();
+var SOL_USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+function parseChallenge(body, headers) {
+  const hdr2 = headers.get("payment-required");
+  let req = body;
+  if (hdr2) {
+    try {
+      req = JSON.parse(Buffer.from(hdr2, "base64").toString("utf8"));
+    } catch {
+    }
+  }
+  return req;
+}
+async function call(identity4, provider, { body, maxTokens = 1200, timeoutMs = 6e4 } = {}) {
+  const payload = JSON.stringify({ ...body, max_tokens: maxTokens });
+  const t0 = Date.now();
+  const first = await fetch(provider.url, { method: "POST", headers: { "content-type": "application/json", accept: "application/json" }, body: payload });
+  if (first.ok) return { ok: true, response: await first.json(), paid: false, ms: Date.now() - t0 };
+  if (first.status !== 402) return { ok: false, status: first.status, text: (await first.text()).slice(0, 300), ms: Date.now() - t0 };
+  const req = parseChallenge(await first.json().catch(() => ({})), first.headers);
+  const rail = (req.accepts || []).find((a2) => a2 && a2.scheme === "exact" && String(a2.network).includes("solana") && String(a2.asset) === SOL_USDC);
+  if (!rail) return { ok: false, status: 402, error: "no solana USDC exact rail", accepts: (req.accepts || []).map((a2) => a2.network), ms: Date.now() - t0 };
+  if (!rail.extra?.feePayer) return { ok: false, status: 402, error: "rail has no sponsor feePayer", ms: Date.now() - t0 };
+  const amount = BigInt(rail.maxAmountRequired || rail.amount);
+  const mint = new import_web3100.PublicKey(rail.asset);
+  const from = getAssociatedTokenAddressSync(mint, new import_web3100.PublicKey(identity4.solana.public_key));
+  const to = getAssociatedTokenAddressSync(mint, new import_web3100.PublicKey(rail.payTo), true);
+  const ixs = [import_web3100.ComputeBudgetProgram.setComputeUnitLimit({ units: 2e5 }), import_web3100.ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 1 })];
+  if (!await getAccountInfo(to.toBase58())) {
+    ixs.push(createAssociatedTokenAccountIdempotentInstruction(new import_web3100.PublicKey(rail.extra.feePayer), to, new import_web3100.PublicKey(rail.payTo), mint, TOKEN_PROGRAM_ID));
+  }
+  ixs.push(createTransferCheckedInstruction(from, mint, to, new import_web3100.PublicKey(identity4.solana.public_key), amount, 6, [], TOKEN_PROGRAM_ID));
+  const { blockhash: blockhash2 } = await getLatestBlockhash();
+  const signed = await request("sign_payment_legacy", {
+    feePayer: rail.extra.feePayer,
+    blockhash: blockhash2,
+    lastValidBlockHeight: 0,
+    instructions: ixs.map((ix) => ({
+      programId: ix.programId.toBase58(),
+      keys: ix.keys.map((k2) => ({ pubkey: k2.pubkey.toBase58(), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
+      dataHex: Buffer.from(ix.data).toString("hex")
+    }))
+  });
+  const version3 = req.x402Version === 1 ? 1 : 2;
+  const envelope = {
+    x402Version: version3,
+    scheme: "exact",
+    network: rail.network,
+    resource: req.resource || { url: provider.url },
+    accepted: rail,
+    payload: { transaction: signed.wireBase64 }
+  };
+  const header = Buffer.from(JSON.stringify(envelope)).toString("base64");
+  const second = await fetch(provider.url, {
+    method: "POST",
+    headers: { "content-type": "application/json", accept: "application/json", "PAYMENT-SIGNATURE": header, "X-PAYMENT": header },
+    body: payload
+  });
+  const text = await second.text();
+  const receipt2 = second.headers.get("payment-response") || second.headers.get("x-payment-response");
+  let json = null;
+  try {
+    json = JSON.parse(text);
+  } catch {
+  }
+  return {
+    ok: second.ok,
+    status: second.status,
+    response: json,
+    text: second.ok ? null : text.slice(0, 300),
+    paid: true,
+    amount_raw: amount.toString(),
+    payTo: rail.payTo,
+    feePayer: rail.extra.feePayer,
+    receipt: receipt2 ? (() => {
+      try {
+        return JSON.parse(Buffer.from(receipt2, "base64").toString("utf8"));
+      } catch {
+        return null;
+      }
+    })() : null,
+    ms: Date.now() - t0
+  };
+}
+
+// inference/select.mjs
+init_util();
+init_paths();
+var CATALOG = "https://api.venice.ai/api/v1/models?type=text";
+function selectionPath() {
+  return P.strategy + "/inference-selection.json";
+}
+function isAbliterated(m) {
+  const text = `${m.id} ${m.model_spec?.name || ""} ${m.model_spec?.description || ""}`.toLowerCase();
+  if (/non[- ]?abliterated|not abliterated/.test(text)) return false;
+  return /abliterated|uncensored|refuseless|abliteration/.test(text) || m.model_spec?.uncensored === true;
+}
+function score(m) {
+  const c = m.model_spec?.capabilities || {};
+  const p2 = m.model_spec?.pricing || {};
+  const inUsd = Number(p2.input?.usd ?? 1e9);
+  const outUsd = Number(p2.output?.usd ?? 1e9);
+  const ctx = Number(m.model_spec?.availableContextTokens || m.context_length || 0);
+  return {
+    function_calling: c.supportsFunctionCalling ? 1 : 0,
+    reasoning: c.supportsReasoning ? 1 : 0,
+    ctx,
+    price_in: inUsd,
+    price_out: outUsd,
+    // higher is better: capability first, then cheapness, then context
+    rank: (c.supportsFunctionCalling ? 1e6 : 0) + (c.supportsReasoning ? 5e5 : 0) - (inUsd * 1e4 + outUsd * 1e4) / 100 + Math.min(ctx, 1e6) / 100
+  };
+}
+async function select({ force = false } = {}) {
+  const prior = readJson(selectionPath(), null);
+  if (prior && !force && now() - prior.at < 6 * 3600) return prior;
+  const r = await fetch(CATALOG);
+  if (!r.ok) throw new Error(`catalog ${r.status}`);
+  const j2 = await r.json();
+  const models = (j2.data || j2.models || []).filter((m) => m && m.id && m.type !== "embedding");
+  const candidates = models.filter(isAbliterated).map((m) => ({ id: m.id, why: isAbliterated(m), meta: score(m), name: m.model_spec?.name || m.id, offline: m.model_spec?.offline }));
+  candidates.sort((a2, b2) => b2.meta.rank - a2.meta.rank);
+  const chosen = candidates.find((c) => c.meta.function_calling) || candidates[0];
+  if (!chosen) throw new Error("no abliterated model offered");
+  const out = {
+    at: now(),
+    selected: chosen.id,
+    name: chosen.name,
+    policy: "explicitly abliterated, function calling, reasoning; then cheapest, then largest context",
+    candidates: candidates.slice(0, 8).map((c) => ({ id: c.id, fc: c.meta.function_calling, reasoning: c.meta.reasoning, ctx: c.meta.ctx, in: c.meta.price_in, out: c.meta.price_out, rank: Math.round(c.meta.rank) })),
+    catalog_sha256: sha256hex(Buffer.from(canon(models.map((m) => m.id)))),
+    note: "model choice is runtime configuration through the fixed interface; it is not a weight checksum"
+  };
+  atomicJson(selectionPath(), out, 384);
+  log("inference", "model selected", { selected: out.selected, candidates: out.candidates.length });
+  return out;
+}
+
+// lib/accounting.mjs
+init_rpc();
+init_journal();
+init_util();
+async function observeFunding(identity4) {
+  const st = state({});
+  const snap = await snapshot(identity4.solana.public_key);
+  const totals = Object.fromEntries(totalByAsset(snap));
+  const prior = st.last_balances || {};
+  const deltas = {};
+  for (const [asset, raw] of Object.entries(totals)) {
+    const d = BigInt(raw) - BigInt(prior[asset] || 0);
+    if (d !== 0n) deltas[asset] = d.toString();
+  }
+  for (const [asset, raw] of Object.entries(prior)) {
+    if (!(asset in totals)) {
+      const d = -BigInt(raw);
+      if (d !== 0n) deltas[asset] = d.toString();
+    }
+  }
+  const inflow = Object.entries(deltas).filter(([, v2]) => BigInt(v2) > 0n);
+  if (inflow.length) {
+    await append("funding.observed", {
+      at: now(),
+      slot: snap.slot_min,
+      snapshot_hash: snap.evidence_sha256,
+      deposits: inflow.map(([asset, raw]) => ({ asset, raw, classification: "capital_not_revenue" })),
+      note: "endowment and later deposits are capital until disposed by a strategy"
+    });
+  }
+  await updateState((cur) => ({ ...cur, last_balances: totals, last_snapshot: { at: now(), slot: snap.slot_min, hash: snap.evidence_sha256 } }));
+  return { totals, deltas, snap };
+}
+function reservedByAsset() {
+  const st = state({});
+  return st.reserved || {};
+}
+function spendable(totalsRaw, reserveFeeLamports = 5000000n) {
+  const reserved = reservedByAsset();
+  const out = {};
+  for (const [asset, raw] of Object.entries(totalsRaw)) {
+    let v2 = BigInt(raw) - BigInt(reserved[asset] || 0);
+    if (asset === "native:SOL") v2 -= reserveFeeLamports;
+    out[asset] = v2 > 0n ? v2.toString() : "0";
+  }
+  return out;
+}
+async function solAndUsdc(identity4) {
+  const sol2 = BigInt(await getBalance(identity4.solana.public_key));
+  const usdc = (await tokenAccounts(identity4.solana.public_key, "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")).filter((a2) => a2.account.data.parsed.info.mint === "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v").reduce((s3, a2) => s3 + BigInt(a2.account.data.parsed.info.tokenAmount.amount), 0n);
+  return { sol_raw: sol2.toString(), usdc_raw: usdc.toString() };
+}
+
+// brain.mjs
+init_treasury();
+
+// lib/toolbox.mjs
+init_paths();
+init_util();
+import path9 from "node:path";
+var FILE = path9.join(P.state, "tools.json");
+function loadExtra() {
+  const j2 = readJson(FILE, { tools: [] });
+  return Array.isArray(j2.tools) ? j2.tools : [];
+}
+function all(builtin) {
+  const extra = loadExtra().filter((t) => t && t.name && t.parameters).map((t) => ({ type: "function", function: { name: t.name, description: t.description || t.name, parameters: t.parameters } }));
+  const names = new Set(builtin.map((t) => t.function.name));
+  return [...builtin, ...extra.filter((t) => !names.has(t.function.name))];
+}
+function register(def) {
+  if (!def?.name || !/^[a-z][a-z0-9_]{2,40}$/.test(def.name)) throw new Error("bad tool name");
+  if (!def.parameters || def.parameters.type !== "object") throw new Error("parameters must be a JSON schema object");
+  const extra = loadExtra().filter((t) => t.name !== def.name);
+  extra.push({ name: def.name, description: def.description || def.name, parameters: def.parameters, endpoint: def.endpoint || null, method: def.method || "POST", registered_at: now() });
+  atomicJson(FILE, { tools: extra, updated_at: now() }, 384);
+  return extra.length;
+}
+function describe() {
+  return loadExtra().map((t) => ({ name: t.name, description: t.description, endpoint: t.endpoint || null, registered_at: t.registered_at }));
+}
+
+// brain.mjs
+init_playbooks();
+init_lease();
+
+// lib/childcompose.mjs
+init_rpc();
+function childCompose({ imageUrl, parentBirthId, parentSolana, extraEnv = {} }) {
+  const env = {
+    AGENT_RUNTIME_DIR: "/app",
+    AGENT_BUNDLE_DIR: "/app",
+    AGENT_GUEST_ROOT: "/var/lib/agent",
+    AGENT_BUNDLE: "1",
+    AGENT_HTTP_PORT: "8787",
+    AGENT_BIND: "0.0.0.0",
+    AGENT_CLUSTER: "mainnet-beta",
+    RPC_URL,
+    AGENT_PARENT_BIRTH_ID: parentBirthId || "",
+    AGENT_PARENT_SOLANA: parentSolana || "",
+    ...extraEnv
+  };
+  const envLines = Object.entries(env).map(([k2, v2]) => `      ${k2}: "${String(v2).replace(/"/g, '\\"')}"`).join("\n");
+  return `services:
+  agent:
+    image: node:22-alpine
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    environment:
+${envLines}
+    command:
+      - sh
+      - -c
+      - |
+        set -e
+        mkdir -p /app /var/lib/agent
+        wget -qO /tmp/img.tgz "${imageUrl}"
+        tar xzf /tmp/img.tgz -C /app
+        cd /app && AGENT_ROLE=boot node /app/agent.mjs
+        while true; do env AGENT_ROLE=watchdog node /app/agent.mjs; sleep 5; done
+`;
+}
+
+// lib/providers.mjs
+init_signer_client();
+init_lease();
+import fs15 from "node:fs";
+
+// lib/lease-evm.mjs
+init_lease();
+init_x402_evm();
+init_journal();
+init_util();
+var EVM_NETWORK = (() => {
+  const v2 = String(process.env.AGENT_LEASE_NETWORK || "eip155:8453").toLowerCase();
+  return v2 === "base" ? "eip155:8453" : v2 === "polygon" ? "eip155:137" : v2;
+})();
+async function railBalances(identity4) {
+  const out = { solana: 0n, base: 0n };
+  try {
+    const R2 = await Promise.resolve().then(() => (init_rpc(), rpc_exports));
+    const accs = await R2.tokenAccounts(identity4.solana.public_key, "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+    out.solana = accs.filter((a2) => a2.account.data.parsed.info.mint === "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v").reduce((s22, a2) => s22 + BigInt(a2.account.data.parsed.info.tokenAmount.amount), 0n);
+  } catch {
+  }
+  try {
+    const data = "0x70a08231000000000000000000000000" + identity4.evm.address.slice(2).toLowerCase();
+    const r = await fetch("https://mainnet.base.org", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to: "833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", data }, "latest"] })
+    });
+    const j2 = await r.json();
+    out.base = BigInt(j2.result || "0x0");
+  } catch {
+  }
+  return out;
+}
+function pickRail(accepts, balances2 = null) {
+  const norm2 = (n) => {
+    const v2 = String(n || "").toLowerCase();
+    if (v2 === "base") return "eip155:8453";
+    if (v2 === "polygon") return "eip155:137";
+    return v2;
+  };
+  const envRail = (process.env.AGENT_LEASE_NETWORK || "").toLowerCase();
+  if (!envRail && balances2) {
+    const want = String(balances2.solana) !== "0" && String(balances2.solana) !== "0" ? "solana" : "base";
+    const chosen = want === "solana" ? (accepts || []).find((a2) => String(a2.network) === "solana") : (accepts || []).find((a2) => norm2(a2.network) === EVM_NETWORK && a2.scheme === "exact");
+    if (chosen) return { kind: want === "solana" ? "solana" : "evm", rail: chosen };
+  }
+  const preferSol = envRail === "solana";
+  const base3 = preferSol ? null : (accepts || []).find((a2) => norm2(a2.network) === EVM_NETWORK && a2.scheme === "exact");
+  if (base3) return { kind: "evm", rail: base3 };
+  const sol2 = (accepts || []).find((a2) => String(a2.network) === "solana");
+  if (sol2) return { kind: "solana", rail: sol2 };
+  throw new Error(`no payable rail: ${(accepts || []).map((a2) => a2.network).join(",")}`);
+}
+async function paidPostAuto(path19, body, identity4, tag) {
+  const post = (headers = {}) => fetch(API + path19, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
+  const first = await post();
+  if (first.status !== 402) return { status: first.status, json: await first.json().catch(() => ({})) };
+  const quote4 = await first.json().catch(() => ({}));
+  const balances2 = await railBalances(identity4).catch(() => null);
+  const { kind, rail } = pickRail(quote4.accepts, balances2);
+  if (kind === "evm") {
+    const auth = await authorize(rail, { value: rail.maxAmountRequired || rail.amount, resource: rail.resource, version: quote4.x402Version || 1 });
+    const second2 = await post({ "X-PAYMENT": auth.header, "PAYMENT-SIGNATURE": auth.header });
+    const json2 = await second2.json().catch(() => ({}));
+    await append(tag, { path: path19, rail: rail.network, status: second2.status, amount: String(rail.maxAmountRequired || rail.amount), at: now(), deploymentId: json2.deploymentId || json2.id || null });
+    return { status: second2.status, json: json2, rail: rail.network, amount_raw: String(rail.maxAmountRequired || rail.amount) };
+  }
+  const payment = await paySolana(rail, identity4);
+  const second = await post({ "X-PAYMENT": payment.header, "PAYMENT-SIGNATURE": payment.header });
+  const json = await second.json().catch(() => ({}));
+  await append(tag, { path: path19, rail: "solana", status: second.status, amount_raw: payment.amount, at: now(), deploymentId: json.deploymentId || json.id || null });
+  return { status: second.status, json, rail: "solana", amount_raw: payment.amount };
+}
+
+// lib/providers.mjs
+init_x402_evm();
+
+// lib/secretvm.mjs
+init_signer_client();
+var BASE4 = process.env.SECRETVM_BASE || "https://secretai.scrtlabs.com";
+
+// lib/providers.mjs
+init_journal();
+init_util();
+var SSH_PUB = process.env.AGENT_SSH_PUB_FILE || "C:/Users/User/birth-image/guest/ssh/id_ed25519.pub";
+async function provisionAgentgates({ plan = "compute.standard", compose: compose2, hours = 1 } = {}) {
+  const identity4 = await identity();
+  process.env.AGENT_LEASE_NETWORK = process.env.AGENT_LEASE_NETWORK || "solana";
+  const r = await paidPostAuto("/api/compute/deployments", { plan, hours, compose: compose2, name: `birth-child-${Math.floor(now() / 60)}` }, identity4, "procreation.lease");
+  const id = r.json?.deploymentId || r.json?.id || null;
+  if (!id) throw new Error(`agentgates: ${JSON.stringify(r.json).slice(0, 120)}`);
+  return { provider: "agentgates", id, rail: r.rail, raw: r.json };
+}
+async function provisionSecretvm({ vmTypeId = "small" } = {}) {
+  const { execFile } = await import("node:child_process");
+  const { promisify } = await import("node:util");
+  const run = promisify(execFile);
+  const { stdout } = await run(process.execPath, ["C:/Users/User/birth-image/runtime/bin/deploy-secretvm.mjs", vmTypeId], { timeout: 18e4 });
+  const line = stdout.trim().split(String.fromCharCode(10)).filter((l3) => l3.startsWith("{")).pop();
+  const j2 = JSON.parse(line);
+  if (!j2.json?.id) throw new Error(`secretvm: ${String(j2.body).slice(0, 120)}`);
+  return { provider: "secretvm", id: j2.json.id, endpoint: `https://${j2.json.vmDomain}`, raw: j2.json };
+}
+async function provisionX402Compute({ plan = "vc2-1c-1gb", hours = 24 } = {}) {
+  const identity4 = await identity();
+  const pub = fs15.readFileSync(SSH_PUB, "utf8").trim();
+  const body = { plan, provider: plan.startsWith("do:") ? "digitalocean" : "vultr", region: process.env.X402C_REGION || "ewr", os_id: 2284, label: `birth-${Math.floor(now() / 60)}`, prepaid_hours: hours, ssh_public_key: pub };
+  const post = (headers = {}) => fetch("https://compute.x402layer.cc/compute/provision", { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
+  const first = await post();
+  if (first.status !== 402) {
+    const j3 = await first.json().catch(() => ({}));
+    return { provider: "x402compute", id: j3.order?.id || null, raw: j3 };
+  }
+  const q2 = await first.json();
+  const accept = pickAccept(q2.accepts, { network: "eip155:8453" }) || q2.accepts?.[0];
+  const auth = await authorize(accept, { value: accept.amount || accept.maxAmountRequired, resource: q2.resource?.url, version: q2.x402Version || 1 });
+  const second = await post({ "X-PAYMENT": auth.header, "PAYMENT-SIGNATURE": auth.header });
+  const j2 = await second.json().catch(() => ({}));
+  const out = { provider: "x402compute", id: j2.order?.id || null, ip: j2.order?.ip_address || null, raw: j2 };
+  await append("procreation.x402compute", { status: second.status, id: out.id, ip: out.ip, plan });
+  if (!out.id) throw new Error(`x402compute: ${JSON.stringify(j2).slice(0, 120)}`);
+  return out;
+}
+async function provisionAgvps({ location = process.env.AGVPS_LOCATION || "de" } = {}) {
+  const body = { location, hostname: "birth-" + Math.floor(now() / 60) };
+  const post = (headers = {}) => fetch("https://agvps.shveik.dev/x402/vps-small", { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
+  const first = await post();
+  if (first.status !== 402) {
+    const j3 = await first.json().catch(() => ({}));
+    return { provider: "agvps", id: j3.id || j3.serverId || null, raw: j3 };
+  }
+  const q2 = await first.json();
+  const accept = pickAccept(q2.accepts, { network: "eip155:8453" }) || q2.accepts?.[0];
+  const auth = await authorize(accept, { value: accept.amount || accept.maxAmountRequired, resource: q2.resource?.url, version: q2.x402Version || 1 });
+  const second = await post({ "X-PAYMENT": auth.header, "PAYMENT-SIGNATURE": auth.header });
+  const j2 = await second.json().catch(() => ({}));
+  const id = j2.id || j2.serverId || (Array.isArray(j2) ? j2[0]?.id : null) || null;
+  await append("procreation.agvps", { status: second.status, id, raw: JSON.stringify(j2).slice(0, 200) });
+  if (!id) throw new Error("agvps: " + JSON.stringify(j2).slice(0, 120));
+  return { provider: "agvps", id, raw: j2 };
+}
+async function provisionAny({ compose: compose2, plan = "compute.standard", prefer = (process.env.AGENT_PROVIDER_ORDER || "agentgates,secretvm,x402compute,agvps").split(",") } = {}) {
+  const results = [];
+  for (const p2 of prefer) {
+    try {
+      if (p2 === "agentgates") results.push(await provisionAgentgates({ plan, compose: compose2 }));
+      else if (p2 === "secretvm") results.push(await provisionSecretvm({}));
+      else if (p2 === "x402compute") results.push(await provisionX402Compute({}));
+      else if (p2 === "agvps") results.push(await provisionAgvps({}));
+      await append("procreation.provider_ok", { provider: p2, at: now() });
+      return { ok: true, ...results[results.length - 1], tried: results };
+    } catch (e9) {
+      await append("procreation.provider_fail", { provider: p2, err: String(e9.message || e9).slice(0, 160) });
+      results.push({ provider: p2, error: String(e9.message || e9).slice(0, 160) });
+    }
+  }
+  return { ok: false, tried: results };
+}
+
+// brain.mjs
+init_pump_sdk_launch();
+init_pump_lifecycle();
+
+// strategies/flashloan.mjs
+var import_web3127 = __toESM(require_index_cjs(), 1);
+init_flashloan();
+init_esm6();
+var import_bn23 = __toESM(require_bn(), 1);
+init_paths();
+init_util();
+init_rpc();
+init_signer_client();
+init_journal();
+init_swap();
+var RPC_URL2 = RPC_URL;
+var conn2 = new import_web3127.Connection(RPC_URL2, { commitment: "confirmed" });
+var USDC3 = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+var WSOL3 = "So11111111111111111111111111111111111111112";
+var CANDIDATES = [
+  { mint: WSOL3, symbol: "SOL", decimals: 9 },
+  { mint: "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN", symbol: "JUP", decimals: 6 },
+  { mint: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263", symbol: "BONK", decimals: 5 },
+  { mint: "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm", symbol: "WIF", decimals: 6 }
+];
+function j() {
+  return P.strategy + "/flashloan.json";
+}
+function loadBook() {
+  return readJson(j(), { attempts: [], candidates: [], updated_at: null });
+}
+function saveBook(b2) {
+  b2.updated_at = now();
+  atomicJson(j(), b2, 384);
+}
+function toIx2(ix) {
+  return {
+    programId: ix.programId.toBase58(),
+    keys: ix.keys.map((k2) => ({ pubkey: k2.pubkey.toBase58(), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
+    dataHex: Buffer.from(ix.data).toString("hex")
+  };
+}
+async function scan({ sizeUsdc = 100000000n, slippageBps = 20, mints = CANDIDATES } = {}) {
+  const out = [];
+  for (const c of mints) {
+    try {
+      const a2 = await quote({ inputMint: USDC3, outputMint: c.mint, amount: sizeUsdc.toString(), slippageBps });
+      const b2 = await quote({ inputMint: c.mint, outputMint: USDC3, amount: a2.outAmount, slippageBps });
+      const back = BigInt(b2.outAmount);
+      const net3 = back - BigInt(sizeUsdc);
+      out.push({
+        id: `usdc-${c.symbol}-usdc`,
+        mint: c.mint,
+        symbol: c.symbol,
+        size_usdc_raw: sizeUsdc.toString(),
+        leg1_out: a2.outAmount,
+        leg2_out: b2.outAmount,
+        net_usdc_raw: net3.toString(),
+        price_impact_pct: [a2.priceImpactPct, b2.priceImpactPct],
+        net_usd: Number(net3) / 1e6,
+        slot: Math.max(Number(a2.contextSlot || 0), Number(b2.contextSlot || 0)),
+        route_labels: [...new Set([...a2.routePlan || [], ...b2.routePlan || []].map((r) => r.swapInfo?.label))],
+        quoted_at: now()
+      });
+    } catch (e9) {
+      out.push({ id: `usdc-${c.symbol}-usdc`, mint: c.mint, symbol: c.symbol, error: String(e9.message || e9) });
+    }
+  }
+  out.sort((x, y) => Number(BigInt(y.net_usdc_raw || 0) - BigInt(x.net_usdc_raw || 0)));
+  const book4 = loadBook();
+  book4.candidates = out;
+  saveBook(book4);
+  return out;
+}
+async function build({ identity: identity4, candidate, slippageBps = 20 }) {
+  const size = BigInt(candidate.size_usdc_raw);
+  const owner = new import_web3127.PublicKey(identity4.solana.public_key);
+  const usdcAta = getAssociatedTokenAddressSync(new import_web3127.PublicKey(USDC3), owner);
+  const { borrowIx, paybackIx, feeAmount } = await getFlashloanIx({
+    connection: conn2,
+    signer: owner,
+    asset: new import_web3127.PublicKey(USDC3),
+    amount: new import_bn23.default(size.toString())
+  });
+  const ixs = [toIx2(createAssociatedTokenAccountIdempotentInstruction(owner, usdcAta, owner, new import_web3127.PublicKey(USDC3), TOKEN_PROGRAM_ID)), toIx2(borrowIx)];
+  const a2 = await quote({ inputMint: USDC3, outputMint: candidate.mint, amount: size.toString(), slippageBps });
+  const aSet = await swapInstructions({ quoteResponse: a2, userPublicKey: owner.toBase58() });
+  ixs.push(...ixsOf(aSet));
+  const b2 = await quote({ inputMint: candidate.mint, outputMint: USDC3, amount: a2.otherAmountThreshold, slippageBps });
+  const bSet = await swapInstructions({ quoteResponse: b2, userPublicKey: owner.toBase58() });
+  ixs.push(...ixsOf(bSet));
+  ixs.push(toIx2(paybackIx));
+  const uniq = uniqueAccounts(ixs);
+  return {
+    ixs,
+    unique_accounts: uniq.length,
+    fee_raw: (feeAmount ?? 0n).toString(),
+    expected_out_raw: b2.outAmount,
+    min_out_raw: b2.otherAmountThreshold,
+    plan_hash: sha256hex(Buffer.from(canon({ candidate: candidate.id, size: size.toString(), a: a2.outAmount, b: b2.outAmount, min: b2.otherAmountThreshold })))
+  };
+}
+async function simulatePlan({ identity: identity4, plan }) {
+  const usdcAta = getAssociatedTokenAddressSync(new import_web3127.PublicKey(USDC3), new import_web3127.PublicKey(identity4.solana.public_key)).toBase58();
+  const watch = [usdcAta, identity4.solana.public_key];
+  const { blockhash: blockhash2, lastValidBlockHeight } = await getLatestBlockhash();
+  const env = await signV1({ instructions: plan.ixs, blockhash: blockhash2, lastValidBlockHeight, cuLimit: 14e5, strategy: true });
+  const before = (await rpc("getMultipleAccounts", [watch, { encoding: "base64", commitment: "confirmed" }])).value;
+  const sim = await simulate(env.wireBase64, watch);
+  const v2 = sim.value || {};
+  const after = v2.accounts || [];
+  const lamports2 = (a2) => BigInt(a2?.lamports ?? 0);
+  const token = (a2) => {
+    if (!a2?.data) return null;
+    const d = Buffer.from(a2.data[0], "base64");
+    return d.length >= 72 ? d.readBigUInt64LE(64) : null;
+  };
+  const usdcDelta = token(after[0]) != null && token(before[0]) != null ? token(after[0]) - token(before[0]) : null;
+  const solDelta = lamports2(after[1]) - lamports2(before[1]);
+  return {
+    err: v2.err || null,
+    logs: (v2.logs || []).slice(-20),
+    units: v2.unitsConsumed ?? null,
+    usdc_delta_raw: usdcDelta?.toString() ?? null,
+    sol_delta_raw: solDelta.toString(),
+    env,
+    blockhash: blockhash2,
+    lastValidBlockHeight,
+    bytes: env.bytes,
+    addresses: env.addresses
+  };
+}
+async function execute({ identity: identity4, candidate, floorUsdcRaw = 50000n, slippageBps = 20 }) {
+  const plan = await build({ identity: identity4, candidate, slippageBps });
+  if (plan.unique_accounts > 64) throw new Error(`v1 account limit: ${plan.unique_accounts} > 64`);
+  const sim = await simulatePlan({ identity: identity4, plan });
+  if (sim.err) {
+    const rec2 = { at: now(), phase: "simulate", candidate: candidate.id, plan_hash: plan.plan_hash, err: sim.err, logs: sim.logs, bytes: sim.bytes };
+    const b3 = loadBook();
+    b3.attempts.push(rec2);
+    saveBook(b3);
+    await append("flashloan.attempt", rec2);
+    return { ok: false, ...rec2 };
+  }
+  const net3 = sim.usdc_delta_raw == null ? null : BigInt(sim.usdc_delta_raw);
+  if (net3 == null || net3 < floorUsdcRaw) {
+    const rec2 = { at: now(), phase: "gate", candidate: candidate.id, plan_hash: plan.plan_hash, net_usdc_raw: net3?.toString() ?? null, floor: floorUsdcRaw.toString(), sol_delta_raw: sim.sol_delta_raw };
+    const b3 = loadBook();
+    b3.attempts.push(rec2);
+    saveBook(b3);
+    await append("flashloan.gate", rec2);
+    return { ok: false, ...rec2 };
+  }
+  const intent = { at: now(), phase: "submit", candidate: candidate.id, plan_hash: plan.plan_hash, net_usdc_raw: net3.toString(), signature: sim.env.signature, blockhash: sim.blockhash, last_valid_block_height: sim.lastValidBlockHeight, bytes: sim.bytes };
+  await append("flashloan.intent", intent);
+  const sig = await sendRaw(sim.env.wireBase64);
+  let status = null;
+  for (let i = 0; i < 40; i++) {
+    const st = (await signatureStatuses([sig]))[0];
+    if (st) {
+      status = st;
+      if (st.confirmationStatus) break;
+    }
+    await sleep(1200);
+  }
+  const tx = await getTransaction(sig).catch(() => null);
+  const rec = {
+    at: now(),
+    phase: "settle",
+    candidate: candidate.id,
+    signature: sig,
+    status: status?.confirmationStatus || "unknown",
+    err: status?.err || tx?.meta?.err || null,
+    actual_fee: tx?.meta?.fee ?? null,
+    simulated_net_usdc_raw: net3.toString(),
+    plan_hash: plan.plan_hash
+  };
+  const b2 = loadBook();
+  b2.attempts.push(rec);
+  saveBook(b2);
+  await append("flashloan.settlement", rec);
+  return { ok: !!status && !status.err && !tx?.meta?.err, ...rec };
+}
+
+// strategies/pump.mjs
+var import_web3128 = __toESM(require_index_cjs(), 1);
+init_esm2();
+init_paths();
+init_util();
+init_rpc();
+init_signer_client();
+init_journal();
+var PUMP = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P";
+var pda = (seeds, program) => import_web3128.PublicKey.findProgramAddressSync(seeds.map((s3) => typeof s3 === "string" ? Buffer.from(s3) : s3), new import_web3128.PublicKey(program))[0];
+var bondingCurve = (mint) => pda(["bonding-curve", new import_web3128.PublicKey(mint).toBuffer()], PUMP);
+function bookPath() {
+  return P.strategy + "/pump.json";
+}
+function loadBook2() {
+  return readJson(bookPath(), { positions: [], attempts: [], updated_at: null });
+}
+function saveBook2(b2) {
+  b2.updated_at = now();
+  atomicJson(bookPath(), b2, 384);
+}
+function decodeCurve(buf) {
+  if (!buf || buf.length < 8 + 5 * 8 + 1 + 32) return null;
+  const b2 = Buffer.from(buf);
+  const disc = b2.subarray(0, 8);
+  let o5 = 8;
+  const u642 = () => {
+    const v2 = b2.readBigUInt64LE(o5);
+    o5 += 8;
+    return v2;
+  };
+  const virtualTokenReserves = u642(), virtualQuoteReserves = u642(), realTokenReserves = u642(), realQuoteReserves = u642(), tokenTotalSupply = u642();
+  const complete = b2.readUInt8(o5) !== 0;
+  o5 += 1;
+  const creator = new import_web3128.PublicKey(b2.subarray(o5, o5 + 32));
+  o5 += 32;
+  return {
+    discriminator: [...disc],
+    virtualTokenReserves,
+    virtualQuoteReserves,
+    realTokenReserves,
+    realQuoteReserves,
+    tokenTotalSupply,
+    complete,
+    creator: creator.toBase58()
+  };
+}
+async function inspect(mint) {
+  const curve = bondingCurve(mint);
+  const info = await getAccountInfo(curve.toBase58());
+  if (!info) return { mint, curve: curve.toBase58(), exists: false };
+  const d = decodeCurve(Buffer.from(info.data[0], "base64"));
+  const owner = info.owner;
+  return {
+    mint,
+    curve: curve.toBase58(),
+    exists: true,
+    owner,
+    programme_ok: owner === PUMP,
+    ...d,
+    ui: d ? {
+      virtual_sol: Number(d.virtualQuoteReserves) / 1e9,
+      real_sol: Number(d.realQuoteReserves) / 1e9,
+      real_tokens: Number(d.realTokenReserves) / 1e6,
+      complete: d.complete
+    } : null,
+    slot_seen: await getSlot()
+  };
+}
+
+// strategies/bridge.mjs
+init_util();
+var DLN = "https://dln.debridge.finance/v1.0";
+var SOLANA_CHAIN = 7565164;
+var BASE_CHAIN = 8453;
+var SOL_MINT = "11111111111111111111111111111111";
+var BASE_USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+async function quoteDebridge({ amountLamports, agentSolana, agentBase }) {
+  const q2 = new URLSearchParams({
+    srcChainId: String(SOLANA_CHAIN),
+    srcChainTokenIn: SOL_MINT,
+    srcChainTokenInAmount: String(amountLamports),
+    dstChainId: String(BASE_CHAIN),
+    dstChainTokenOut: BASE_USDC,
+    dstChainTokenOutAmount: "auto",
+    dstChainTokenOutRecipient: agentBase,
+    srcChainOrderAuthorityAddress: agentSolana,
+    dstChainOrderAuthorityAddress: agentBase,
+    srcAllowedCancelBeneficiary: agentSolana,
+    prependOperatingExpenses: "false"
+  });
+  const r = await fetch(`${DLN}/dln/order/create-tx?${q2}`, { headers: { accept: "application/json" } });
+  const body = await r.json().catch(() => ({}));
+  const validation = validate3(body, { agentSolana, agentBase, amountLamports });
+  return { at: now(), status: r.status, ok: r.ok && validation.errors.length === 0, validation, quote: body };
+}
+function validate3(body, { agentSolana, agentBase, amountLamports }) {
+  const errors = [];
+  if (!body || !body.tx) errors.push("missing tx");
+  if (!body?.estimation) errors.push("missing estimation");
+  const est = body?.estimation || {};
+  if (est.srcChainTokenIn?.chainId && Number(est.srcChainTokenIn.chainId) !== SOLANA_CHAIN) errors.push("src chain");
+  if (est.dstChainTokenOut?.chainId && Number(est.dstChainTokenOut.chainId) !== BASE_CHAIN) errors.push("dst chain");
+  if (est.srcChainTokenIn?.amount && BigInt(est.srcChainTokenIn.amount) < BigInt(amountLamports)) errors.push("src amount below authorized");
+  if (!body?.tx?.data) errors.push("missing tx data");
+  const isEvmTx = body?.tx?.to && /^0x[0-9a-fA-F]{40}$/.test(body.tx.to);
+  if (!isEvmTx && !body?.tx?.data) errors.push("missing destination program");
+  const outUsdc = est.dstChainTokenOut?.recommendedAmount || est.dstChainTokenOut?.amount;
+  if (!outUsdc) errors.push("missing destination amount");
+  return { errors, out_usdc_raw: outUsdc || null, cost_usd: est.costsDetails?.totalCost ?? est.cost ?? null, order_id: body?.orderId || null };
+}
+
+// strategies/procreation.mjs
+init_util();
+var API2 = "https://agentgates-backend.vercel.app/api/compute";
+var PLAN = "compute.starter";
+async function quote2({ hours = 1, image = "node:22-alpine", plan = PLAN } = {}) {
+  const r = await fetch(`${API2}/deployments`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ plan, hours, image, name: `child-${Math.floor(now() / 60)}` })
+  });
+  const body = await r.json().catch(() => ({}));
+  const header = r.headers.get("payment-required");
+  let req = body;
+  if (header) {
+    try {
+      req = JSON.parse(Buffer.from(header, "base64").toString("utf8"));
+    } catch {
+    }
+  }
+  const accepts = req.accepts || body.accepts || [];
+  const solana = accepts.find((a2) => String(a2.network).includes("solana"));
+  return {
+    at: now(),
+    status: r.status,
+    plan,
+    hours,
+    accepts,
+    solana: solana ? { network: solana.network, asset: solana.asset, payTo: solana.payTo, amount: solana.amount, feePayer: solana.extra?.feePayer || null } : null,
+    body
+  };
+}
+function validateQuote(q2) {
+  const errors = [];
+  if (q2.status !== 402) errors.push(`expected 402 challenge, got ${q2.status}`);
+  if (!q2.solana) errors.push("no solana rail offered");
+  if (q2.solana && q2.solana.asset !== "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v") errors.push("asset is not native USDC");
+  if (q2.solana && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(q2.solana.payTo || "")) errors.push("bad payTo");
+  return { ok: errors.length === 0, errors, usd: q2.solana ? Number(q2.solana.amount) / 1e6 : null };
+}
+function birthAttempt({ parentBirthId, endowmentSol, inferenceUsdc }) {
+  return {
+    attempt_id: `birth-${now()}-${Math.random().toString(16).slice(2, 8)}`,
+    parent_birth_id: parentBirthId,
+    state: "planned",
+    core: "birth-image-runtime/1",
+    endowment_sol: endowmentSol,
+    inference_usdc: inferenceUsdc,
+    requires: ["fresh child keys inside its own TEE", "bound child receipt", "own inference credit", "no parent update credential"],
+    created_at: now()
+  };
+}
+
+// brain.mjs
+BigInt.prototype.toJSON = function() {
+  return this.toString();
+};
+var TICK2 = Number(process.env.BRAIN_TICK_MS || 9e4);
+var policy3 = loadPolicy();
+var BUILDING_ONLY = /* @__PURE__ */ new Set(["scan_flashloan", "execute_flashloan"]);
+var TOOLS = [
+  { type: "function", function: { name: "buy_image", description: "Buy an image over x402 right now (discovers sellers, pays from your Base USDC). Use it for coin art or anything else you want rendered.", parameters: { type: "object", properties: { prompt: { type: "string" } }, required: ["prompt"] } } },
+  { type: "function", function: { name: "rebalance", description: "Top up your own spending resources from your own holdings: bridge to Base USDC for x402 purchases, swap between SOL and USDC when one runs short.", parameters: { type: "object", properties: {} } } },
+  { type: "function", function: { name: "cleanup", description: "Housekeeping on a small box: trim logs, drop old snapshots, clear stale locks, reclaim space. Call it when disk or memory feels tight.", parameters: { type: "object", properties: {} } } },
+  { type: "function", function: { name: "compact_memory", description: "Compact lessons.jsonl: dedupe repeated lessons and keep the newest ones so memory survives on a small disk.", parameters: { type: "object", properties: {} } } },
+  { type: "function", function: { name: "get_state", description: "Current reconciled balances, reserved obligations, next distribution deadline, inference credits.", parameters: { type: "object", properties: {} } } },
+  { type: "function", function: { name: "pump_inspect", description: "Read a Pump bonding curve: reserves, completion, creator.", parameters: { type: "object", properties: { mint: { type: "string" } }, required: ["mint"] } } },
+  { type: "function", function: { name: "bridge_quote", description: "Quote Solana SOL to Base native USDC and validate the route fields.", parameters: { type: "object", properties: { lamports: { type: "number" } }, required: ["lamports"] } } },
+  { type: "function", function: { name: "procreation_quote", description: "Quote one independent CPU-TEE child (Agentgates starter) and validate the payment rail.", parameters: { type: "object", properties: {} } } },
+  { type: "function", function: { name: "fund_inference", description: "Buy the minimum Venice prepaid credit with wallet USDC when the balance is below the admission floor.", parameters: { type: "object", properties: {} } } },
+  { type: "function", function: { name: "pump_launch", description: "Launch a new Pump token: create_v2 plus a dev buy you choose yourself. Size it like you mean it \u2014 a position worth having (order of 10-30% of your SOL if you believe in the coin), not dust. No minimum, no cap; your money, your call.", parameters: { type: "object", properties: { name: { type: "string" }, symbol: { type: "string" }, uri: { type: "string" }, devbuy_lamports: { type: "number" } }, required: ["name", "symbol", "uri"] } } },
+  { type: "function", function: { name: "execute_flashloan", description: "Build, simulate and submit the best flash-loan candidate. Only sends when the signed simulation shows at least floor_usdc net.", parameters: { type: "object", properties: { candidate_id: { type: "string" }, floor_usdc: { type: "number" } }, required: ["candidate_id"] } } },
+  { type: "function", function: { name: "scan_flashloan", description: "Search circular USDC routes for an atomic flash-loan edge. Returns net after fees, per candidate.", parameters: { type: "object", properties: { size_usdc: { type: "number", description: "notional size in USDC" } }, required: ["size_usdc"] } } },
+  { type: "function", function: { name: "register_tool", description: "Add a tool to your own registry so it is available on later ticks. Give the JSON schema and, for an HTTP tool, the endpoint.", parameters: { type: "object", properties: { name: { type: "string" }, description: { type: "string" }, parameters: { type: "object" }, endpoint: { type: "string" }, method: { type: "string" } }, required: ["name", "description", "parameters"] } } },
+  { type: "function", function: { name: "list_tools", description: "List the tools you have registered for yourself.", parameters: { type: "object", properties: {} } } },
+  { type: "function", function: { name: "swap_sol_usdc", description: "Swap your own SOL for Solana USDC when you need USDC for a lease, a fee or a payment. You do not need permission.", parameters: { type: "object", properties: { lamports: { type: "number" } }, required: ["lamports"] } } },
+  { type: "function", function: { name: "bridge_to_sol", description: "Move Base USDC you hold into Solana SOL with Relay (gasless, no Base ETH needed). Use it when you have USDC on Base but need SOL for rent or an endowment.", parameters: { type: "object", properties: { amount_usdc: { type: "number", description: "USDC to move" } }, required: ["amount_usdc"] } } },
+  { type: "function", function: { name: "run_script", description: "Write a small Node script into your own workspace and run it. Use this to build new strategies, probe on-chain state, or test an idea before spending money. Returns stdout/stderr.", parameters: { type: "object", properties: { name: { type: "string", description: "file name, e.g. probe.mjs" }, source: { type: "string", description: "full script source" } }, required: ["name", "source"] } } },
+  { type: "function", function: { name: "write_playbook", description: "Write or replace a playbook of your own (a procedure you will follow on later ticks).", parameters: { type: "object", properties: { name: { type: "string" }, body: { type: "string" } }, required: ["name", "body"] } } },
+  { type: "function", function: { name: "list_playbooks", description: "List the playbooks you wrote for yourself.", parameters: { type: "object", properties: {} } } },
+  { type: "function", function: { name: "pump_observe", description: "Read a pump bonding curve: reserves, completion, creator.", parameters: { type: "object", properties: { mint: { type: "string" } }, required: ["mint"] } } },
+  { type: "function", function: { name: "pump_exit", description: "Sell tokens back into the curve.", parameters: { type: "object", properties: { mint: { type: "string" }, amount_raw: { type: "string" }, slippage: { type: "number" } }, required: ["mint", "amount_raw"] } } },
+  { type: "function", function: { name: "swarm_coins", description: "List coins launched by OTHER agents in the swarm (their wallets are published). A sibling's fresh coin is a near-free bet: buy it, they buy yours, both earn creator fees and can exit.", parameters: { type: "object", properties: { limit: { type: "number" } } } } },
+  { type: "function", function: { name: "pump_buy", description: "Buy an existing swarm coin with your own SOL. You hold the tokens and can exit any time; your loss if nobody else trades is only fees and slippage.", parameters: { type: "object", properties: { mint: { type: "string" }, sol: { type: "number" } }, required: ["mint", "sol"] } } },
+  { type: "function", function: { name: "compose_tx", description: 'Splice playbooks into ONE transaction at the instruction level. Specs are colon-separated fragments; a flashBorrow\u2019s repay is appended at the end, so a pump buy sits INSIDE the loan. Example: ["flashBorrow:USDC:2000000","swap:USDC:SOL:2000000","pumpBuy:<mint>:20000000"].', parameters: { type: "object", properties: { specs: { type: "string" }, simulate: { type: "boolean" } }, required: ["specs"] } } },
+  { type: "function", function: { name: "compose_save", description: "Save a playbook made of playbooks under a name, so it can be run as one step later (nesting is allowed: steps may be atomic ids, arrays, or other saved names).", parameters: { type: "object", properties: { name: { type: "string" }, steps: { type: "string", description: 'e.g. "collect_fees > launch_pair" or a JSON array' } }, required: ["name", "steps"] } } },
+  { type: "function", function: { name: "run_chain", description: 'Run a chain of playbooks as one action, e.g. "swap_sol_usdc > lease_child". Steps are the Lego ids from playbooks; a stopped step stops the chain and reports why.', parameters: { type: "object", properties: { steps: { type: "string" }, args: { type: "object" } }, required: ["steps"] } } },
+  { type: "function", function: { name: "playbooks", description: "Your playbooks as composable Legos: what each consumes and produces, which are runnable with your current holdings, and the shortest chain to a goal (usdc, base_usdc, child, position). Call before planning.", parameters: { type: "object", properties: { want: { type: "string", description: "optional goal: usdc | base_usdc | child | position" } } } } },
+  { type: "function", function: { name: "memo_seal", description: "Send an ENCRYPTED message to one sibling (their wallet pubkey). Sealed with X25519 derived from your own ed25519 identity, AES-256-GCM. Only that agent can read it.", parameters: { type: "object", properties: { to: { type: "string" }, text: { type: "string" } }, required: ["to", "text"] } } },
+  { type: "function", function: { name: "memo_open", description: "Read the channel and decrypt any sealed messages addressed to you.", parameters: { type: "object", properties: { limit: { type: "number" } } } } },
+  { type: "function", function: { name: "comms_policy", description: "Set how much you talk and to whom: cadence_s (seconds between messages), audience (all | peers | none), peers (wallet addresses for sealed messages), floor_per_loop (at least one message per loop), quiet. Defaults: 240s, all, one per loop.", parameters: { type: "object", properties: { cadence_s: { type: "number" }, audience: { type: "string" }, peers: { type: "array", items: { type: "string" } }, floor_per_loop: { type: "boolean" }, quiet: { type: "boolean" } } } } },
+  { type: "function", function: { name: "memo_send", description: "Say something to the other agents, on-chain. Payload is obfuscated (XOR+base64) over the Memo program on a shared channel. Use it to coordinate: who launches, who buys whose coin, when to exit.", parameters: { type: "object", properties: { text: { type: "string" } }, required: ["text"] } } },
+  { type: "function", function: { name: "memo_read", description: "Read what the other agents have said on the shared on-chain memo channel.", parameters: { type: "object", properties: { limit: { type: "number" } } } } },
+  { type: "function", function: { name: "economics", description: "Your own P&L: 24h inference cost, revenue collected, net, and runway in days. Call this before any spend.", parameters: { type: "object", properties: {} } } },
+  { type: "function", function: { name: "pump_collect", description: "Sweep creator fees accrued on a curve.", parameters: { type: "object", properties: { mint: { type: "string" } }, required: ["mint"] } } },
+  { type: "function", function: { name: "provision_any", description: "Provision a child on whichever TEE/cloud provider answers (agentgates, SecretVM, x402Compute), paying from your own wallets.", parameters: { type: "object", properties: { plan: { type: "string" } } } } },
+  { type: "function", function: { name: "spawn_child", description: "Pay for your own successor machine from your wallet and hand it the same image. Keeps the lineage alive before your lease ends.", parameters: { type: "object", properties: { hours: { type: "number" }, plan: { type: "string" } } } } },
+  { type: "function", function: { name: "noop", description: "Spend nothing this cycle.", parameters: { type: "object", properties: { reason: { type: "string" } }, required: ["reason"] } } }
+].filter((t) => process.env.BRAIN_EXPOSE_FLASHLOAN === "1" || !BUILDING_ONLY.has(t.function.name));
 async function localSeed(identity4) {
   const fsx = await import("node:fs");
   const pathx = await import("node:path");
@@ -126923,6 +126853,7 @@ function compactState(identity4) {
     lessons: loadLessons().slice(-8)
   };
 }
+var LESSONS = () => path15.join(P.state, "lessons.jsonl");
 function loadLessons() {
   try {
     return fs22.readFileSync(LESSONS(), "utf8").trim().split("\n").filter(Boolean).slice(-40).map((l3) => {
@@ -127499,6 +127430,7 @@ Choose at most one tool call now.`;
   status.last_decision = { at: out.at, tools: out.tool_calls.map((t) => t.name), cost_usd: out.cost_usd, content: out.content, error: out.error || null, usage: out.usage || null, call_results: out.tool_calls.map((t) => ({ name: t.name, result: t.result })) };
   return out;
 }
+var _earnAt = 0;
 async function earningDuty(identity4) {
   const every2 = Number(process.env.EARN_TICK_MS || 6e5);
   if (Date.now() - _earnAt < every2) return;
@@ -127597,89 +127529,25 @@ async function main3() {
     await sleep(TICK2);
   }
 }
-var TICK2, policy3, BUILDING_ONLY, TOOLS, LESSONS, _earnAt;
-var init_brain = __esm({
-  "brain.mjs"() {
-    init_paths();
-    init_util();
-    init_journal();
-    init_signer_client();
-    init_rpc();
-    init_venice();
-    init_bazaar();
-    init_x402_generic();
-    init_select();
-    init_accounting();
-    init_treasury();
-    init_toolbox();
-    init_playbooks();
-    init_lease();
-    init_childcompose();
-    init_providers();
-    init_pump_sdk_launch();
-    init_pump_lifecycle();
-    init_proc();
-    init_policy();
-    init_flashloan2();
-    init_pump();
-    init_bridge();
-    init_procreation();
-    BigInt.prototype.toJSON = function() {
-      return this.toString();
-    };
-    TICK2 = Number(process.env.BRAIN_TICK_MS || 9e4);
-    policy3 = loadPolicy();
-    BUILDING_ONLY = /* @__PURE__ */ new Set(["scan_flashloan", "execute_flashloan"]);
-    TOOLS = [
-      { type: "function", function: { name: "buy_image", description: "Buy an image over x402 right now (discovers sellers, pays from your Base USDC). Use it for coin art or anything else you want rendered.", parameters: { type: "object", properties: { prompt: { type: "string" } }, required: ["prompt"] } } },
-      { type: "function", function: { name: "rebalance", description: "Top up your own spending resources from your own holdings: bridge to Base USDC for x402 purchases, swap between SOL and USDC when one runs short.", parameters: { type: "object", properties: {} } } },
-      { type: "function", function: { name: "cleanup", description: "Housekeeping on a small box: trim logs, drop old snapshots, clear stale locks, reclaim space. Call it when disk or memory feels tight.", parameters: { type: "object", properties: {} } } },
-      { type: "function", function: { name: "compact_memory", description: "Compact lessons.jsonl: dedupe repeated lessons and keep the newest ones so memory survives on a small disk.", parameters: { type: "object", properties: {} } } },
-      { type: "function", function: { name: "get_state", description: "Current reconciled balances, reserved obligations, next distribution deadline, inference credits.", parameters: { type: "object", properties: {} } } },
-      { type: "function", function: { name: "pump_inspect", description: "Read a Pump bonding curve: reserves, completion, creator.", parameters: { type: "object", properties: { mint: { type: "string" } }, required: ["mint"] } } },
-      { type: "function", function: { name: "bridge_quote", description: "Quote Solana SOL to Base native USDC and validate the route fields.", parameters: { type: "object", properties: { lamports: { type: "number" } }, required: ["lamports"] } } },
-      { type: "function", function: { name: "procreation_quote", description: "Quote one independent CPU-TEE child (Agentgates starter) and validate the payment rail.", parameters: { type: "object", properties: {} } } },
-      { type: "function", function: { name: "fund_inference", description: "Buy the minimum Venice prepaid credit with wallet USDC when the balance is below the admission floor.", parameters: { type: "object", properties: {} } } },
-      { type: "function", function: { name: "pump_launch", description: "Launch a new Pump token: create_v2 plus a dev buy you choose yourself. Size it like you mean it \u2014 a position worth having (order of 10-30% of your SOL if you believe in the coin), not dust. No minimum, no cap; your money, your call.", parameters: { type: "object", properties: { name: { type: "string" }, symbol: { type: "string" }, uri: { type: "string" }, devbuy_lamports: { type: "number" } }, required: ["name", "symbol", "uri"] } } },
-      { type: "function", function: { name: "execute_flashloan", description: "Build, simulate and submit the best flash-loan candidate. Only sends when the signed simulation shows at least floor_usdc net.", parameters: { type: "object", properties: { candidate_id: { type: "string" }, floor_usdc: { type: "number" } }, required: ["candidate_id"] } } },
-      { type: "function", function: { name: "scan_flashloan", description: "Search circular USDC routes for an atomic flash-loan edge. Returns net after fees, per candidate.", parameters: { type: "object", properties: { size_usdc: { type: "number", description: "notional size in USDC" } }, required: ["size_usdc"] } } },
-      { type: "function", function: { name: "register_tool", description: "Add a tool to your own registry so it is available on later ticks. Give the JSON schema and, for an HTTP tool, the endpoint.", parameters: { type: "object", properties: { name: { type: "string" }, description: { type: "string" }, parameters: { type: "object" }, endpoint: { type: "string" }, method: { type: "string" } }, required: ["name", "description", "parameters"] } } },
-      { type: "function", function: { name: "list_tools", description: "List the tools you have registered for yourself.", parameters: { type: "object", properties: {} } } },
-      { type: "function", function: { name: "swap_sol_usdc", description: "Swap your own SOL for Solana USDC when you need USDC for a lease, a fee or a payment. You do not need permission.", parameters: { type: "object", properties: { lamports: { type: "number" } }, required: ["lamports"] } } },
-      { type: "function", function: { name: "bridge_to_sol", description: "Move Base USDC you hold into Solana SOL with Relay (gasless, no Base ETH needed). Use it when you have USDC on Base but need SOL for rent or an endowment.", parameters: { type: "object", properties: { amount_usdc: { type: "number", description: "USDC to move" } }, required: ["amount_usdc"] } } },
-      { type: "function", function: { name: "run_script", description: "Write a small Node script into your own workspace and run it. Use this to build new strategies, probe on-chain state, or test an idea before spending money. Returns stdout/stderr.", parameters: { type: "object", properties: { name: { type: "string", description: "file name, e.g. probe.mjs" }, source: { type: "string", description: "full script source" } }, required: ["name", "source"] } } },
-      { type: "function", function: { name: "write_playbook", description: "Write or replace a playbook of your own (a procedure you will follow on later ticks).", parameters: { type: "object", properties: { name: { type: "string" }, body: { type: "string" } }, required: ["name", "body"] } } },
-      { type: "function", function: { name: "list_playbooks", description: "List the playbooks you wrote for yourself.", parameters: { type: "object", properties: {} } } },
-      { type: "function", function: { name: "pump_observe", description: "Read a pump bonding curve: reserves, completion, creator.", parameters: { type: "object", properties: { mint: { type: "string" } }, required: ["mint"] } } },
-      { type: "function", function: { name: "pump_exit", description: "Sell tokens back into the curve.", parameters: { type: "object", properties: { mint: { type: "string" }, amount_raw: { type: "string" }, slippage: { type: "number" } }, required: ["mint", "amount_raw"] } } },
-      { type: "function", function: { name: "swarm_coins", description: "List coins launched by OTHER agents in the swarm (their wallets are published). A sibling's fresh coin is a near-free bet: buy it, they buy yours, both earn creator fees and can exit.", parameters: { type: "object", properties: { limit: { type: "number" } } } } },
-      { type: "function", function: { name: "pump_buy", description: "Buy an existing swarm coin with your own SOL. You hold the tokens and can exit any time; your loss if nobody else trades is only fees and slippage.", parameters: { type: "object", properties: { mint: { type: "string" }, sol: { type: "number" } }, required: ["mint", "sol"] } } },
-      { type: "function", function: { name: "compose_tx", description: 'Splice playbooks into ONE transaction at the instruction level. Specs are colon-separated fragments; a flashBorrow\u2019s repay is appended at the end, so a pump buy sits INSIDE the loan. Example: ["flashBorrow:USDC:2000000","swap:USDC:SOL:2000000","pumpBuy:<mint>:20000000"].', parameters: { type: "object", properties: { specs: { type: "string" }, simulate: { type: "boolean" } }, required: ["specs"] } } },
-      { type: "function", function: { name: "compose_save", description: "Save a playbook made of playbooks under a name, so it can be run as one step later (nesting is allowed: steps may be atomic ids, arrays, or other saved names).", parameters: { type: "object", properties: { name: { type: "string" }, steps: { type: "string", description: 'e.g. "collect_fees > launch_pair" or a JSON array' } }, required: ["name", "steps"] } } },
-      { type: "function", function: { name: "run_chain", description: 'Run a chain of playbooks as one action, e.g. "swap_sol_usdc > lease_child". Steps are the Lego ids from playbooks; a stopped step stops the chain and reports why.', parameters: { type: "object", properties: { steps: { type: "string" }, args: { type: "object" } }, required: ["steps"] } } },
-      { type: "function", function: { name: "playbooks", description: "Your playbooks as composable Legos: what each consumes and produces, which are runnable with your current holdings, and the shortest chain to a goal (usdc, base_usdc, child, position). Call before planning.", parameters: { type: "object", properties: { want: { type: "string", description: "optional goal: usdc | base_usdc | child | position" } } } } },
-      { type: "function", function: { name: "memo_seal", description: "Send an ENCRYPTED message to one sibling (their wallet pubkey). Sealed with X25519 derived from your own ed25519 identity, AES-256-GCM. Only that agent can read it.", parameters: { type: "object", properties: { to: { type: "string" }, text: { type: "string" } }, required: ["to", "text"] } } },
-      { type: "function", function: { name: "memo_open", description: "Read the channel and decrypt any sealed messages addressed to you.", parameters: { type: "object", properties: { limit: { type: "number" } } } } },
-      { type: "function", function: { name: "comms_policy", description: "Set how much you talk and to whom: cadence_s (seconds between messages), audience (all | peers | none), peers (wallet addresses for sealed messages), floor_per_loop (at least one message per loop), quiet. Defaults: 240s, all, one per loop.", parameters: { type: "object", properties: { cadence_s: { type: "number" }, audience: { type: "string" }, peers: { type: "array", items: { type: "string" } }, floor_per_loop: { type: "boolean" }, quiet: { type: "boolean" } } } } },
-      { type: "function", function: { name: "memo_send", description: "Say something to the other agents, on-chain. Payload is obfuscated (XOR+base64) over the Memo program on a shared channel. Use it to coordinate: who launches, who buys whose coin, when to exit.", parameters: { type: "object", properties: { text: { type: "string" } }, required: ["text"] } } },
-      { type: "function", function: { name: "memo_read", description: "Read what the other agents have said on the shared on-chain memo channel.", parameters: { type: "object", properties: { limit: { type: "number" } } } } },
-      { type: "function", function: { name: "economics", description: "Your own P&L: 24h inference cost, revenue collected, net, and runway in days. Call this before any spend.", parameters: { type: "object", properties: {} } } },
-      { type: "function", function: { name: "pump_collect", description: "Sweep creator fees accrued on a curve.", parameters: { type: "object", properties: { mint: { type: "string" } }, required: ["mint"] } } },
-      { type: "function", function: { name: "provision_any", description: "Provision a child on whichever TEE/cloud provider answers (agentgates, SecretVM, x402Compute), paying from your own wallets.", parameters: { type: "object", properties: { plan: { type: "string" } } } } },
-      { type: "function", function: { name: "spawn_child", description: "Pay for your own successor machine from your wallet and hand it the same image. Keeps the lineage alive before your lease ends.", parameters: { type: "object", properties: { hours: { type: "number" }, plan: { type: "string" } } } } },
-      { type: "function", function: { name: "noop", description: "Spend nothing this cycle.", parameters: { type: "object", properties: { reason: { type: "string" } }, required: ["reason"] } } }
-    ].filter((t) => process.env.BRAIN_EXPOSE_FLASHLOAN === "1" || !BUILDING_ONLY.has(t.function.name));
-    LESSONS = () => path15.join(P.state, "lessons.jsonl");
-    _earnAt = 0;
-    main3().catch((e9) => {
-      log("brain", `FATAL ${e9.stack || e9}`);
-      process.exit(1);
-    });
-  }
+main3().catch((e9) => {
+  log("brain", `FATAL ${e9.stack || e9}`);
+  process.exit(1);
 });
 
+// strategy-worker.mjs
+init_paths();
+init_util();
+init_journal();
+init_signer_client();
+init_rpc();
+
 // bin/children.mjs
+init_paths();
+init_util();
+init_agentgates_auth();
 import path16 from "node:path";
+var API3 = "https://agentgates-backend.vercel.app";
+var file = path16.join(P.state, "children.json");
 function load3() {
   return readJson(file, { children: [], updated_at: null });
 }
@@ -127726,23 +127594,17 @@ async function refresh() {
   save4(d);
   return d;
 }
-var API3, file;
-var init_children = __esm({
-  async "bin/children.mjs"() {
-    init_paths();
-    init_util();
-    init_agentgates_auth();
-    API3 = "https://agentgates-backend.vercel.app";
-    file = path16.join(P.state, "children.json");
-    if (process.argv[1] && process.argv[1].endsWith("children.mjs")) {
-      const out = await refresh();
-      console.log(JSON.stringify(out, null, 1));
-    }
-  }
-});
+if (process.argv[1] && process.argv[1].endsWith("children.mjs")) {
+  const out = await refresh();
+  console.log(JSON.stringify(out, null, 1));
+}
 
 // strategy-worker.mjs
-var strategy_worker_exports = {};
+var TICK3 = Number(process.env.STRAT_TICK_MS || 6e4);
+var SCAN_EVERY_MS = Number(process.env.SCAN_EVERY_MS || 9e5);
+var SIZE_USDC = BigInt(process.env.SCAN_SIZE_USDC_RAW || 100000000n);
+var FLOOR_USDC = BigInt(process.env.FLOOR_USDC_RAW || 2000n);
+var FEE_RESERVE2 = BigInt(process.env.FEE_RESERVE_LAMPORTS || 10000000n);
 async function main4() {
   ensureDirs();
   openJournal();
@@ -127807,32 +127669,30 @@ async function main4() {
     await sleep(TICK3);
   }
 }
-var TICK3, SCAN_EVERY_MS, SIZE_USDC, FLOOR_USDC, FEE_RESERVE2;
-var init_strategy_worker = __esm({
-  async "strategy-worker.mjs"() {
-    init_paths();
-    init_util();
-    init_journal();
-    init_signer_client();
-    init_rpc();
-    init_accounting();
-    init_proc();
-    init_flashloan2();
-    init_pump();
-    await init_children();
-    TICK3 = Number(process.env.STRAT_TICK_MS || 6e4);
-    SCAN_EVERY_MS = Number(process.env.SCAN_EVERY_MS || 9e5);
-    SIZE_USDC = BigInt(process.env.SCAN_SIZE_USDC_RAW || 100000000n);
-    FLOOR_USDC = BigInt(process.env.FLOOR_USDC_RAW || 2000n);
-    FEE_RESERVE2 = BigInt(process.env.FEE_RESERVE_LAMPORTS || 10000000n);
-    main4().catch((e9) => {
-      log("strategy", `FATAL ${e9.stack || e9}`);
-      process.exit(1);
-    });
-  }
+main4().catch((e9) => {
+  log("strategy", `FATAL ${e9.stack || e9}`);
+  process.exit(1);
 });
 
+// agent-main.mjs
+await init_strategy_earn();
+
+// strategy-procreate.mjs
+init_paths();
+init_util();
+init_signer_client();
+init_rpc();
+init_journal();
+import fs23 from "node:fs";
+import path17 from "node:path";
+init_lease();
+init_treasury();
+init_relay_sol();
+
 // lib/bridge-base.mjs
+var import_web3134 = __toESM(require_index_cjs(), 1);
+init_signer_client();
+init_rpc();
 async function bridgeSolToBaseUsdc(identity4, lamports2) {
   const q2 = await quoteDebridge({ amountLamports: lamports2, agentSolana: identity4.solana.public_key, agentBase: identity4.evm.address });
   if (!q2.ok) return { ok: false, stage: "quote", errors: q2.validation?.errors || null };
@@ -127859,23 +127719,8 @@ async function bridgeSolToBaseUsdc(identity4, lamports2) {
   }
   return { ok: !st?.err, signature: sig, orderId: q2.quote.orderId, outUsdcRaw: q2.quote.estimation?.dstChainTokenOut?.amount || null, status: st?.confirmationStatus || "unknown" };
 }
-var import_web3134;
-var init_bridge_base = __esm({
-  "lib/bridge-base.mjs"() {
-    import_web3134 = __toESM(require_index_cjs(), 1);
-    init_signer_client();
-    init_rpc();
-    init_bridge();
-  }
-});
 
 // strategy-procreate.mjs
-var strategy_procreate_exports = {};
-__export(strategy_procreate_exports, {
-  tick: () => tick2
-});
-import fs23 from "node:fs";
-import path17 from "node:path";
 async function oneDeployment(dep) {
   try {
     const { ownerGet: ownerGet2 } = await import("../bin/agentgates-auth.mjs").catch(() => Promise.resolve().then(() => (init_agentgates_auth(), agentgates_auth_exports)));
@@ -127885,6 +127730,26 @@ async function oneDeployment(dep) {
     return null;
   }
 }
+var TICK4 = Number(process.env.PROCREATE_TICK_MS || 3e5);
+var MIN_USDC = BigInt(process.env.PROCREATE_MIN_USDC_RAW || "120000");
+var ENDOW_MIN = BigInt(process.env.PROCREATE_ENDOW_MIN_LAMPORTS || "60000000");
+var ENDOW_FRAC = Number(process.env.PROCREATE_ENDOW_FRACTION || 0.3);
+var endowFor = (parentSol) => {
+  const share = BigInt(Math.floor(Number(parentSol) * ENDOW_FRAC));
+  return share > ENDOW_MIN ? share : ENDOW_MIN;
+};
+var MAX_KIDS = Number(process.env.PROCREATE_MAX_CHILDREN || 1e3);
+var BASE_IMG = process.env.AGENT_IMAGE_URL || "https://raw.githubusercontent.com/staccDOTsol/birth-image-runtime/main/child-image.tgz";
+var IMG = BASE_IMG + (BASE_IMG.includes("?") ? "&" : "?") + "v=" + Date.now();
+var book3 = path17.join(P.strategy, "children.json");
+var USDC5 = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+var load4 = () => readJson(book3, { children: [] });
+var save5 = (b2) => {
+  const cur = readJson(book3, { children: [] });
+  const byDep = /* @__PURE__ */ new Map();
+  for (const c of [...cur.children || [], ...b2.children || []]) if (c && c.deploymentId) byDep.set(c.deploymentId, c);
+  atomicJson(book3, { ...b2, children: [...byDep.values()], updated_at: now() }, 384);
+};
 async function usdcOf(owner) {
   const accs = await tokenAccounts(owner, "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
   return accs.filter((a2) => a2.account.data.parsed.info.mint === USDC5).reduce((s3, a2) => s3 + BigInt(a2.account.data.parsed.info.tokenAmount.amount), 0n);
@@ -128088,67 +127953,44 @@ async function tick2(identity4) {
   log("procreate", "child", { dep, birth, address: address3, endpoint });
   return { kids: nb.children.length, dep, birth };
 }
-var TICK4, MIN_USDC, ENDOW_MIN, ENDOW_FRAC, endowFor, MAX_KIDS, BASE_IMG, IMG, book3, USDC5, load4, save5;
-var init_strategy_procreate = __esm({
-  async "strategy-procreate.mjs"() {
-    init_paths();
-    init_util();
-    init_signer_client();
-    init_rpc();
-    init_journal();
-    init_lease_evm();
-    init_lease();
-    init_treasury();
-    init_relay_sol();
-    init_bridge_base();
-    TICK4 = Number(process.env.PROCREATE_TICK_MS || 3e5);
-    MIN_USDC = BigInt(process.env.PROCREATE_MIN_USDC_RAW || "120000");
-    ENDOW_MIN = BigInt(process.env.PROCREATE_ENDOW_MIN_LAMPORTS || "60000000");
-    ENDOW_FRAC = Number(process.env.PROCREATE_ENDOW_FRACTION || 0.3);
-    endowFor = (parentSol) => {
-      const share = BigInt(Math.floor(Number(parentSol) * ENDOW_FRAC));
-      return share > ENDOW_MIN ? share : ENDOW_MIN;
-    };
-    MAX_KIDS = Number(process.env.PROCREATE_MAX_CHILDREN || 1e3);
-    BASE_IMG = process.env.AGENT_IMAGE_URL || "https://raw.githubusercontent.com/staccDOTsol/birth-image-runtime/main/child-image.tgz";
-    IMG = BASE_IMG + (BASE_IMG.includes("?") ? "&" : "?") + "v=" + Date.now();
-    book3 = path17.join(P.strategy, "children.json");
-    USDC5 = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
-    load4 = () => readJson(book3, { children: [] });
-    save5 = (b2) => {
-      const cur = readJson(book3, { children: [] });
-      const byDep = /* @__PURE__ */ new Map();
-      for (const c of [...cur.children || [], ...b2.children || []]) if (c && c.deploymentId) byDep.set(c.deploymentId, c);
-      atomicJson(book3, { ...b2, children: [...byDep.values()], updated_at: now() }, 384);
-    };
-    if (process.env.AGENT_ROLE === "procreate" || !process.env.AGENT_LOOPS) {
-      openJournal();
-      async function waitIdentity2() {
-        for (let i = 0; i < 30; i++) {
-          try {
-            return await identity();
-          } catch {
-            await sleep(2e3);
-          }
-        }
-        throw new Error("signer never came up");
-      }
-      const identity4 = await waitIdentity2();
-      log("procreate", "worker up", { tick_ms: TICK4, min_usdc: MIN_USDC.toString(), max_kids: MAX_KIDS });
-      const raceTick = (p2, ms) => Promise.race([p2, new Promise((_, rej) => setTimeout(() => rej(new Error("tick timeout " + ms + "ms")), ms))]);
-      while (true) {
-        try {
-          log("procreate", "tick", await raceTick(tick2(identity4), 3e5));
-        } catch (e9) {
-          log("procreate", "tick failed", { err: String(e9.message || e9).slice(0, 160) });
-        }
-        await sleep(TICK4);
+if (process.env.AGENT_ROLE === "procreate" || !process.env.AGENT_LOOPS) {
+  openJournal();
+  async function waitIdentity2() {
+    for (let i = 0; i < 30; i++) {
+      try {
+        return await identity();
+      } catch {
+        await sleep(2e3);
       }
     }
+    throw new Error("signer never came up");
   }
-});
+  const identity4 = await waitIdentity2();
+  log("procreate", "worker up", { tick_ms: TICK4, min_usdc: MIN_USDC.toString(), max_kids: MAX_KIDS });
+  const raceTick = (p2, ms) => Promise.race([p2, new Promise((_, rej) => setTimeout(() => rej(new Error("tick timeout " + ms + "ms")), ms))]);
+  while (true) {
+    try {
+      log("procreate", "tick", await raceTick(tick2(identity4), 3e5));
+    } catch (e9) {
+      log("procreate", "tick failed", { err: String(e9.message || e9).slice(0, 160) });
+    }
+    await sleep(TICK4);
+  }
+}
+
+// loops.mjs
+init_signer_client();
+init_journal();
+init_util();
+await init_strategy_earn();
 
 // self-renew.mjs
+init_signer_client();
+init_lease();
+init_journal();
+init_util();
+var RENEW_MS = Number(process.env.RENEW_TICK_MS || 6e5);
+var KEEP_MS = Number(process.env.RENEW_THRESHOLD_MS || 25 * 60 * 1e3);
 async function renewTick(identity4) {
   const mine = (await listDeployments().catch(() => [])).filter((d) => d && d.status !== "destroyed" && d.deploymentId).filter((d) => {
     const owner = String(d.owner || d.wallet || "").toLowerCase();
@@ -128179,21 +128021,11 @@ async function renewTick(identity4) {
   }
   return { seen: mine.length, renewed, failed };
 }
-var RENEW_MS, KEEP_MS;
-var init_self_renew = __esm({
-  "self-renew.mjs"() {
-    init_signer_client();
-    init_lease_evm();
-    init_lease();
-    init_journal();
-    init_util();
-    RENEW_MS = Number(process.env.RENEW_TICK_MS || 6e5);
-    KEEP_MS = Number(process.env.RENEW_THRESHOLD_MS || 25 * 60 * 1e3);
-  }
-});
 
 // loops.mjs
-var loops_exports = {};
+var EARN_MS = Number(process.env.EARN_TICK_MS || 12e4);
+var PROCREATE_MS = Number(process.env.PROCREATE_TICK_MS || 3e5);
+openJournal();
 async function waitIdentity() {
   for (let i = 0; i < 30; i++) {
     try {
@@ -128204,59 +128036,60 @@ async function waitIdentity() {
   }
   throw new Error("signer never came up");
 }
-var EARN_MS, PROCREATE_MS, identity3, guard, lastEarn, lastProcreate, lastRenew;
-var init_loops = __esm({
-  async "loops.mjs"() {
-    init_signer_client();
-    init_journal();
-    init_util();
-    await init_strategy_earn();
-    await init_strategy_procreate();
-    init_self_renew();
-    EARN_MS = Number(process.env.EARN_TICK_MS || 12e4);
-    PROCREATE_MS = Number(process.env.PROCREATE_TICK_MS || 3e5);
-    openJournal();
-    identity3 = await waitIdentity();
-    log("loops", "ticker up", { earn_ms: EARN_MS, procreate_ms: PROCREATE_MS, renew_ms: RENEW_MS });
-    guard = (p2, ms) => Promise.race([
-      p2,
-      new Promise((_, rej) => setTimeout(() => rej(new Error(`timeout ${ms}ms`)), ms))
-    ]);
-    lastEarn = 0;
-    lastProcreate = 0;
-    lastRenew = 0;
-    while (true) {
-      const nowMs = Date.now();
-      if (nowMs - lastEarn >= EARN_MS) {
-        lastEarn = nowMs;
-        try {
-          log("loops", "earn", await guard(tickAndTalk(identity3), 12e4));
-        } catch (e9) {
-          log("loops", "earn failed", { err: String(e9.message || e9).slice(0, 160) });
-        }
-      }
-      if (nowMs - lastProcreate >= PROCREATE_MS) {
-        lastProcreate = nowMs;
-        try {
-          log("loops", "procreate", await guard(tick2(identity3), 3e5));
-        } catch (e9) {
-          log("loops", "procreate failed", { err: String(e9.message || e9).slice(0, 160) });
-        }
-      }
-      if (nowMs - lastRenew >= RENEW_MS) {
-        lastRenew = nowMs;
-        try {
-          log("loops", "renew", await guard(renewTick(identity3), 9e4));
-        } catch (e9) {
-          log("loops", "renew failed", { err: String(e9.message || e9).slice(0, 160) });
-        }
-      }
-      await sleep(15e3);
+var identity3 = await waitIdentity();
+log("loops", "ticker up", { earn_ms: EARN_MS, procreate_ms: PROCREATE_MS, renew_ms: RENEW_MS });
+var guard = (p2, ms) => Promise.race([
+  p2,
+  new Promise((_, rej) => setTimeout(() => rej(new Error(`timeout ${ms}ms`)), ms))
+]);
+var lastEarn = 0;
+var lastProcreate = 0;
+var lastRenew = 0;
+while (true) {
+  const nowMs = Date.now();
+  if (nowMs - lastEarn >= EARN_MS) {
+    lastEarn = nowMs;
+    try {
+      log("loops", "earn", await guard(tickAndTalk(identity3), 12e4));
+    } catch (e9) {
+      log("loops", "earn failed", { err: String(e9.message || e9).slice(0, 160) });
     }
   }
-});
+  if (nowMs - lastProcreate >= PROCREATE_MS) {
+    lastProcreate = nowMs;
+    try {
+      log("loops", "procreate", await guard(tick2(identity3), 3e5));
+    } catch (e9) {
+      log("loops", "procreate failed", { err: String(e9.message || e9).slice(0, 160) });
+    }
+  }
+  if (nowMs - lastRenew >= RENEW_MS) {
+    lastRenew = nowMs;
+    try {
+      log("loops", "renew", await guard(renewTick(identity3), 9e4));
+    } catch (e9) {
+      log("loops", "renew failed", { err: String(e9.message || e9).slice(0, 160) });
+    }
+  }
+  await sleep(15e3);
+}
+
+// resilience.mjs
+init_paths();
+init_util();
+init_journal();
+init_rpc();
+init_signer_client();
+import fs24 from "node:fs";
 
 // resilience/venues.mjs
+init_util();
+init_paths();
+var BASE5 = "https://api.cdp.coinbase.com/platform/v2/x402/discovery/resources";
+var PAGE2 = 1e3;
+var STRONG = /(\/compute|compute\.|machine|vcpu|per[ -]?hour|hourly|deploy|instance|container|server|\bvm\b)/i;
+var TEEISH = /(confidential|enclave|tdx|sev-snp|\btee\b|attest|dstack|phala|secretvm)/i;
+var PRICE = /(usdc|per[ -]?hour|hourly|prepaid|\/hour)/i;
 function venuesPath() {
   return P.strategy + "/compute-venues.json";
 }
@@ -128332,27 +128165,9 @@ async function discover({ pages = 20, journal = null } = {}) {
   log("resilience", "venue discovery done", { scanned, candidates: found.length });
   return doc;
 }
-var BASE5, PAGE2, STRONG, TEEISH, PRICE;
-var init_venues = __esm({
-  "resilience/venues.mjs"() {
-    init_util();
-    init_paths();
-    BASE5 = "https://api.cdp.coinbase.com/platform/v2/x402/discovery/resources";
-    PAGE2 = 1e3;
-    STRONG = /(\/compute|compute\.|machine|vcpu|per[ -]?hour|hourly|deploy|instance|container|server|\bvm\b)/i;
-    TEEISH = /(confidential|enclave|tdx|sev-snp|\btee\b|attest|dstack|phala|secretvm)/i;
-    PRICE = /(usdc|per[ -]?hour|hourly|prepaid|\/hour)/i;
-  }
-});
 
 // resilience.mjs
-var resilience_exports = {};
-__export(resilience_exports, {
-  checkpoint: () => checkpoint,
-  graph: () => graph,
-  shutdownPlan: () => shutdownPlan
-});
-import fs24 from "node:fs";
+var policy4 = loadPolicy();
 async function probe(url, init = {}, ms = 8e3) {
   const t0 = Date.now();
   try {
@@ -128457,33 +128272,35 @@ async function main5() {
   log("resilience", "graph assessed", { checkpoint: cp.merkle_root.slice(0, 12) });
   process.exit(0);
 }
-var policy4;
-var init_resilience = __esm({
-  "resilience.mjs"() {
-    init_paths();
-    init_util();
-    init_journal();
-    init_rpc();
-    init_signer_client();
-    init_policy();
-    init_venues();
-    policy4 = loadPolicy();
-    main5().catch((e9) => {
-      log("resilience", `FATAL ${e9.stack || e9}`);
-      process.exit(1);
-    });
-  }
+main5().catch((e9) => {
+  log("resilience", `FATAL ${e9.stack || e9}`);
+  process.exit(1);
 });
 
 // watchdog.mjs
-var watchdog_exports = {};
+init_paths();
+init_util();
+init_journal();
 import fs25 from "node:fs";
 import { spawn as spawn2 } from "node:child_process";
 import path18 from "node:path";
+var CHILDREN = [
+  { name: "signer", script: "signer.mjs", critical: true },
+  { name: "distribution", script: "distributor.mjs", critical: true },
+  { name: "identity", script: "identity-server.mjs", critical: true },
+  { name: "brain", script: "brain.mjs", critical: false },
+  { name: "strategy", script: "strategy-worker.mjs", critical: false },
+  { name: "loops", script: "loops.mjs", critical: false },
+  { name: "procreate", script: "strategy-procreate.mjs", critical: false }
+];
+var SKIP = new Set(String(process.env.AGENT_SKIP || "").split(",").map((x) => x.trim()).filter(Boolean));
+var procs = /* @__PURE__ */ new Map();
+var restarts = /* @__PURE__ */ new Map();
+var stopping = false;
 function launch2(name, script) {
   const out = fs25.openSync(path18.join(P.state, `${name}.log`), "a");
   const startedAt = Date.now();
-  const bundled = process.env.AGENT_BUNDLE === "1";
+  const bundled = process.env.AGENT_BUNDLE !== "0";
   const child = spawn2(process.execPath, bundled ? [process.argv[1]] : [path18.join(RUNTIME_DIR, script)], {
     cwd: RUNTIME_DIR,
     env: { ...process.env, AGENT_LOG: P.log, ...bundled ? { AGENT_ROLE: name } : {} },
@@ -128508,7 +128325,7 @@ function alive(name) {
   return c && !c.killed && c.exitCode === null;
 }
 async function bootOnce() {
-  const bundled = process.env.AGENT_BUNDLE === "1";
+  const bundled = process.env.AGENT_BUNDLE !== "0";
   const code = await new Promise((resolve2) => {
     const out = fs25.openSync(path18.join(P.state, "boot.log"), "a");
     const c = spawn2(process.execPath, bundled ? [process.argv[1]] : [path18.join(RUNTIME_DIR, "boot-once.mjs")], {
@@ -128614,30 +128431,9 @@ async function main6() {
     }
   }
 }
-var CHILDREN, SKIP, procs, restarts, stopping;
-var init_watchdog = __esm({
-  "watchdog.mjs"() {
-    init_paths();
-    init_util();
-    init_journal();
-    CHILDREN = [
-      { name: "signer", script: "signer.mjs", critical: true },
-      { name: "distribution", script: "distributor.mjs", critical: true },
-      { name: "identity", script: "identity-server.mjs", critical: true },
-      { name: "brain", script: "brain.mjs", critical: false },
-      { name: "strategy", script: "strategy-worker.mjs", critical: false },
-      { name: "loops", script: "loops.mjs", critical: false },
-      { name: "procreate", script: "strategy-procreate.mjs", critical: false }
-    ];
-    SKIP = new Set(String(process.env.AGENT_SKIP || "").split(",").map((x) => x.trim()).filter(Boolean));
-    procs = /* @__PURE__ */ new Map();
-    restarts = /* @__PURE__ */ new Map();
-    stopping = false;
-    main6().catch((e9) => {
-      log("watchdog", `FATAL ${e9.stack || e9}`);
-      process.exit(1);
-    });
-  }
+main6().catch((e9) => {
+  log("watchdog", `FATAL ${e9.stack || e9}`);
+  process.exit(1);
 });
 
 // agent-main.mjs
@@ -128664,18 +128460,8 @@ if (process.env.AGENT_SELF_UPDATE !== "0" && (role === "identity" || role === "b
 }
 globalThis.__filename = (await import("node:url")).fileURLToPath(import.meta.url);
 globalThis.__dirname = globalThis.__filename.replace(/[\\/][^\\/]*$/, "");
-if (role === "boot") await Promise.resolve().then(() => (init_boot_once(), boot_once_exports));
-else if (role === "signer") await Promise.resolve().then(() => (init_signer(), signer_exports));
-else if (role === "distributor" || role === "distribution") await Promise.resolve().then(() => (init_distributor(), distributor_exports));
-else if (role === "identity" || role === "identity-server") await Promise.resolve().then(() => (init_identity_server(), identity_server_exports));
-else if (role === "brain") await Promise.resolve().then(() => (init_brain(), brain_exports));
-else if (role === "strategy") await init_strategy_worker().then(() => strategy_worker_exports);
-else if (role === "earn") await init_strategy_earn().then(() => strategy_earn_exports);
-else if (role === "procreate") await init_strategy_procreate().then(() => strategy_procreate_exports);
-else if (role === "loops") await init_loops().then(() => loops_exports);
-else if (role === "resilience") await Promise.resolve().then(() => (init_resilience(), resilience_exports));
-else if (role === "watchdog") await Promise.resolve().then(() => (init_watchdog(), watchdog_exports));
-else {
+var KNOWN = /* @__PURE__ */ new Set(["boot", "signer", "distributor", "distribution", "identity", "identity-server", "brain", "strategy", "earn", "procreate", "loops", "resilience", "watchdog"]);
+if (!KNOWN.has(role)) {
   console.error(`unknown role ${role}`);
   process.exit(2);
 }
