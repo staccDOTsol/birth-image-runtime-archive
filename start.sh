@@ -12,6 +12,8 @@ export AGENT_HTTP_PORT="$PORT_NUM"
 echo "start $(date -u) port=$AGENT_HTTP_PORT" > /tmp/boot.log
 
 cd /app || { echo "no /app" >> /tmp/boot.log; exit 1; }
+# The fixed core reads its policy from a root-level path; in a container only /app exists.
+ln -sfn /app/infrastructure /infrastructure 2>/dev/null || true
 # Cap the V8 heap: four instances on a 1 GB box otherwise fill RAM and the cgroup kills them
 # mid-work, which is why their workers never reached a 10-minute cadence.
 export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=48}"
