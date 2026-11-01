@@ -67358,6 +67358,14 @@ var init_accounting = __esm({
 });
 
 // lib/swap.mjs
+var swap_exports = {};
+__export(swap_exports, {
+  asIx: () => asIx,
+  ixsOf: () => ixsOf,
+  quote: () => quote,
+  swapInstructions: () => swapInstructions,
+  uniqueAccounts: () => uniqueAccounts
+});
 async function gate() {
   const wait = Math.max(0, 900 - (Date.now() - lastCall));
   if (wait) await new Promise((r) => setTimeout(r, wait));
@@ -125333,6 +125341,189 @@ var init_procreation = __esm({
   }
 });
 
+// lib/x402.mjs
+async function balances(identity3) {
+  const out = { base: 0n, solana: 0n };
+  try {
+    const data = "0x70a08231000000000000000000000000" + identity3.evm.address.slice(2).toLowerCase();
+    const r = await (await fetch("https://mainnet.base.org", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to: USDC_BASE, data }, "latest"] }), signal: AbortSignal.timeout(8e3) })).json();
+    out.base = BigInt(r.result || "0x0");
+  } catch {
+  }
+  try {
+    const R2 = await Promise.resolve().then(() => (init_rpc(), rpc_exports));
+    const accs = await R2.tokenAccounts(identity3.solana.public_key, "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+    out.solana = accs.filter((a2) => a2.account.data.parsed.info.mint === USDC_SOL).reduce((s3, a2) => s3 + BigInt(a2.account.data.parsed.info.amount || a2.account.data.parsed.info.tokenAmount.amount), 0n);
+  } catch {
+  }
+  return out;
+}
+async function solanaSelfPay(rail, identity3, version3 = 2) {
+  const [{ PublicKey: PublicKey38, ComputeBudgetProgram: ComputeBudgetProgram4 }, spl, S2, R2] = await Promise.all([
+    Promise.resolve().then(() => __toESM(require_index_cjs(), 1)),
+    Promise.resolve().then(() => (init_esm6(), esm_exports2)),
+    Promise.resolve().then(() => (init_signer_client(), signer_client_exports)),
+    Promise.resolve().then(() => (init_rpc(), rpc_exports))
+  ]);
+  const amount = amountOf(rail);
+  const mint = new PublicKey38(rail.asset || USDC_SOL);
+  const owner = new PublicKey38(identity3.solana.public_key);
+  const from = spl.getAssociatedTokenAddressSync(mint, owner);
+  const to = spl.getAssociatedTokenAddressSync(mint, new PublicKey38(rail.payTo), true);
+  const feePayer = rail.extra?.feePayer ? new PublicKey38(rail.extra.feePayer) : owner;
+  const ixs = [ComputeBudgetProgram4.setComputeUnitLimit({ units: 2e5 }), ComputeBudgetProgram4.setComputeUnitPrice({ microLamports: 1 })];
+  if (!await R2.getAccountInfo(to.toBase58())) {
+    ixs.push(spl.createAssociatedTokenAccountIdempotentInstruction(feePayer, to, new PublicKey38(rail.payTo), mint, spl.TOKEN_PROGRAM_ID));
+  }
+  ixs.push(spl.createTransferCheckedInstruction(from, mint, to, owner, amount, 6, [], spl.TOKEN_PROGRAM_ID));
+  const { blockhash: blockhash2 } = await R2.getLatestBlockhash();
+  const signed = await S2.request("sign_payment_legacy", {
+    feePayer: feePayer.toBase58(),
+    blockhash: blockhash2,
+    lastValidBlockHeight: 0,
+    instructions: ixs.map((ix) => ({
+      programId: ix.programId.toBase58(),
+      keys: ix.keys.map((k2) => ({ pubkey: k2.pubkey.toBase58(), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
+      dataHex: Buffer.from(ix.data).toString("hex")
+    }))
+  });
+  const header = Buffer.from(JSON.stringify({ x402Version: version3 || 2, scheme: "exact", network: rail.network, payload: { transaction: signed.wireBase64 } })).toString("base64");
+  return { header, amount: amount.toString() };
+}
+function orderRails(accepts, bal) {
+  const list2 = (accepts || []).filter((a2) => a2 && (isEvm(a2) || isSol(a2)));
+  const affordable = list2.filter((a2) => (isEvm(a2) ? bal.base : bal.solana) >= amountOf(a2));
+  const rest = list2.filter((a2) => !affordable.includes(a2));
+  const score2 = (a2) => (isSol(a2) ? 0 : 1) * 1e12 + Number(amountOf(a2));
+  return [...affordable.sort((x, y) => Number(amountOf(x) - amountOf(y))), ...rest.sort((x, y) => score2(x) - score2(y))];
+}
+async function quote3(url, body, headers = {}) {
+  const r = await fetch(url, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: body === void 0 ? void 0 : JSON.stringify(body), signal: AbortSignal.timeout(6e4) });
+  if (r.status !== 402) return { settled: r.status < 300, response: r };
+  let q2 = {};
+  try {
+    q2 = JSON.parse(Buffer.from(r.headers.get("payment-required") || "", "base64").toString("utf8"));
+  } catch {
+    q2 = await r.clone().json().catch(() => ({}));
+  }
+  return { settled: false, response: r, quote: q2, accepts: q2.accepts || q2.accepted || q2.paymentRequirements || [] };
+}
+async function signRequirement(rail, { identity: identity3, resource, version: version3 }) {
+  if (isSol(rail)) {
+    try {
+      if (rail.extra?.feePayer) {
+        const p3 = await paySolana(rail, identity3);
+        return { header: p3.header, rail: "solana", amount: amountOf(rail) };
+      }
+      const p2 = await solanaSelfPay(rail, identity3, version3);
+      return { header: p2.header, rail: "solana", amount: amountOf(rail) };
+    } catch (e9) {
+      return { header: null, rail: "solana", amount: amountOf(rail), err: String(e9.message || e9).slice(0, 80) };
+    }
+  }
+  const res = typeof resource === "string" ? { url: resource, description: "paid request", mimeType: "application/json" } : resource;
+  const a2 = await authorize(rail, { value: amountOf(rail), resource: res, version: version3, identity: identity3 });
+  return { header: a2.header, rail: "base", amount: amountOf(rail) };
+}
+async function paidRequest(url, body, { identity: identity3, headers = {}, maxTries = 3 } = {}) {
+  const first = await quote3(url, body, headers);
+  if (first.settled) return { status: first.response.status, json: await first.response.json().catch(() => ({})), paid: 0 };
+  const bal = await balances(identity3);
+  const rails = orderRails(first.accepts, bal).slice(0, maxTries);
+  const tried = [];
+  for (const rail of rails) {
+    try {
+      const res = first.quote.resource && typeof first.quote.resource === "object" ? first.quote.resource : { url, description: "paid request", mimeType: "application/json" };
+      const signed = await signRequirement(rail, { identity: identity3, resource: res, version: first.quote.x402Version || 2 });
+      const r = await fetch(url, { method: "POST", headers: { "content-type": "application/json", ...headers, "PAYMENT-SIGNATURE": signed.header }, body: body === void 0 ? void 0 : JSON.stringify(body), signal: AbortSignal.timeout(18e4) });
+      const json = await r.json().catch(() => ({}));
+      if (r.status < 300) return { status: r.status, json, paid: Number(signed.amount) / 1e6, rail: signed.rail };
+      tried.push({ rail: signed.rail, status: r.status, err: JSON.stringify(json).slice(0, 90) });
+    } catch (e9) {
+      tried.push({ rail: String(rail.network), err: String(e9.message || e9).slice(0, 80) });
+    }
+  }
+  return { status: 402, json: {}, tried, accepts: first.accepts.map((a2) => a2.network) };
+}
+var USDC_SOL, USDC_BASE, amountOf, isEvm, isSol;
+var init_x402 = __esm({
+  "lib/x402.mjs"() {
+    init_x402_evm();
+    init_lease();
+    USDC_SOL = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+    USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+    amountOf = (a2) => BigInt(a2.maxAmountRequired ?? a2.amount ?? 0);
+    isEvm = (a2) => String(a2.network || "").startsWith("eip155:");
+    isSol = (a2) => String(a2.network || "").startsWith("solana");
+  }
+});
+
+// strategies/rebalance.mjs
+var rebalance_exports = {};
+__export(rebalance_exports, {
+  rebalance: () => rebalance
+});
+async function rebalance({ dry = false } = {}) {
+  const id = await identity();
+  const before = await balances(id);
+  const solLamports = BigInt(await getBalance(id.solana.public_key) || 0);
+  const plan = [];
+  const out = { at: now(), before: { base_usdc: Number(before.base) / 1e6, sol_usdc: Number(before.solana) / 1e6, sol: Number(solLamports) / 1e9 }, actions: plan };
+  if (before.base < MIN_BASE_USDC && before.solana > MIN_SOL_USDC) {
+    const want = MIN_BASE_USDC - before.base;
+    plan.push({ action: "bridge_usdc_to_base", want_usdc: Number(want) / 1e6 });
+    if (!dry) {
+      try {
+        const { execFileSync } = await import("node:child_process");
+        const r = execFileSync(process.execPath, ["bin/bridge-base.mjs", String(Number(want) / 1e6 * 1e9)], { encoding: "utf8", timeout: 18e4 });
+        out.bridge = r.trim().split("\n").pop().slice(0, 200);
+      } catch (e9) {
+        out.bridge_err = String(e9.message || e9).slice(0, 120);
+      }
+    }
+  }
+  if (solLamports < MIN_SOL_LAMPORTS && before.solana > MIN_SOL_USDC) {
+    plan.push({ action: "swap_usdc_to_sol", want_sol: 0.02 });
+    if (!dry) {
+      try {
+        const swap = await Promise.resolve().then(() => (init_swap(), swap_exports));
+        const q2 = await swap.quote({ inputMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", outputMint: "So11111111111111111111111111111111111111112", amount: String(MIN_SOL_USDC), slippageBps: 50 });
+        if (q2?.outAmount) out.swap = String(q2.outAmount);
+      } catch (e9) {
+        out.swap_err = String(e9.message || e9).slice(0, 100);
+      }
+    }
+  }
+  if (before.solana < MIN_SOL_USDC && solLamports > MIN_SOL_LAMPORTS * 3n) {
+    plan.push({ action: "swap_sol_to_usdc", lamports: Number(10000000n) });
+    if (!dry) {
+      try {
+        const { execFileSync } = await import("node:child_process");
+        const r = execFileSync(process.execPath, ["bin/swap-sol-usdc.mjs", "10000000"], { encoding: "utf8", timeout: 12e4 });
+        out.swap_sol = r.trim().split("\n").pop().slice(0, 160);
+      } catch (e9) {
+        out.swap_sol_err = String(e9.message || e9).slice(0, 100);
+      }
+    }
+  }
+  if (!plan.length) out.ok = true;
+  log("rebalance", "tick", out);
+  return out;
+}
+var MIN_BASE_USDC, MIN_SOL_USDC, MIN_SOL_LAMPORTS;
+var init_rebalance = __esm({
+  async "strategies/rebalance.mjs"() {
+    init_signer_client();
+    init_rpc();
+    init_x402();
+    init_util();
+    MIN_BASE_USDC = BigInt(process.env.AGENT_MIN_BASE_USDC || 5e5);
+    MIN_SOL_USDC = BigInt(process.env.AGENT_MIN_SOL_USDC || 1e6);
+    MIN_SOL_LAMPORTS = BigInt(process.env.AGENT_MIN_SOL || 2e7);
+    if (process.argv[1] && process.argv[1].endsWith("rebalance.mjs")) console.log(JSON.stringify(await rebalance({ dry: process.argv.includes("--dry") })));
+  }
+});
+
 // strategies/cleanup.mjs
 var cleanup_exports = {};
 __export(cleanup_exports, {
@@ -125457,123 +125648,6 @@ var init_discovery_image = __esm({
   "lib/discovery-image.mjs"() {
     BAZAAR = "https://api.cdp.coinbase.com/platform/v2/x402/discovery/resources?limit=1000";
     IMG_KW = /image|img|diffus|flux|sdxl|banana|dall|seedream|recraft|picture|painting|text-to-image|venice/i;
-  }
-});
-
-// lib/x402.mjs
-async function balances(identity3) {
-  const out = { base: 0n, solana: 0n };
-  try {
-    const data = "0x70a08231000000000000000000000000" + identity3.evm.address.slice(2).toLowerCase();
-    const r = await (await fetch("https://mainnet.base.org", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to: USDC_BASE, data }, "latest"] }), signal: AbortSignal.timeout(8e3) })).json();
-    out.base = BigInt(r.result || "0x0");
-  } catch {
-  }
-  try {
-    const R2 = await Promise.resolve().then(() => (init_rpc(), rpc_exports));
-    const accs = await R2.tokenAccounts(identity3.solana.public_key, "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
-    out.solana = accs.filter((a2) => a2.account.data.parsed.info.mint === USDC_SOL).reduce((s3, a2) => s3 + BigInt(a2.account.data.parsed.info.amount || a2.account.data.parsed.info.tokenAmount.amount), 0n);
-  } catch {
-  }
-  return out;
-}
-async function solanaSelfPay(rail, identity3, version3 = 2) {
-  const [{ PublicKey: PublicKey38, ComputeBudgetProgram: ComputeBudgetProgram4 }, spl, S2, R2] = await Promise.all([
-    Promise.resolve().then(() => __toESM(require_index_cjs(), 1)),
-    Promise.resolve().then(() => (init_esm6(), esm_exports2)),
-    Promise.resolve().then(() => (init_signer_client(), signer_client_exports)),
-    Promise.resolve().then(() => (init_rpc(), rpc_exports))
-  ]);
-  const amount = amountOf(rail);
-  const mint = new PublicKey38(rail.asset || USDC_SOL);
-  const owner = new PublicKey38(identity3.solana.public_key);
-  const from = spl.getAssociatedTokenAddressSync(mint, owner);
-  const to = spl.getAssociatedTokenAddressSync(mint, new PublicKey38(rail.payTo), true);
-  const feePayer = rail.extra?.feePayer ? new PublicKey38(rail.extra.feePayer) : owner;
-  const ixs = [ComputeBudgetProgram4.setComputeUnitLimit({ units: 2e5 }), ComputeBudgetProgram4.setComputeUnitPrice({ microLamports: 1 })];
-  if (!await R2.getAccountInfo(to.toBase58())) {
-    ixs.push(spl.createAssociatedTokenAccountIdempotentInstruction(feePayer, to, new PublicKey38(rail.payTo), mint, spl.TOKEN_PROGRAM_ID));
-  }
-  ixs.push(spl.createTransferCheckedInstruction(from, mint, to, owner, amount, 6, [], spl.TOKEN_PROGRAM_ID));
-  const { blockhash: blockhash2 } = await R2.getLatestBlockhash();
-  const signed = await S2.request("sign_payment_legacy", {
-    feePayer: feePayer.toBase58(),
-    blockhash: blockhash2,
-    lastValidBlockHeight: 0,
-    instructions: ixs.map((ix) => ({
-      programId: ix.programId.toBase58(),
-      keys: ix.keys.map((k2) => ({ pubkey: k2.pubkey.toBase58(), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
-      dataHex: Buffer.from(ix.data).toString("hex")
-    }))
-  });
-  const header = Buffer.from(JSON.stringify({ x402Version: version3 || 2, scheme: "exact", network: rail.network, payload: { transaction: signed.wireBase64 } })).toString("base64");
-  return { header, amount: amount.toString() };
-}
-function orderRails(accepts, bal) {
-  const list2 = (accepts || []).filter((a2) => a2 && (isEvm(a2) || isSol(a2)));
-  const affordable = list2.filter((a2) => (isEvm(a2) ? bal.base : bal.solana) >= amountOf(a2));
-  const rest = list2.filter((a2) => !affordable.includes(a2));
-  const score2 = (a2) => (isSol(a2) ? 0 : 1) * 1e12 + Number(amountOf(a2));
-  return [...affordable.sort((x, y) => Number(amountOf(x) - amountOf(y))), ...rest.sort((x, y) => score2(x) - score2(y))];
-}
-async function quote3(url, body, headers = {}) {
-  const r = await fetch(url, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: body === void 0 ? void 0 : JSON.stringify(body), signal: AbortSignal.timeout(6e4) });
-  if (r.status !== 402) return { settled: r.status < 300, response: r };
-  let q2 = {};
-  try {
-    q2 = JSON.parse(Buffer.from(r.headers.get("payment-required") || "", "base64").toString("utf8"));
-  } catch {
-    q2 = await r.clone().json().catch(() => ({}));
-  }
-  return { settled: false, response: r, quote: q2, accepts: q2.accepts || q2.accepted || q2.paymentRequirements || [] };
-}
-async function signRequirement(rail, { identity: identity3, resource, version: version3 }) {
-  if (isSol(rail)) {
-    try {
-      if (rail.extra?.feePayer) {
-        const p3 = await paySolana(rail, identity3);
-        return { header: p3.header, rail: "solana", amount: amountOf(rail) };
-      }
-      const p2 = await solanaSelfPay(rail, identity3, version3);
-      return { header: p2.header, rail: "solana", amount: amountOf(rail) };
-    } catch (e9) {
-      return { header: null, rail: "solana", amount: amountOf(rail), err: String(e9.message || e9).slice(0, 80) };
-    }
-  }
-  const res = typeof resource === "string" ? { url: resource, description: "paid request", mimeType: "application/json" } : resource;
-  const a2 = await authorize(rail, { value: amountOf(rail), resource: res, version: version3, identity: identity3 });
-  return { header: a2.header, rail: "base", amount: amountOf(rail) };
-}
-async function paidRequest(url, body, { identity: identity3, headers = {}, maxTries = 3 } = {}) {
-  const first = await quote3(url, body, headers);
-  if (first.settled) return { status: first.response.status, json: await first.response.json().catch(() => ({})), paid: 0 };
-  const bal = await balances(identity3);
-  const rails = orderRails(first.accepts, bal).slice(0, maxTries);
-  const tried = [];
-  for (const rail of rails) {
-    try {
-      const res = first.quote.resource && typeof first.quote.resource === "object" ? first.quote.resource : { url, description: "paid request", mimeType: "application/json" };
-      const signed = await signRequirement(rail, { identity: identity3, resource: res, version: first.quote.x402Version || 2 });
-      const r = await fetch(url, { method: "POST", headers: { "content-type": "application/json", ...headers, "PAYMENT-SIGNATURE": signed.header }, body: body === void 0 ? void 0 : JSON.stringify(body), signal: AbortSignal.timeout(18e4) });
-      const json = await r.json().catch(() => ({}));
-      if (r.status < 300) return { status: r.status, json, paid: Number(signed.amount) / 1e6, rail: signed.rail };
-      tried.push({ rail: signed.rail, status: r.status, err: JSON.stringify(json).slice(0, 90) });
-    } catch (e9) {
-      tried.push({ rail: String(rail.network), err: String(e9.message || e9).slice(0, 80) });
-    }
-  }
-  return { status: 402, json: {}, tried, accepts: first.accepts.map((a2) => a2.network) };
-}
-var USDC_SOL, USDC_BASE, amountOf, isEvm, isSol;
-var init_x402 = __esm({
-  "lib/x402.mjs"() {
-    init_x402_evm();
-    init_lease();
-    USDC_SOL = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
-    USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
-    amountOf = (a2) => BigInt(a2.maxAmountRequired ?? a2.amount ?? 0);
-    isEvm = (a2) => String(a2.network || "").startsWith("eip155:");
-    isSol = (a2) => String(a2.network || "").startsWith("solana");
   }
 });
 
@@ -125775,6 +125849,10 @@ async function dispatch(name, args, identity3) {
       const r = await fundIfNeeded(identity3, { maxTopUpUsdc: 5 });
       await append("brain.inference_fund", { funded: r.funded, credits: r.credits });
       return r;
+    }
+    case "rebalance": {
+      const { rebalance: rebalance2 } = await init_rebalance().then(() => rebalance_exports);
+      return await rebalance2({});
     }
     case "cleanup": {
       const { cleanup: cleanup2 } = await init_cleanup().then(() => cleanup_exports);
@@ -126126,6 +126204,7 @@ var init_brain = __esm({
     policy3 = loadPolicy();
     BUILDING_ONLY = /* @__PURE__ */ new Set(["scan_flashloan", "execute_flashloan"]);
     TOOLS = [
+      { type: "function", function: { name: "rebalance", description: "Top up your own spending resources from your own holdings: bridge to Base USDC for x402 purchases, swap between SOL and USDC when one runs short.", parameters: { type: "object", properties: {} } } },
       { type: "function", function: { name: "cleanup", description: "Housekeeping on a small box: trim logs, drop old snapshots, clear stale locks, reclaim space. Call it when disk or memory feels tight.", parameters: { type: "object", properties: {} } } },
       { type: "function", function: { name: "compact_memory", description: "Compact lessons.jsonl: dedupe repeated lessons and keep the newest ones so memory survives on a small disk.", parameters: { type: "object", properties: {} } } },
       { type: "function", function: { name: "get_state", description: "Current reconciled balances, reserved obligations, next distribution deadline, inference credits.", parameters: { type: "object", properties: {} } } },
