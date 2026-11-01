@@ -49,7 +49,7 @@ export async function memoRead({ limit = 12 } = {}) {
         if (!MEMO_IDS.has(pid)) continue;
         const raw = ix.data ? Buffer.from(ix.data, 'base64').toString('utf8') : (ix.parsed || '');
         const text = decode(String(raw));
-        if (text) out.push({ from: (tx.transaction.message.accountKeys?.[0]?.pubkey || s.signature).slice(0, 8), text, at: s.blockTime });
+        if (text) out.push({ from: (tx.transaction.message.accountKeys?.[0]?.pubkey || s.signature).slice(0, 8), sender: (tx.transaction.message.accountKeys?.[0]?.pubkey || null), text, at: s.blockTime });
       }
     } catch {}
   }

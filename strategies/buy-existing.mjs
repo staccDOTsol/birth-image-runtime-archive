@@ -7,12 +7,13 @@ import BN from 'bn.js';
 import * as S from '../lib/signer-client.mjs';
 import * as R from '../lib/rpc.mjs';
 
-const T22 = new PublicKey('TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb');
+import { tokenProgramOf } from '../lib/token-program.mjs';
 
 export async function buyExisting({ identity, mint: mintAddress, solLamports, slippageBps = 1500 }) {
   const mint = new PublicKey(mintAddress);
   const user = new PublicKey(identity.solana.public_key);
   const conn = new Connection(R.RPC_URL, 'confirmed');
+  const T22 = await tokenProgramOf(conn, mintAddress);
   const online = new OnlinePumpSdk(conn);
   const sdk = new PumpSdk();
   const curve = await online.fetchBondingCurve(mint);

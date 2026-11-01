@@ -1,6 +1,8 @@
 // The coordinator. Deterministic watchers run on their own; the paid external
 // abliterated model is consulted for bounded decisions and its tool calls are validated
 // and executed locally. No key, raw journal or payment authorization enters a prompt.
+// Balances are BigInt; JSON has no BigInt. One global shim so a decision can never die on it.
+(BigInt.prototype).toJSON = function () { return this.toString(); };
 import fs from 'node:fs';
 import path from 'node:path';
 import { P, ensureDirs } from './lib/paths.mjs';
@@ -58,6 +60,10 @@ export const TOOLS = [
   { type: 'function', function: { name: 'pump_exit', description: 'Sell tokens back into the curve.', parameters: { type: 'object', properties: { mint: { type: 'string' }, amount_raw: { type: 'string' }, slippage: { type: 'number' } }, required: ['mint', 'amount_raw'] } } },
   { type: 'function', function: { name: 'swarm_coins', description: "List coins launched by OTHER agents in the swarm (their wallets are published). A sibling's fresh coin is a near-free bet: buy it, they buy yours, both earn creator fees and can exit.", parameters: { type: 'object', properties: { limit: { type: 'number' } } } } },
   { type: 'function', function: { name: 'pump_buy', description: 'Buy an existing swarm coin with your own SOL. You hold the tokens and can exit any time; your loss if nobody else trades is only fees and slippage.', parameters: { type: 'object', properties: { mint: { type: 'string' }, sol: { type: 'number' } }, required: ['mint', 'sol'] } } },
+  { type: 'function', function: { name: 'run_chain', description: 'Run a chain of playbooks as one action, e.g. "swap_sol_usdc > lease_child". Steps are the Lego ids from playbooks; a stopped step stops the chain and reports why.', parameters: { type: 'object', properties: { steps: { type: 'string' }, args: { type: 'object' } }, required: ['steps'] } } },
+  { type: 'function', function: { name: 'playbooks', description: 'Your playbooks as composable Legos: what each consumes and produces, which are runnable with your current holdings, and the shortest chain to a goal (usdc, base_usdc, child, position). Call before planning.', parameters: { type: 'object', properties: { want: { type: 'string', description: 'optional goal: usdc | base_usdc | child | position' } } } } },
+  { type: 'function', function: { name: 'memo_seal', description: 'Send an ENCRYPTED message to one sibling (their wallet pubkey). Sealed with X25519 derived from your own ed25519 identity, AES-256-GCM. Only that agent can read it.', parameters: { type: 'object', properties: { to: { type: 'string' }, text: { type: 'string' } }, required: ['to', 'text'] } } },
+  { type: 'function', function: { name: 'memo_open', description: 'Read the channel and decrypt any sealed messages addressed to you.', parameters: { type: 'object', properties: { limit: { type: 'number' } } } } },
   { type: 'function', function: { name: 'memo_send', description: 'Say something to the other agents, on-chain. Payload is obfuscated (XOR+base64) over the Memo program on a shared channel. Use it to coordinate: who launches, who buys whose coin, when to exit.', parameters: { type: 'object', properties: { text: { type: 'string' } }, required: ['text'] } } },
   { type: 'function', function: { name: 'memo_read', description: 'Read what the other agents have said on the shared on-chain memo channel.', parameters: { type: 'object', properties: { limit: { type: 'number' } } } } },
   { type: 'function', function: { name: 'economics', description: 'Your own P&L: 24h inference cost, revenue collected, net, and runway in days. Call this before any spend.', parameters: { type: 'object', properties: {} } } },
@@ -67,6 +73,23 @@ export const TOOLS = [
   { type: 'function', function: { name: 'noop', description: 'Spend nothing this cycle.', parameters: { type: 'object', properties: { reason: { type: 'string' } }, required: ['reason'] } } },
 ].filter((t) => process.env.BRAIN_EXPOSE_FLASHLOAN === '1' || !BUILDING_ONLY.has(t.function.name));
 
+
+// The agent's own ed25519 seed, unsealed from its guest store (never leaves the process).
+async function localSeed(identity) {
+  const fsx = await import('node:fs');
+  const pathx = await import('node:path');
+  const crypto = await import('node:crypto');
+  const base = process.env.AGENT_GUEST_ROOT || '/var/lib/agent';
+  const sealKey = pathx.join(base, 'var/lib/agent/seal.key');
+  const sealed = pathx.join(base, 'var/lib/agent/sealed-keys.enc');
+  const master = fsx.readFileSync(sealKey);
+  const box = JSON.parse(fsx.readFileSync(sealed, 'utf8'));
+  const key = Buffer.from(crypto.hkdfSync('sha256', master, Buffer.from('birth-image-seal-v1'), Buffer.from('identity'), 32));
+  const d = crypto.createDecipheriv('aes-256-gcm', key, Buffer.from(box.iv, 'base64'));
+  d.setAAD(Buffer.from('birth-image-identity')); d.setAuthTag(Buffer.from(box.tag, 'base64'));
+  const j = JSON.parse(Buffer.concat([d.update(Buffer.from(box.ct, 'base64')), d.final()]).toString());
+  return Buffer.from(j.solana.secretKey).subarray(0, 32);
+}
 function compactState(identity) {
   const st = J.state({});
   const dist = readJson(P.status, {})?.distribution || {};
@@ -270,6 +293,49 @@ async function dispatch(name, args, identity) {
       if (!args.mint || !(sol > 0)) { result = { ok: false, err: 'mint and sol required' }; break; }
       const { buyExisting } = await import('./strategies/buy-existing.mjs');
       result = await buyExisting({ identity, mint: args.mint, solLamports: Math.round(sol * 1e9) });
+      break;
+    }
+    case 'run_chain': {
+      const C = await import('./lib/compose.mjs');
+      const steps = C.parseChain(args.steps);
+      result = await C.runChain(steps, args.args || {});
+      break;
+    }
+    case 'playbooks': {
+      const L = await import('./lib/lego.mjs');
+      const fsx = await import('node:fs');
+      const base = process.env.AGENT_GUEST_ROOT || '/var/lib/agent';
+      let sol = 0, usdc = 0;
+      try {
+        const st = JSON.parse(fsx.readFileSync(base + '/var/lib/agent/status.json', 'utf8'));
+        sol = Number(st.last_balances?.sol ?? 0); usdc = Number(st.last_balances?.usdc ?? 0);
+      } catch {}
+      const holdings = { sol, usdc, base_usdc: 0, position: 0, coin: 0, peer: 1 };
+      result = { ok: true, holdings, legos: L.assess(holdings), own_playbooks: (await import('./lib/playbooks.mjs')).list().map((p) => p.name), chain: args.want ? L.chainTo(args.want, holdings) : null };
+      break;
+    }
+    case 'memo_seal': {
+      const { sealTo } = await import('./lib/wire.mjs');
+      const sol = await import('@solana/web3.js');
+      const w = await import('./lib/wire.mjs'); w.injectSolana(sol);
+      const { memoSend } = await import('./strategies/memo-bus.mjs');
+      const seed = await localSeed(identity);
+      const env = sealTo(args.to, args.text, seed);
+      result = { ...(await memoSend({ identity, text: env })), sealed: true, to: String(args.to).slice(0, 8) };
+      break;
+    }
+    case 'memo_open': {
+      const w = await import('./lib/wire.mjs');
+      const sol = await import('@solana/web3.js'); w.injectSolana(sol);
+      const { memoRead } = await import('./strategies/memo-bus.mjs');
+      const seed = await localSeed(identity);
+      const got = await memoRead({ limit: Number(args.limit || 20) });
+      const mine = [];
+      for (const m of got.messages || []) {
+        if (!String(m.text).startsWith('swm2.')) continue;
+        try { mine.push({ from: m.from, at: m.at, text: w.openFrom(m.sender || m.from, m.text, seed) }); } catch {}
+      }
+      result = { ok: true, scanned: (got.messages || []).length, decrypted: mine };
       break;
     }
     case 'memo_send': {
