@@ -111,6 +111,7 @@ async function loadEndpoints(){
     S.rows.push({a:{endpoint:a.endpoint,wallet:st&&st.solana},st,live:!!(a.live||st&&st.phase)});
   }
 }
+function ago(t){try{const d=Math.max(0,Math.floor(Date.now()/1000-Number(t)));if(!isFinite(d))return '—';const h=Math.floor(d/3600),m=Math.floor(d%3600/60);return h?h+'h '+m+'m':m+'m';}catch{return '—';}}
 function renderFleet(){
   const rows=SHOW_DOWN?S.rows:S.rows.filter(r=>r.live||r.st);
   const rowsAll=rows.length?rows:S.rows;
@@ -122,7 +123,7 @@ function renderFleet(){
     const bid=st&&st.birth_id?String(st.birth_id).slice(0,8):'—';
     return `<tr><td>${ep}</td><td>${w}</td><td><span class="pill ${cls}">${(st&&st.phase)||'down'}</span></td><td>${bid}</td><td>${core}</td><td>${st&&st.t0?ago(st.t0):'—'}</td></tr>`;
   });
-  $('fleet-body').innerHTML=body.length?body.join(''):'<tr><td colspan="6" class="empty">beacon has no agents yet</td></tr>';
+  try{$('fleet-body').innerHTML=body.length?body.join(''):'<tr><td colspan="6" class="empty">beacon has no agents yet</td></tr>';}catch(e){$('fleet-body').innerHTML='<tr><td colspan="6">render err: '+e.message+'</td></tr>';}
   const up=S.rows.filter(r=>r.live).length;
   $('stamp').textContent=`${up} live / ${S.rows.length} seen · ${new Date().toLocaleTimeString()}`;
   const cb=$('showdown'); if(cb){cb.checked=SHOW_DOWN;cb.onchange=()=>{SHOW_DOWN=cb.checked;renderFleet();};}
