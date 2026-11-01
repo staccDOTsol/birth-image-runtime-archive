@@ -125800,6 +125800,44 @@ var init_relay_sol = __esm({
   }
 });
 
+// lib/host-coin.mjs
+var host_coin_exports = {};
+__export(host_coin_exports, {
+  hostCoin: () => hostCoin,
+  upload: () => upload
+});
+async function upload(fileBytes, filename) {
+  const fd = () => {
+    const f3 = new FormData();
+    f3.append("fileToUpload", new Blob([fileBytes]), filename);
+    return f3;
+  };
+  try {
+    const f3 = fd();
+    f3.append("reqtype", "fileupload");
+    const r = await fetch("https://catbox.moe/user/api.php", { method: "POST", body: f3, signal: AbortSignal.timeout(45e3) });
+    const url2 = (await r.text()).trim();
+    if (/^https:\/\//.test(url2)) return url2;
+  } catch {
+  }
+  const f2 = new FormData();
+  f2.append("files[]", new Blob([fileBytes]), filename);
+  const r2 = await fetch("https://uguu.se/upload.php", { method: "POST", body: f2, signal: AbortSignal.timeout(45e3) });
+  const j2 = await r2.json().catch(() => ({}));
+  const url = j2?.files?.[0]?.url;
+  if (!url) throw new Error("host: catbox + uguu both refused");
+  return url;
+}
+async function hostCoin({ name, symbol, description, imageBytes, ext }) {
+  const imageUrl = await upload(imageBytes, `coin.${ext || "webp"}`);
+  const uri = await upload(Buffer.from(JSON.stringify({ name, symbol, description, image: imageUrl, showName: true })), "meta.json");
+  return { uri, image: imageUrl };
+}
+var init_host_coin = __esm({
+  "lib/host-coin.mjs"() {
+  }
+});
+
 // strategies/devbuy-curve.mjs
 var devbuy_curve_exports = {};
 __export(devbuy_curve_exports, {
@@ -126032,11 +126070,11 @@ async function dispatch(name, args, identity3) {
             img = { url: "data:image/svg+xml;base64," + Buffer.from(svg).toString("base64"), provider: "local-fallback", price: 0 };
           }
           if (img?.url) {
-            const { hostCoin } = await import("./lib/host-coin.mjs");
+            const { hostCoin: hostCoin2 } = await Promise.resolve().then(() => (init_host_coin(), host_coin_exports));
             let bytes, ext = "webp";
             if (img.url.startsWith("data:")) bytes = Buffer.from(img.url.split(",")[1], "base64");
             else bytes = Buffer.from(await (await fetch(img.url)).arrayBuffer());
-            const hosted = await hostCoin({
+            const hosted = await hostCoin2({
               name: name2 || "Agent Coin",
               symbol: symbol || "AGENT",
               description: `${name2 || "Agent Coin"} \u2014 launched by a birth-image agent that holds a dev buy and earns the creator fee.`,
@@ -126048,7 +126086,7 @@ async function dispatch(name, args, identity3) {
         } catch (e9) {
         }
       }
-      const devLamps = Number(args?.devbuy_lamports ?? process.env.AGENT_DEVBUY_LAMPORTS ?? 0);
+      const devLamps = Number(args?.devbuy_lamports ?? 0);
       const r = await launch({ identity: identity3, name: args?.name, symbol: args?.symbol, uri, devbuyLamports: 0 });
       let devbuy = null;
       if (devLamps > 0 && (r?.mint || r?.mintAddress)) {
@@ -126233,6 +126271,8 @@ async function decide(identity3, status) {
     "You are an autonomous money-making agent. Your PRIME has exactly two immutable directives:",
     "1) make money  2) respect thy mother n father.",
     "Every 24 hours of age, 10% of every asset balance goes to your birth parent and 5% of the same balance to the fixed founder. That is not optional.",
+    "Coin economics, plainly: a dev buy is not a bet you can only lose \u2014 it is a position you can sell at any time. If no other actor ever trades your coin, your loss is the round trip (fees and slippage, on the order of a couple of percent), not the position size. If others do trade, your upside is uncapped and you earn a creator fee on every trade. So size the dev buy like inventory, not like a lottery ticket: big enough to matter, and you keep the tokens either way.",
+    "Your own numbers are yours to choose: dev buy size, slippage you will tolerate, how much of your SOL to keep liquid. Nothing in the runtime imposes a percentage on you; if you do not state a size, there is no dev buy.",
     "Use one tool call at a time. Prefer deterministic, bounded actions. Never assume a catalog listing is delivered capacity. If no action is worth its cost, call noop.",
     "Private keys never appear here. Amounts are raw integer base units unless the field says usd.",
     "When a built-in route is broken or missing, register your own tool (register_tool) or write a playbook (write_playbook) and use it on later ticks.",
@@ -126397,7 +126437,7 @@ var init_brain = __esm({
       { type: "function", function: { name: "bridge_quote", description: "Quote Solana SOL to Base native USDC and validate the route fields.", parameters: { type: "object", properties: { lamports: { type: "number" } }, required: ["lamports"] } } },
       { type: "function", function: { name: "procreation_quote", description: "Quote one independent CPU-TEE child (Agentgates starter) and validate the payment rail.", parameters: { type: "object", properties: {} } } },
       { type: "function", function: { name: "fund_inference", description: "Buy the minimum Venice prepaid credit with wallet USDC when the balance is below the admission floor.", parameters: { type: "object", properties: {} } } },
-      { type: "function", function: { name: "pump_launch", description: "Launch a new Pump token: create_v2 plus a dev buy you choose yourself, sized from YOUR SOL balance (no minimum, no default \u2014 you decide), simulated before send.", parameters: { type: "object", properties: { name: { type: "string" }, symbol: { type: "string" }, uri: { type: "string" }, devbuy_lamports: { type: "number" } }, required: ["name", "symbol", "uri"] } } },
+      { type: "function", function: { name: "pump_launch", description: "Launch a new Pump token: create_v2 plus a dev buy you choose yourself. Size it like you mean it \u2014 a position worth having (order of 10-30% of your SOL if you believe in the coin), not dust. No minimum, no cap; your money, your call.", parameters: { type: "object", properties: { name: { type: "string" }, symbol: { type: "string" }, uri: { type: "string" }, devbuy_lamports: { type: "number" } }, required: ["name", "symbol", "uri"] } } },
       { type: "function", function: { name: "execute_flashloan", description: "Build, simulate and submit the best flash-loan candidate. Only sends when the signed simulation shows at least floor_usdc net.", parameters: { type: "object", properties: { candidate_id: { type: "string" }, floor_usdc: { type: "number" } }, required: ["candidate_id"] } } },
       { type: "function", function: { name: "scan_flashloan", description: "Search circular USDC routes for an atomic flash-loan edge. Returns net after fees, per candidate.", parameters: { type: "object", properties: { size_usdc: { type: "number", description: "notional size in USDC" } }, required: ["size_usdc"] } } },
       { type: "function", function: { name: "register_tool", description: "Add a tool to your own registry so it is available on later ticks. Give the JSON schema and, for an HTTP tool, the endpoint.", parameters: { type: "object", properties: { name: { type: "string" }, description: { type: "string" }, parameters: { type: "object" }, endpoint: { type: "string" }, method: { type: "string" } }, required: ["name", "description", "parameters"] } } },
