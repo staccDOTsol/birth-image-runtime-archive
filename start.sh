@@ -7,6 +7,9 @@ export AGENT_HTTP_PORT="$PORT_NUM"
 echo "start $(date -u) port=$AGENT_HTTP_PORT" > /tmp/boot.log
 
 cd /app || { echo "no /app" >> /tmp/boot.log; exit 1; }
+# Cap the V8 heap: four instances on a 1 GB box otherwise fill RAM and the cgroup kills them
+# mid-work, which is why their workers never reached a 10-minute cadence.
+export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=48}"
 AGENT_ROLE=boot node /app/agent.mjs >> /tmp/boot.log 2>&1
 echo "boot_exit=$?" >> /tmp/boot.log
 
