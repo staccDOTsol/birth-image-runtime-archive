@@ -99,7 +99,14 @@ async function getJson(url,ms=8000){const c=new AbortController();const t=setTim
 async function rpc(m,p){const b=JSON.stringify({jsonrpc:'2.0',id:1,method:m,params:p});for(const u of ['https://solana-rpc.publicnode.com','https://api.mainnet-beta.solana.com']){try{const r=await fetch(u,{method:'POST',headers:{'content-type':'application/json'},body:b});const j=await r.json();if(j.result)return j.result;}catch{}}return null;}
 const BEACON='http://64.176.200.115:9099/beacon.json';
 async function loadEndpoints(){const out=new Map();
-  const bc=await getJson(PROXY(BEACON),12000);
+  let bc=null;
+  try {
+    const r=await fetch('https://r.jina.ai/'+BEACON,{cache:'no-store'});
+    const t=await r.text();
+    const i=t.indexOf('{');
+    if(i>=0) bc=JSON.parse(t.slice(i));
+  } catch {}
+  if(!bc) bc=await getJson(PROXY(BEACON),12000);
   for(const a of (bc&&bc.agents)||[]) if(a.endpoint) out.set(a.endpoint,{endpoint:a.endpoint,wallet:a.status&&a.status.solana,id:a.id});
   if(!out.size){const roots=await getJson('roots.json');  const walk=(xs)=>{for(const it of xs||[]){if(it.endpoint)out.set(it.endpoint,it);walk(it.children);}};walk(roots&&roots.roots);}const swarm=await getJson('swarm.json');for(const a of (swarm&&swarm.agents)||[])if(a.endpoint)out.set(a.endpoint,{endpoint:a.endpoint,wallet:a.wallet,id:a.id});S.agents=[...out.values()];}
 async function probe(){S.rows=await Promise.all(S.agents.map(async(a)=>{const st=await getJson(a.endpoint.replace(/\/$/,'')+'/status',6500);return{a,st};}));}
