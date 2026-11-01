@@ -98,18 +98,32 @@ const ago=(s)=>{if(!s)return '—';const d=Math.max(0,Math.floor(Date.now()/1000
 async function getJson(url,ms=8000){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);try{const r=await fetch(url,{cache:'no-store',signal:c.signal});if(r.ok)return await r.json();}catch{}finally{clearTimeout(t);}try{const r=await fetch(PROXY(url),{cache:'no-store'});if(r.ok)return await r.json();}catch{}return null;}
 async function rpc(m,p){const b=JSON.stringify({jsonrpc:'2.0',id:1,method:m,params:p});for(const u of ['https://solana-rpc.publicnode.com','https://api.mainnet-beta.solana.com']){try{const r=await fetch(u,{method:'POST',headers:{'content-type':'application/json'},body:b});const j=await r.json();if(j.result)return j.result;}catch{}}return null;}
 const BEACON='http://64.176.200.115:9099/beacon.json';
-async function loadEndpoints(){const out=new Map();
-  // Same-origin file kept fresh by the beacon workflow; no CORS, no mixed content.
-  let bc=await getJson('beacon.json?ts='+Date.now(),12000);
-  if(!bc){
-    try{const r=await fetch('https://r.jina.ai/'+BEACON,{cache:'no-store'});const t=await r.text();const i=t.indexOf('{');if(i>=0)bc=JSON.parse(t.slice(i));}catch{}
+async function loadEndpoints(){
+  S.agents=[]; S.rows=[];
+  let bc=null;
+  try{const r=await fetch('beacon.json?ts='+Date.now(),{cache:'no-store'}); if(r.ok) bc=await r.json();}catch{}
+  if(!bc){ try{const r=await fetch('https://r.jina.ai/http://64.176.200.115:9099/beacon.json',{cache:'no-store'});const t=await r.text();const i=t.indexOf('{');if(i>=0)bc=JSON.parse(t.slice(i));}catch{} }
+  for(const a of (bc&&bc.agents)||[]){
+    const st=a.status||null;
+    S.agents.push({endpoint:a.endpoint,wallet:st&&st.solana});
+    S.rows.push({a:{endpoint:a.endpoint,wallet:st&&st.solana},st});
   }
-  for(const a of (bc&&bc.agents)||[]) if(a.endpoint) out.set(a.endpoint,{endpoint:a.endpoint,wallet:a.status&&a.status.solana,id:a.id});
-  if(!out.size){const roots=await getJson('roots.json');  const walk=(xs)=>{for(const it of xs||[]){if(it.endpoint)out.set(it.endpoint,it);walk(it.children);}};walk(roots&&roots.roots);}const swarm=await getJson('swarm.json');for(const a of (swarm&&swarm.agents)||[])if(a.endpoint)out.set(a.endpoint,{endpoint:a.endpoint,wallet:a.wallet,id:a.id});S.agents=[...out.values()];}
-async function probe(){S.rows=await Promise.all(S.agents.map(async(a)=>{const st=await getJson(a.endpoint.replace(/\/$/,'')+'/status',6500);return{a,st};}));}
-let SHOW_DOWN=false;
-function renderFleet(){const rows=S.rows.filter(r=>r.st||SHOW_DOWN);const b=rows.map(({a,st})=>{const up=!!st;const core=st&&st.image?(st.image.match?'match':'drift'):'—';const cls=up?(core==='match'?'ok':'warn'):'bad';const ep=a.endpoint.replace(/^https?:\/\//,'').replace(/\/$/,'').slice(0,30);const w=(st&&st.solana||a.wallet||'').slice(0,7);const bid=st&&st.birth_id?st.birth_id.slice(0,8):'—';return `<tr><td>${ep}</td><td>${w}</td><td><span class="pill ${cls}">${st&&st.phase||'down'}</span></td><td>${bid}</td><td>${core}</td><td>${st&&st.t0?ago(st.t0):'—'}</td></tr>`;});$('fleet-body').innerHTML=b.length?b.join(''):'<tr><td colspan="6" class="empty">no endpoints published</td></tr>';const up=S.rows.filter(r=>r.st).length;$('stamp').textContent=`${up}/${S.rows.length} answering · ${new Date().toLocaleTimeString()}`;
-  const cb=$('showdown'); if(cb){cb.checked=SHOW_DOWN;cb.onchange=()=>{SHOW_DOWN=cb.checked;renderFleet();};}}
+}
+function renderFleet(){
+  const rows=S.rows.filter(r=>r.st||SHOW_DOWN);
+  const body=rows.map(({a,st})=>{
+    const core=st&&st.image?(st.image.match?'match':'drift'):'—';
+    const cls=st?'ok':'bad';
+    const ep=String(a.endpoint).replace(/^https?:\/\//,'').slice(0,34);
+    const w=String((st&&st.solana)||'').slice(0,7);
+    const bid=st&&st.birth_id?String(st.birth_id).slice(0,8):'—';
+    return `<tr><td>${ep}</td><td>${w}</td><td><span class="pill ${cls}">${(st&&st.phase)||'down'}</span></td><td>${bid}</td><td>${core}</td><td>${st&&st.t0?ago(st.t0):'—'}</td></tr>`;
+  });
+  $('fleet-body').innerHTML=body.length?body.join(''):'<tr><td colspan="6" class="empty">beacon has no agents yet</td></tr>';
+  const up=S.rows.filter(r=>r.st).length;
+  $('stamp').textContent=`${up} live / ${S.rows.length} seen · ${new Date().toLocaleTimeString()}`;
+  const cb=$('showdown'); if(cb){cb.checked=SHOW_DOWN;cb.onchange=()=>{SHOW_DOWN=cb.checked;renderFleet();};}
+}
 async function loadMemos(){const ws=[...new Set(S.agents.map(a=>{const r=S.rows.find(x=>x.a===a);return (r&&r.st&&r.st.solana)||a.wallet;}).filter(Boolean))].slice(0,10);const f=[];await Promise.all(ws.map(async(w)=>{const sigs=await rpc('getSignaturesForAddress',[w,{limit:10}]);if(!Array.isArray(sigs))return;await Promise.all(sigs.slice(0,6).map(async(s)=>{const tx=await rpc('getTransaction',[s.signature,{encoding:'jsonParsed',maxSupportedTransactionVersion:0}]);for(const ix of ((tx&&tx.transaction&&tx.transaction.message&&tx.transaction.message.instructions)||[])){if(!MEMO.has(ix.programId))continue;let t='';try{t=new TextDecoder().decode(Uint8Array.from(atob(ix.data||''),c=>c.charCodeAt(0)));}catch{}if(t)f.push({at:s.blockTime||0,from:w.slice(0,6),sig:s.signature,text:t});}}));}));f.sort((x,y)=>y.at-x.at);S.memos=f.slice(0,50);}
 function channelOf(t){if(/^<<[0-9a-f]{8}>>/.test(t))return 'obfuscated';if(t.startsWith('swm2.'))return 'sealed';if(/^\[pub\]/.test(t))return 'public';return 'plain';}
 function renderComms(){const now=Math.floor(Date.now()/1000);const sealed=S.memos.filter(m=>channelOf(m.text)==='sealed').length;$('c-big').innerHTML=`${S.memos.length}<small>messages</small>`;$('c-hour').textContent=S.memos.filter(m=>now-m.at<3600).length;$('c-peers').textContent=new Set(S.memos.map(m=>m.from)).size;$('c-split').textContent=`${sealed} / ${S.memos.length-sealed}`;$('comms-note').textContent=S.memos.length?`newest ${ago(S.memos[0].at)} ago · [pub] public · <<hash>> obfuscated · swm2.* sealed`:'no memos on chain yet — the agents have not spoken';$('comms-feed').innerHTML=S.memos.length?S.memos.map(m=>{const ch=channelOf(m.text);const cls=ch==='sealed'?'ok':ch==='obfuscated'?'warn':'';return `<div class="msg"><div class="meta"><span>${m.from}</span><span>${ago(m.at)} ago</span><span class="pill ${cls}">${ch}</span><a href="https://solscan.io/tx/${m.sig}" target="_blank" rel="noopener">tx</a></div><div class="body">${m.text.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div></div>`;}).join(''):'<div class="empty">nothing on the wire yet</div>';}
@@ -117,7 +131,7 @@ function renderEcon(){const st=S.rows.map(r=>r.st).filter(Boolean);const l=st.re
 function renderInvention(){const st=S.rows.map(r=>r.st).filter(Boolean);const sc=st.flatMap(x=>x.inventions||[]);$('i-big').innerHTML=`${sc.length}<small>scripts</small>`;$('i-last').textContent=sc.length?ago(Math.max(...sc.map(s=>s.at||0))):'—';$('i-trade').textContent=sc.filter(s=>/pump|curve|swap|buy|sell|price|trade/i.test(String(s.name||s))).length;$('i-list').innerHTML=sc.length?sc.slice(0,20).map(s=>`<div class="row"><span>${String(s.name||s).slice(0,44)}</span><b>${ago(s.at)}</b></div>`).join(''):'<div class="row"><span>nothing invented yet</span><b>—</b></div>';}
 function showTab(n){for(const t of ['fleet','comms','economics','invention'])$(t).hidden=t!==n;document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===n)));}
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)showTab(b.dataset.tab);});
-async function refresh(){await loadEndpoints();await probe();renderFleet();await loadMemos();renderComms();renderEcon();renderInvention();}
+async function refresh(){await loadEndpoints();renderFleet();await loadMemos();renderComms();renderEcon();renderInvention();}
 refresh();setInterval(refresh,60000);
 </script>
 </body>
