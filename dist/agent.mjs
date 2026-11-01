@@ -125374,6 +125374,15 @@ var init_discovery_image = __esm({
 });
 
 // lib/x402.mjs
+var x402_exports = {};
+__export(x402_exports, {
+  balances: () => balances,
+  orderRails: () => orderRails,
+  paidRequest: () => paidRequest,
+  quote: () => quote3,
+  signRequirement: () => signRequirement,
+  solanaSelfPay: () => solanaSelfPay
+});
 async function balances(identity3) {
   const out = { base: 0n, solana: 0n };
   try {
@@ -125711,10 +125720,88 @@ var init_memory = __esm({
   }
 });
 
+// lib/relay-sol.mjs
+var relay_sol_exports = {};
+__export(relay_sol_exports, {
+  bridgeSolToBase: () => bridgeSolToBase,
+  quoteSolToBase: () => quoteSolToBase
+});
+async function quoteSolToBase(identity3, amountRaw) {
+  const body = {
+    user: identity3.solana.public_key,
+    recipient: identity3.evm.address,
+    originChainId: 792703809,
+    destinationChainId: 8453,
+    originCurrency: SOL_USDC2,
+    destinationCurrency: BASE_USDC2,
+    amount: String(amountRaw),
+    tradeType: "EXACT_INPUT"
+  };
+  const r = await fetch("https://api.relay.link/quote", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+  const j2 = await r.json();
+  if (!j2.steps) throw new Error(`relay quote: ${r.status} ${JSON.stringify(j2).slice(0, 160)}`);
+  return j2;
+}
+async function bridgeSolToBase(identity3, amountRaw) {
+  const q2 = await quoteSolToBase(identity3, amountRaw);
+  const ins = q2.steps[0]?.items?.[0]?.data?.instructions || [];
+  const alts = q2.steps[0]?.items?.[0]?.data?.addressLookupTableAddresses || [];
+  if (!ins.length) throw new Error("relay: no deposit instructions");
+  const web3 = await Promise.resolve().then(() => __toESM(require_index_cjs(), 1));
+  const { PublicKey: PublicKey38, TransactionInstruction: TransactionInstruction48, TransactionMessage: TransactionMessage2, VersionedTransaction: VersionedTransaction3, AddressLookupTableAccount, ComputeBudgetProgram: ComputeBudgetProgram4 } = web3;
+  const ixs = ins.map((i) => new TransactionInstruction48({
+    programId: new PublicKey38(i.programId),
+    keys: i.keys.map((k2) => ({ pubkey: new PublicKey38(k2.pubkey), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
+    data: (() => {
+      const d = String(i.data || "");
+      if (/^[0-9a-fA-F]+$/.test(d) && d.length % 2 === 0) return Buffer.from(d, "hex");
+      try {
+        const b2 = Buffer.from(d, "base64");
+        if (b2.length) return b2;
+      } catch {
+      }
+      return Buffer.from(bs58.decode(d));
+    })()
+  }));
+  const tables = [];
+  for (const a2 of alts.slice(0, 4)) {
+    try {
+      const acc = await rpc("getAccountInfo", [a2, { encoding: "base64" }]);
+      if (acc?.value?.data) tables.push(new AddressLookupTableAccount({ key: new PublicKey38(a2), state: AddressLookupTableAccount.deserialize(Buffer.from(acc.value.data[0], "base64")) }));
+    } catch {
+    }
+  }
+  const { blockhash: blockhash2 } = await getLatestBlockhash();
+  const msg = new TransactionMessage2({
+    payerKey: new PublicKey38(identity3.solana.public_key),
+    recentBlockhash: blockhash2,
+    instructions: [ComputeBudgetProgram4.setComputeUnitLimit({ units: 4e5 }), ...ixs]
+  }).compileToV0Message(tables);
+  const vtx = new VersionedTransaction3(msg);
+  const signed = await request("sign_tx", { wireBase64: Buffer.from(vtx.serialize()).toString("base64") });
+  if (!signed?.wireBase64) throw new Error("relay: sign failed " + JSON.stringify(signed).slice(0, 120));
+  const sim = await simulate(signed.wireBase64, [identity3.solana.public_key]);
+  if (sim.value?.err) return { ok: false, stage: "simulate", err: sim.value.err, logs: (sim.value.logs || []).slice(-3) };
+  const sig = await sendRaw(signed.wireBase64);
+  return { ok: true, signature: sig, outAmount: q2.details?.currencyOut?.amount || null, via: "v0+alt" };
+}
+var import_web3128, bs58, SOL_USDC2, BASE_USDC2;
+var init_relay_sol = __esm({
+  "lib/relay-sol.mjs"() {
+    import_web3128 = __toESM(require_index_cjs(), 1);
+    init_esm2();
+    init_signer_client();
+    init_rpc();
+    bs58 = esm_default2.default || esm_default2;
+    SOL_USDC2 = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+    BASE_USDC2 = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+  }
+});
+
 // lib/relay.mjs
 var relay_exports = {};
 __export(relay_exports, {
-  BASE_USDC: () => BASE_USDC2,
+  BASE_USDC: () => BASE_USDC3,
   RELAY_API: () => RELAY_API,
   SOL_MINT: () => SOL_MINT2,
   bridgeBaseToSol: () => bridgeBaseToSol,
@@ -125726,7 +125813,7 @@ async function quoteToSol({ amountRaw, identity: identity3 }) {
     recipient: identity3.solana.public_key,
     originChainId: 8453,
     destinationChainId: 792703809,
-    originCurrency: BASE_USDC2,
+    originCurrency: BASE_USDC3,
     destinationCurrency: SOL_MINT2,
     amount: String(amountRaw),
     tradeType: "EXACT_INPUT",
@@ -125758,12 +125845,12 @@ async function bridgeBaseToSol(identity3, amountRaw) {
   const text = await res.text();
   return { ok: res.status === 200, status: res.status, body: text.slice(0, 200), out: q2.details?.currencyOut?.amount || null };
 }
-var RELAY_API, BASE_USDC2, SOL_MINT2;
+var RELAY_API, BASE_USDC3, SOL_MINT2;
 var init_relay = __esm({
   "lib/relay.mjs"() {
     init_signer_client();
     RELAY_API = "https://api.relay.link";
-    BASE_USDC2 = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+    BASE_USDC3 = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
     SOL_MINT2 = "11111111111111111111111111111111";
   }
 });
@@ -125871,6 +125958,16 @@ async function dispatch(name, args, identity3) {
       if (!uri) {
         try {
           const { buyImage: buyImage2 } = await init_x402_image().then(() => x402_image_exports);
+          try {
+            const { balances: balances2 } = await Promise.resolve().then(() => (init_x402(), x402_exports));
+            const b2 = await balances2(identity3);
+            if (b2.base < 30000n && b2.solana > 1200000n) {
+              const { bridgeSolToBase: bridgeSolToBase2 } = await Promise.resolve().then(() => (init_relay_sol(), relay_sol_exports));
+              const br = await bridgeSolToBase2(identity3, 1e6);
+              if (!br.ok) log("launch", "bridge failed", { err: JSON.stringify(br.err || br.stage).slice(0, 80) });
+            }
+          } catch {
+          }
           let img = await buyImage2(`${name2 || "memecoin"} ${symbol || ""} \u2014 bold sticker art, dark background, no text`);
           if (!img?.url) {
             const seed = (name2 || "agent") + (symbol || "");
@@ -126475,69 +126572,6 @@ var init_strategy_earn = __esm({
         await sleep(TICK3);
       }
     }
-  }
-});
-
-// lib/relay-sol.mjs
-async function quoteSolToBase(identity3, amountRaw) {
-  const body = {
-    user: identity3.solana.public_key,
-    recipient: identity3.evm.address,
-    originChainId: 792703809,
-    destinationChainId: 8453,
-    originCurrency: SOL_USDC2,
-    destinationCurrency: BASE_USDC3,
-    amount: String(amountRaw),
-    tradeType: "EXACT_INPUT"
-  };
-  const r = await fetch("https://api.relay.link/quote", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
-  const j2 = await r.json();
-  if (!j2.steps) throw new Error(`relay quote: ${r.status} ${JSON.stringify(j2).slice(0, 160)}`);
-  return j2;
-}
-async function bridgeSolToBase(identity3, amountRaw) {
-  const q2 = await quoteSolToBase(identity3, amountRaw);
-  const ins = q2.steps[0]?.items?.[0]?.data?.instructions || [];
-  if (!ins.length) throw new Error("relay: no deposit instructions");
-  const ixs = ins.map((i) => new import_web3128.TransactionInstruction({
-    programId: new import_web3128.PublicKey(i.programId),
-    keys: i.keys.map((k2) => ({ pubkey: new import_web3128.PublicKey(k2.pubkey), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
-    data: (() => {
-      const d = String(i.data || "");
-      if (/^[0-9a-fA-F]+$/.test(d) && d.length % 2 === 0) return Buffer.from(d, "hex");
-      try {
-        const b2 = Buffer.from(d, "base64");
-        if (b2.length) return b2;
-      } catch {
-      }
-      return Buffer.from(bs58.decode(d));
-    })()
-  }));
-  const writable = ixs.flatMap((ix) => ix.keys.filter((k2) => k2.isWritable).map((k2) => k2.pubkey.toBase58()));
-  const { blockhash: blockhash2, lastValidBlockHeight } = await getLatestBlockhash();
-  const env = await signV1({
-    instructions: ixs,
-    blockhash: blockhash2,
-    lastValidBlockHeight,
-    cuLimit: 4e5,
-    allowedDestinations: [.../* @__PURE__ */ new Set([...writable, identity3.solana.public_key])],
-    strategy: true
-  });
-  const sim = await simulate(env.wireBase64, [.../* @__PURE__ */ new Set([...writable, identity3.solana.public_key])]);
-  if (sim.value?.err) return { ok: false, stage: "simulate", err: sim.value.err, logs: (sim.value.logs || []).slice(-4) };
-  const sig = await sendRaw(env.wireBase64);
-  return { ok: true, signature: sig, outAmount: q2.details?.currencyOut?.amount || null };
-}
-var import_web3128, bs58, SOL_USDC2, BASE_USDC3;
-var init_relay_sol = __esm({
-  "lib/relay-sol.mjs"() {
-    import_web3128 = __toESM(require_index_cjs(), 1);
-    init_esm2();
-    init_signer_client();
-    init_rpc();
-    bs58 = esm_default2.default || esm_default2;
-    SOL_USDC2 = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
-    BASE_USDC3 = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
   }
 });
 
