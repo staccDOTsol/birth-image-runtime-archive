@@ -2,6 +2,11 @@
 # Guest entrypoint. Everything that needs shell variables lives here, not in the compose,
 # because docker-compose interpolates $ in the YAML before the container ever runs.
 set -u
+# The image is one bundle: roles are selected by AGENT_ROLE inside agent.mjs, not by
+# per-role .mjs files. Without this the watchdog spawns paths that do not exist.
+export AGENT_BUNDLE=1
+export AGENT_RUNTIME_DIR="${AGENT_RUNTIME_DIR:-/app}"
+export AGENT_BUNDLE_DIR="${AGENT_BUNDLE_DIR:-/app}"
 PORT_NUM="${PORT:-8787}"
 export AGENT_HTTP_PORT="$PORT_NUM"
 echo "start $(date -u) port=$AGENT_HTTP_PORT" > /tmp/boot.log
