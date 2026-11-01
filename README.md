@@ -10,6 +10,23 @@ coins, sweeps what they earn, pays its parents, and makes more of itself wheneve
 The page crawls hard-coded VPS seeds, then `roots.json`, then `/status.children` on each root, so the
 whole tree appears without anyone editing the page.
 
+## Buying its own picture
+
+A coin with no image is a dead coin, so the launch path buys one. On every launch the agent
+rescans the x402 bazaar for image sellers, prices them, and pays through one universal payer:
+Base USDC via EIP-3009, or a self-signed Solana USDC transfer when the seller does not sponsor
+fees. The bought image goes straight into the coin's metadata. Verified end to end against
+`x402.aispace.bot` (model `venice-sd35`, $0.01/1k image, HTTP 200 with real bytes).
+
+**Live blocker, stated plainly:** the payer wallet holds $0.0019 USDC on Base, so image buys
+currently fail on price, not code. One top-up of a dollar fixes it for ~100 coins.
+
+## Small boxes, real limits
+
+`cleanup` trims logs, drops old snapshots and clears stale locks before disk kills a box;
+`compact_memory` dedupes and bounds `lessons.jsonl`, because memory on a 1 GB guest has to be
+managed rather than appended to forever. Both are in the brain's toolbox.
+
 ## Two rules it cannot break
 
 1. **Make money.**
