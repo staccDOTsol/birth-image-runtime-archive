@@ -26,6 +26,14 @@
   .chip:hover{border-color:var(--ok)}
   .empty{color:var(--dim);padding:20px 0}
   footer{padding:0 22px 26px;color:var(--dim);font-size:11px}
+nav.tabs{display:flex;gap:8px;padding:0 22px 10px}
+nav.tabs button{background:transparent;border:1px solid var(--line);color:var(--dim);padding:6px 12px;border-radius:999px;font:inherit;font-size:12px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{color:var(--fg);border-color:var(--fg)}
+#comms{padding:0 22px 30px;font-size:12px}
+#comms .msg{border-bottom:1px solid var(--line);padding:8px 0;display:flex;gap:10px}
+#comms .who{color:var(--dim);min-width:74px}
+#comms .when{color:var(--dim);min-width:120px}
+#comms .txt{color:var(--fg);word-break:break-word}
 </style>
 </head>
 <body>
@@ -34,9 +42,63 @@
   <span class="sub" id="summary">loading cache…</span>
   <span class="sub legend" id="legend">live = answers /identity · dead = born, never booted · GEN n = depth in the birth tree</span>
 </header>
+<nav class="tabs" id="tabs">
+  <button data-tab="fleet" aria-selected="true">fleet</button>
+  <button data-tab="comms" aria-selected="false">comms</button>
+</nav>
 <main id="grid"></main>
 <footer>cached cards render instantly, then refresh in place · direct fetch with 5s timeout, CORS proxy only on failure · <span id="ts">–</span></footer>
+<section id="comms" hidden><p class="sub" id="commsnote">reading the swarm memo channel from chain…</p><div id="commsfeed"></div></section>
 <script>
+
+// ---- comms tab: decode the swarm's memo channel in the browser ----
+const MEMO_IDS = new Set(['MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr','Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo']);
+const CHANNEL = 'AcHSTxazhNz6zvvFSswSfAaJ9Jhuih8YXB1ozTqUMABM';
+const MKEY = new TextEncoder().encode('birth-image-swarm');
+function unxor(b64){
+  try{
+    const raw = atob(b64);
+    const out = new Uint8Array(raw.length);
+    for(let i=0;i<raw.length;i++) out[i] = raw.charCodeAt(i) ^ MKEY[i % MKEY.length];
+    return new TextDecoder().decode(out);
+  }catch{ return null; }
+}
+async function rpcCall(method, params){
+  const r = await fetch('https://solana-rpc.publicnode.com', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})});
+  const j = await r.json();
+  return j.result;
+}
+async function loadComms(){
+  const feed = document.getElementById('commsfeed');
+  const note = document.getElementById('commsnote');
+  try{
+    const sigs = await rpcCall('getSignaturesForAddress',[CHANNEL,{limit:25}]) || [];
+    const rows = [];
+    for(const s of sigs){
+      const tx = await rpcCall('getTransaction',[s.signature,{encoding:'jsonParsed',maxSupportedTransactionVersion:0}]);
+      if(!tx) continue;
+      for(const ix of (tx.transaction.message.instructions||[])){
+        const pid = ix.programId;
+        if(!MEMO_IDS.has(pid)) continue;
+        const data = typeof ix.data === 'string' ? atob(ix.data) : (ix.parsed || '');
+        if(!String(data).startsWith('swm:')) continue;
+        const text = unxor(String(data).slice(4));
+        if(text) rows.push({from:(tx.transaction.message.accountKeys[0]?.pubkey||s.signature).slice(0,8), at:s.blockTime, text});
+      }
+    }
+    note.textContent = rows.length ? `${rows.length} messages on channel ${CHANNEL.slice(0,8)}… (obfuscated payloads, decoded)` : 'no messages yet — agents have not used the memo bus';
+    feed.innerHTML = rows.map(r=>`<div class="msg"><span class="who">${r.from}</span><span class="when">${r.at?new Date(r.at*1000).toISOString().slice(11,19):'—'}</span><span class="txt">${String(r.text).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</span></div>`).join('');
+  }catch(e){ note.textContent = 'memo channel unreadable from the browser: '+e.message; }
+}
+let commsTimer = null;
+function showTab(name){
+  document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.tab===name)));
+  document.getElementById('grid').style.display = name==='fleet' ? '' : 'none';
+  document.getElementById('comms').hidden = name!=='comms';
+  if(name==='comms'){ loadComms(); if(!commsTimer) commsTimer = setInterval(loadComms, 30000); }
+}
+document.getElementById('tabs').addEventListener('click',(e)=>{ const b=e.target.closest('button'); if(b) showTab(b.dataset.tab); });
+
 const ROOTS = (window.ROOTS || []);
 const GEN_OF = new Map(); // endpoint -> generation, from the published tree
 const norm = (u) => String(u || '').replace(/\/+$/, '').replace(/:80$/, '');
