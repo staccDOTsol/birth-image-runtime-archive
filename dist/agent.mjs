@@ -3750,8 +3750,8 @@ var require_bn = __commonJS({
         ctor.prototype = new TempCtor();
         ctor.prototype.constructor = ctor;
       }
-      function BN22(number, base2, endian) {
-        if (BN22.isBN(number)) {
+      function BN24(number, base2, endian) {
+        if (BN24.isBN(number)) {
           return number;
         }
         this.negative = 0;
@@ -3767,12 +3767,12 @@ var require_bn = __commonJS({
         }
       }
       if (typeof module2 === "object") {
-        module2.exports = BN22;
+        module2.exports = BN24;
       } else {
-        exports2.BN = BN22;
+        exports2.BN = BN24;
       }
-      BN22.BN = BN22;
-      BN22.wordSize = 26;
+      BN24.BN = BN24;
+      BN24.wordSize = 26;
       var Buffer4;
       try {
         if (typeof window !== "undefined" && typeof window.Buffer !== "undefined") {
@@ -3782,21 +3782,21 @@ var require_bn = __commonJS({
         }
       } catch (e9) {
       }
-      BN22.isBN = function isBN(num2) {
-        if (num2 instanceof BN22) {
+      BN24.isBN = function isBN(num2) {
+        if (num2 instanceof BN24) {
           return true;
         }
-        return num2 !== null && typeof num2 === "object" && num2.constructor.wordSize === BN22.wordSize && Array.isArray(num2.words);
+        return num2 !== null && typeof num2 === "object" && num2.constructor.wordSize === BN24.wordSize && Array.isArray(num2.words);
       };
-      BN22.max = function max(left, right) {
+      BN24.max = function max(left, right) {
         if (left.cmp(right) > 0) return left;
         return right;
       };
-      BN22.min = function min(left, right) {
+      BN24.min = function min(left, right) {
         if (left.cmp(right) < 0) return left;
         return right;
       };
-      BN22.prototype._init = function init(number, base2, endian) {
+      BN24.prototype._init = function init(number, base2, endian) {
         if (typeof number === "number") {
           return this._initNumber(number, base2, endian);
         }
@@ -3824,7 +3824,7 @@ var require_bn = __commonJS({
           }
         }
       };
-      BN22.prototype._initNumber = function _initNumber(number, base2, endian) {
+      BN24.prototype._initNumber = function _initNumber(number, base2, endian) {
         if (number < 0) {
           this.negative = 1;
           number = -number;
@@ -3850,7 +3850,7 @@ var require_bn = __commonJS({
         if (endian !== "le") return;
         this._initArray(this.toArray(), base2, endian);
       };
-      BN22.prototype._initArray = function _initArray(number, base2, endian) {
+      BN24.prototype._initArray = function _initArray(number, base2, endian) {
         assert(typeof number.length === "number");
         if (number.length <= 0) {
           this.words = [0];
@@ -3908,7 +3908,7 @@ var require_bn = __commonJS({
         }
         return r;
       }
-      BN22.prototype._parseHex = function _parseHex(number, start, endian) {
+      BN24.prototype._parseHex = function _parseHex(number, start, endian) {
         this.length = Math.ceil((number.length - start) / 6);
         this.words = new Array(this.length);
         for (var i = 0; i < this.length; i++) {
@@ -3964,7 +3964,7 @@ var require_bn = __commonJS({
         }
         return r;
       }
-      BN22.prototype._parseBase = function _parseBase(number, base2, start) {
+      BN24.prototype._parseBase = function _parseBase(number, base2, start) {
         this.words = [0];
         this.length = 1;
         for (var limbLen = 0, limbPow = 1; limbPow <= 67108863; limbPow *= base2) {
@@ -4000,7 +4000,7 @@ var require_bn = __commonJS({
         }
         this._strip();
       };
-      BN22.prototype.copy = function copy(dest) {
+      BN24.prototype.copy = function copy(dest) {
         dest.words = new Array(this.length);
         for (var i = 0; i < this.length; i++) {
           dest.words[i] = this.words[i];
@@ -4015,27 +4015,27 @@ var require_bn = __commonJS({
         dest.negative = src.negative;
         dest.red = src.red;
       }
-      BN22.prototype._move = function _move(dest) {
+      BN24.prototype._move = function _move(dest) {
         move(dest, this);
       };
-      BN22.prototype.clone = function clone2() {
-        var r = new BN22(null);
+      BN24.prototype.clone = function clone2() {
+        var r = new BN24(null);
         this.copy(r);
         return r;
       };
-      BN22.prototype._expand = function _expand(size) {
+      BN24.prototype._expand = function _expand(size) {
         while (this.length < size) {
           this.words[this.length++] = 0;
         }
         return this;
       };
-      BN22.prototype._strip = function strip() {
+      BN24.prototype._strip = function strip() {
         while (this.length > 1 && this.words[this.length - 1] === 0) {
           this.length--;
         }
         return this._normSign();
       };
-      BN22.prototype._normSign = function _normSign() {
+      BN24.prototype._normSign = function _normSign() {
         if (this.length === 1 && this.words[0] === 0) {
           this.negative = 0;
         }
@@ -4043,12 +4043,12 @@ var require_bn = __commonJS({
       };
       if (typeof Symbol !== "undefined" && typeof Symbol.for === "function") {
         try {
-          BN22.prototype[/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")] = inspect2;
+          BN24.prototype[/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")] = inspect2;
         } catch (e9) {
-          BN22.prototype.inspect = inspect2;
+          BN24.prototype.inspect = inspect2;
         }
       } else {
-        BN22.prototype.inspect = inspect2;
+        BN24.prototype.inspect = inspect2;
       }
       function inspect2() {
         return (this.red ? "<BN-R: " : "<BN: ") + this.toString(16) + ">";
@@ -4159,7 +4159,7 @@ var require_bn = __commonJS({
         52521875,
         60466176
       ];
-      BN22.prototype.toString = function toString(base2, padding) {
+      BN24.prototype.toString = function toString(base2, padding) {
         base2 = base2 || 10;
         padding = padding | 0 || 1;
         var out;
@@ -4221,7 +4221,7 @@ var require_bn = __commonJS({
         }
         assert(false, "Base should be between 2 and 36");
       };
-      BN22.prototype.toNumber = function toNumber() {
+      BN24.prototype.toNumber = function toNumber() {
         var ret = this.words[0];
         if (this.length === 2) {
           ret += this.words[1] * 67108864;
@@ -4232,15 +4232,15 @@ var require_bn = __commonJS({
         }
         return this.negative !== 0 ? -ret : ret;
       };
-      BN22.prototype.toJSON = function toJSON() {
+      BN24.prototype.toJSON = function toJSON() {
         return this.toString(16, 2);
       };
       if (Buffer4) {
-        BN22.prototype.toBuffer = function toBuffer(endian, length) {
+        BN24.prototype.toBuffer = function toBuffer(endian, length) {
           return this.toArrayLike(Buffer4, endian, length);
         };
       }
-      BN22.prototype.toArray = function toArray(endian, length) {
+      BN24.prototype.toArray = function toArray(endian, length) {
         return this.toArrayLike(Array, endian, length);
       };
       var allocate = function allocate2(ArrayType, size) {
@@ -4249,7 +4249,7 @@ var require_bn = __commonJS({
         }
         return new ArrayType(size);
       };
-      BN22.prototype.toArrayLike = function toArrayLike(ArrayType, endian, length) {
+      BN24.prototype.toArrayLike = function toArrayLike(ArrayType, endian, length) {
         this._strip();
         var byteLength = this.byteLength();
         var reqLength = length || Math.max(1, byteLength);
@@ -4260,7 +4260,7 @@ var require_bn = __commonJS({
         this["_toArrayLike" + postfix](res, byteLength);
         return res;
       };
-      BN22.prototype._toArrayLikeLE = function _toArrayLikeLE(res, byteLength) {
+      BN24.prototype._toArrayLikeLE = function _toArrayLikeLE(res, byteLength) {
         var position = 0;
         var carry = 0;
         for (var i = 0, shift = 0; i < this.length; i++) {
@@ -4290,7 +4290,7 @@ var require_bn = __commonJS({
           }
         }
       };
-      BN22.prototype._toArrayLikeBE = function _toArrayLikeBE(res, byteLength) {
+      BN24.prototype._toArrayLikeBE = function _toArrayLikeBE(res, byteLength) {
         var position = res.length - 1;
         var carry = 0;
         for (var i = 0, shift = 0; i < this.length; i++) {
@@ -4321,11 +4321,11 @@ var require_bn = __commonJS({
         }
       };
       if (Math.clz32) {
-        BN22.prototype._countBits = function _countBits(w2) {
+        BN24.prototype._countBits = function _countBits(w2) {
           return 32 - Math.clz32(w2);
         };
       } else {
-        BN22.prototype._countBits = function _countBits(w2) {
+        BN24.prototype._countBits = function _countBits(w2) {
           var t = w2;
           var r = 0;
           if (t >= 4096) {
@@ -4347,7 +4347,7 @@ var require_bn = __commonJS({
           return r + t;
         };
       }
-      BN22.prototype._zeroBits = function _zeroBits(w2) {
+      BN24.prototype._zeroBits = function _zeroBits(w2) {
         if (w2 === 0) return 26;
         var t = w2;
         var r = 0;
@@ -4372,7 +4372,7 @@ var require_bn = __commonJS({
         }
         return r;
       };
-      BN22.prototype.bitLength = function bitLength() {
+      BN24.prototype.bitLength = function bitLength() {
         var w2 = this.words[this.length - 1];
         var hi = this._countBits(w2);
         return (this.length - 1) * 26 + hi;
@@ -4386,7 +4386,7 @@ var require_bn = __commonJS({
         }
         return w2;
       }
-      BN22.prototype.zeroBits = function zeroBits() {
+      BN24.prototype.zeroBits = function zeroBits() {
         if (this.isZero()) return 0;
         var r = 0;
         for (var i = 0; i < this.length; i++) {
@@ -4396,34 +4396,34 @@ var require_bn = __commonJS({
         }
         return r;
       };
-      BN22.prototype.byteLength = function byteLength() {
+      BN24.prototype.byteLength = function byteLength() {
         return Math.ceil(this.bitLength() / 8);
       };
-      BN22.prototype.toTwos = function toTwos(width) {
+      BN24.prototype.toTwos = function toTwos(width) {
         if (this.negative !== 0) {
           return this.abs().inotn(width).iaddn(1);
         }
         return this.clone();
       };
-      BN22.prototype.fromTwos = function fromTwos(width) {
+      BN24.prototype.fromTwos = function fromTwos(width) {
         if (this.testn(width - 1)) {
           return this.notn(width).iaddn(1).ineg();
         }
         return this.clone();
       };
-      BN22.prototype.isNeg = function isNeg() {
+      BN24.prototype.isNeg = function isNeg() {
         return this.negative !== 0;
       };
-      BN22.prototype.neg = function neg() {
+      BN24.prototype.neg = function neg() {
         return this.clone().ineg();
       };
-      BN22.prototype.ineg = function ineg() {
+      BN24.prototype.ineg = function ineg() {
         if (!this.isZero()) {
           this.negative ^= 1;
         }
         return this;
       };
-      BN22.prototype.iuor = function iuor(num2) {
+      BN24.prototype.iuor = function iuor(num2) {
         while (this.length < num2.length) {
           this.words[this.length++] = 0;
         }
@@ -4432,19 +4432,19 @@ var require_bn = __commonJS({
         }
         return this._strip();
       };
-      BN22.prototype.ior = function ior(num2) {
+      BN24.prototype.ior = function ior(num2) {
         assert((this.negative | num2.negative) === 0);
         return this.iuor(num2);
       };
-      BN22.prototype.or = function or(num2) {
+      BN24.prototype.or = function or(num2) {
         if (this.length > num2.length) return this.clone().ior(num2);
         return num2.clone().ior(this);
       };
-      BN22.prototype.uor = function uor(num2) {
+      BN24.prototype.uor = function uor(num2) {
         if (this.length > num2.length) return this.clone().iuor(num2);
         return num2.clone().iuor(this);
       };
-      BN22.prototype.iuand = function iuand(num2) {
+      BN24.prototype.iuand = function iuand(num2) {
         var b2;
         if (this.length > num2.length) {
           b2 = num2;
@@ -4457,19 +4457,19 @@ var require_bn = __commonJS({
         this.length = b2.length;
         return this._strip();
       };
-      BN22.prototype.iand = function iand(num2) {
+      BN24.prototype.iand = function iand(num2) {
         assert((this.negative | num2.negative) === 0);
         return this.iuand(num2);
       };
-      BN22.prototype.and = function and(num2) {
+      BN24.prototype.and = function and(num2) {
         if (this.length > num2.length) return this.clone().iand(num2);
         return num2.clone().iand(this);
       };
-      BN22.prototype.uand = function uand(num2) {
+      BN24.prototype.uand = function uand(num2) {
         if (this.length > num2.length) return this.clone().iuand(num2);
         return num2.clone().iuand(this);
       };
-      BN22.prototype.iuxor = function iuxor(num2) {
+      BN24.prototype.iuxor = function iuxor(num2) {
         var a2;
         var b2;
         if (this.length > num2.length) {
@@ -4490,19 +4490,19 @@ var require_bn = __commonJS({
         this.length = a2.length;
         return this._strip();
       };
-      BN22.prototype.ixor = function ixor(num2) {
+      BN24.prototype.ixor = function ixor(num2) {
         assert((this.negative | num2.negative) === 0);
         return this.iuxor(num2);
       };
-      BN22.prototype.xor = function xor(num2) {
+      BN24.prototype.xor = function xor(num2) {
         if (this.length > num2.length) return this.clone().ixor(num2);
         return num2.clone().ixor(this);
       };
-      BN22.prototype.uxor = function uxor(num2) {
+      BN24.prototype.uxor = function uxor(num2) {
         if (this.length > num2.length) return this.clone().iuxor(num2);
         return num2.clone().iuxor(this);
       };
-      BN22.prototype.inotn = function inotn(width) {
+      BN24.prototype.inotn = function inotn(width) {
         assert(typeof width === "number" && width >= 0);
         var bytesNeeded = Math.ceil(width / 26) | 0;
         var bitsLeft = width % 26;
@@ -4522,10 +4522,10 @@ var require_bn = __commonJS({
         }
         return this._strip();
       };
-      BN22.prototype.notn = function notn(width) {
+      BN24.prototype.notn = function notn(width) {
         return this.clone().inotn(width);
       };
-      BN22.prototype.setn = function setn(bit, val) {
+      BN24.prototype.setn = function setn(bit, val) {
         assert(typeof bit === "number" && bit >= 0);
         var off = bit / 26 | 0;
         var wbit = bit % 26;
@@ -4537,7 +4537,7 @@ var require_bn = __commonJS({
         }
         return this._strip();
       };
-      BN22.prototype.iadd = function iadd(num2) {
+      BN24.prototype.iadd = function iadd(num2) {
         var r;
         if (this.negative !== 0 && num2.negative === 0) {
           this.negative = 0;
@@ -4580,7 +4580,7 @@ var require_bn = __commonJS({
         }
         return this;
       };
-      BN22.prototype.add = function add2(num2) {
+      BN24.prototype.add = function add2(num2) {
         var res;
         if (num2.negative !== 0 && this.negative === 0) {
           num2.negative = 0;
@@ -4596,7 +4596,7 @@ var require_bn = __commonJS({
         if (this.length > num2.length) return this.clone().iadd(num2);
         return num2.clone().iadd(this);
       };
-      BN22.prototype.isub = function isub(num2) {
+      BN24.prototype.isub = function isub(num2) {
         if (num2.negative !== 0) {
           num2.negative = 0;
           var r = this.iadd(num2);
@@ -4645,7 +4645,7 @@ var require_bn = __commonJS({
         }
         return this._strip();
       };
-      BN22.prototype.sub = function sub(num2) {
+      BN24.prototype.sub = function sub(num2) {
         return this.clone().isub(num2);
       };
       function smallMulTo(self2, num2, out) {
@@ -5273,7 +5273,7 @@ var require_bn = __commonJS({
       function jumboMulTo(self2, num2, out) {
         return bigMulTo(self2, num2, out);
       }
-      BN22.prototype.mulTo = function mulTo(num2, out) {
+      BN24.prototype.mulTo = function mulTo(num2, out) {
         var res;
         var len = this.length + num2.length;
         if (this.length === 10 && num2.length === 10) {
@@ -5293,7 +5293,7 @@ var require_bn = __commonJS({
       }
       FFTM.prototype.makeRBT = function makeRBT(N2) {
         var t = new Array(N2);
-        var l3 = BN22.prototype._countBits(N2) - 1;
+        var l3 = BN24.prototype._countBits(N2) - 1;
         for (var i = 0; i < N2; i++) {
           t[i] = this.revBin(i, l3, N2);
         }
@@ -5428,20 +5428,20 @@ var require_bn = __commonJS({
         out.length = x.length + y.length;
         return out._strip();
       };
-      BN22.prototype.mul = function mul(num2) {
-        var out = new BN22(null);
+      BN24.prototype.mul = function mul(num2) {
+        var out = new BN24(null);
         out.words = new Array(this.length + num2.length);
         return this.mulTo(num2, out);
       };
-      BN22.prototype.mulf = function mulf(num2) {
-        var out = new BN22(null);
+      BN24.prototype.mulf = function mulf(num2) {
+        var out = new BN24(null);
         out.words = new Array(this.length + num2.length);
         return jumboMulTo(this, num2, out);
       };
-      BN22.prototype.imul = function imul(num2) {
+      BN24.prototype.imul = function imul(num2) {
         return this.clone().mulTo(num2, this);
       };
-      BN22.prototype.imuln = function imuln(num2) {
+      BN24.prototype.imuln = function imuln(num2) {
         var isNegNum = num2 < 0;
         if (isNegNum) num2 = -num2;
         assert(typeof num2 === "number");
@@ -5465,18 +5465,18 @@ var require_bn = __commonJS({
         }
         return isNegNum ? this.ineg() : this;
       };
-      BN22.prototype.muln = function muln(num2) {
+      BN24.prototype.muln = function muln(num2) {
         return this.clone().imuln(num2);
       };
-      BN22.prototype.sqr = function sqr() {
+      BN24.prototype.sqr = function sqr() {
         return this.mul(this);
       };
-      BN22.prototype.isqr = function isqr() {
+      BN24.prototype.isqr = function isqr() {
         return this.imul(this.clone());
       };
-      BN22.prototype.pow = function pow(num2) {
+      BN24.prototype.pow = function pow(num2) {
         var w2 = toBitArray(num2);
-        if (w2.length === 0) return new BN22(1);
+        if (w2.length === 0) return new BN24(1);
         var res = this;
         for (var i = 0; i < w2.length; i++, res = res.sqr()) {
           if (w2[i] !== 0) break;
@@ -5489,7 +5489,7 @@ var require_bn = __commonJS({
         }
         return res;
       };
-      BN22.prototype.iushln = function iushln(bits) {
+      BN24.prototype.iushln = function iushln(bits) {
         assert(typeof bits === "number" && bits >= 0);
         var r = bits % 26;
         var s3 = (bits - r) / 26;
@@ -5519,11 +5519,11 @@ var require_bn = __commonJS({
         }
         return this._strip();
       };
-      BN22.prototype.ishln = function ishln(bits) {
+      BN24.prototype.ishln = function ishln(bits) {
         assert(this.negative === 0);
         return this.iushln(bits);
       };
-      BN22.prototype.iushrn = function iushrn(bits, hint, extended) {
+      BN24.prototype.iushrn = function iushrn(bits, hint, extended) {
         assert(typeof bits === "number" && bits >= 0);
         var h2;
         if (hint) {
@@ -5568,23 +5568,23 @@ var require_bn = __commonJS({
         }
         return this._strip();
       };
-      BN22.prototype.ishrn = function ishrn(bits, hint, extended) {
+      BN24.prototype.ishrn = function ishrn(bits, hint, extended) {
         assert(this.negative === 0);
         return this.iushrn(bits, hint, extended);
       };
-      BN22.prototype.shln = function shln(bits) {
+      BN24.prototype.shln = function shln(bits) {
         return this.clone().ishln(bits);
       };
-      BN22.prototype.ushln = function ushln(bits) {
+      BN24.prototype.ushln = function ushln(bits) {
         return this.clone().iushln(bits);
       };
-      BN22.prototype.shrn = function shrn(bits) {
+      BN24.prototype.shrn = function shrn(bits) {
         return this.clone().ishrn(bits);
       };
-      BN22.prototype.ushrn = function ushrn(bits) {
+      BN24.prototype.ushrn = function ushrn(bits) {
         return this.clone().iushrn(bits);
       };
-      BN22.prototype.testn = function testn(bit) {
+      BN24.prototype.testn = function testn(bit) {
         assert(typeof bit === "number" && bit >= 0);
         var r = bit % 26;
         var s3 = (bit - r) / 26;
@@ -5593,7 +5593,7 @@ var require_bn = __commonJS({
         var w2 = this.words[s3];
         return !!(w2 & q2);
       };
-      BN22.prototype.imaskn = function imaskn(bits) {
+      BN24.prototype.imaskn = function imaskn(bits) {
         assert(typeof bits === "number" && bits >= 0);
         var r = bits % 26;
         var s3 = (bits - r) / 26;
@@ -5615,10 +5615,10 @@ var require_bn = __commonJS({
         }
         return this._strip();
       };
-      BN22.prototype.maskn = function maskn(bits) {
+      BN24.prototype.maskn = function maskn(bits) {
         return this.clone().imaskn(bits);
       };
-      BN22.prototype.iaddn = function iaddn(num2) {
+      BN24.prototype.iaddn = function iaddn(num2) {
         assert(typeof num2 === "number");
         assert(num2 < 67108864);
         if (num2 < 0) return this.isubn(-num2);
@@ -5635,7 +5635,7 @@ var require_bn = __commonJS({
         }
         return this._iaddn(num2);
       };
-      BN22.prototype._iaddn = function _iaddn(num2) {
+      BN24.prototype._iaddn = function _iaddn(num2) {
         this.words[0] += num2;
         for (var i = 0; i < this.length && this.words[i] >= 67108864; i++) {
           this.words[i] -= 67108864;
@@ -5648,7 +5648,7 @@ var require_bn = __commonJS({
         this.length = Math.max(this.length, i + 1);
         return this;
       };
-      BN22.prototype.isubn = function isubn(num2) {
+      BN24.prototype.isubn = function isubn(num2) {
         assert(typeof num2 === "number");
         assert(num2 < 67108864);
         if (num2 < 0) return this.iaddn(-num2);
@@ -5670,20 +5670,20 @@ var require_bn = __commonJS({
         }
         return this._strip();
       };
-      BN22.prototype.addn = function addn(num2) {
+      BN24.prototype.addn = function addn(num2) {
         return this.clone().iaddn(num2);
       };
-      BN22.prototype.subn = function subn(num2) {
+      BN24.prototype.subn = function subn(num2) {
         return this.clone().isubn(num2);
       };
-      BN22.prototype.iabs = function iabs() {
+      BN24.prototype.iabs = function iabs() {
         this.negative = 0;
         return this;
       };
-      BN22.prototype.abs = function abs() {
+      BN24.prototype.abs = function abs() {
         return this.clone().iabs();
       };
-      BN22.prototype._ishlnsubmul = function _ishlnsubmul(num2, mul, shift) {
+      BN24.prototype._ishlnsubmul = function _ishlnsubmul(num2, mul, shift) {
         var len = num2.length + shift;
         var i;
         this._expand(len);
@@ -5712,7 +5712,7 @@ var require_bn = __commonJS({
         this.negative = 1;
         return this._strip();
       };
-      BN22.prototype._wordDiv = function _wordDiv(num2, mode) {
+      BN24.prototype._wordDiv = function _wordDiv(num2, mode) {
         var shift = this.length - num2.length;
         var a2 = this.clone();
         var b2 = num2;
@@ -5727,7 +5727,7 @@ var require_bn = __commonJS({
         var m = a2.length - b2.length;
         var q2;
         if (mode !== "mod") {
-          q2 = new BN22(null);
+          q2 = new BN24(null);
           q2.length = m + 1;
           q2.words = new Array(q2.length);
           for (var i = 0; i < q2.length; i++) {
@@ -5769,12 +5769,12 @@ var require_bn = __commonJS({
           mod: a2
         };
       };
-      BN22.prototype.divmod = function divmod(num2, mode, positive) {
+      BN24.prototype.divmod = function divmod(num2, mode, positive) {
         assert(!num2.isZero());
         if (this.isZero()) {
           return {
-            div: new BN22(0),
-            mod: new BN22(0)
+            div: new BN24(0),
+            mod: new BN24(0)
           };
         }
         var div, mod3, res;
@@ -5819,7 +5819,7 @@ var require_bn = __commonJS({
         }
         if (num2.length > this.length || this.cmp(num2) < 0) {
           return {
-            div: new BN22(0),
+            div: new BN24(0),
             mod: this
           };
         }
@@ -5833,26 +5833,26 @@ var require_bn = __commonJS({
           if (mode === "mod") {
             return {
               div: null,
-              mod: new BN22(this.modrn(num2.words[0]))
+              mod: new BN24(this.modrn(num2.words[0]))
             };
           }
           return {
             div: this.divn(num2.words[0]),
-            mod: new BN22(this.modrn(num2.words[0]))
+            mod: new BN24(this.modrn(num2.words[0]))
           };
         }
         return this._wordDiv(num2, mode);
       };
-      BN22.prototype.div = function div(num2) {
+      BN24.prototype.div = function div(num2) {
         return this.divmod(num2, "div", false).div;
       };
-      BN22.prototype.mod = function mod3(num2) {
+      BN24.prototype.mod = function mod3(num2) {
         return this.divmod(num2, "mod", false).mod;
       };
-      BN22.prototype.umod = function umod(num2) {
+      BN24.prototype.umod = function umod(num2) {
         return this.divmod(num2, "mod", true).mod;
       };
-      BN22.prototype.divRound = function divRound(num2) {
+      BN24.prototype.divRound = function divRound(num2) {
         var dm = this.divmod(num2);
         if (dm.mod.isZero()) return dm.div;
         var mod3 = dm.mod.abs();
@@ -5860,11 +5860,11 @@ var require_bn = __commonJS({
         var r2 = num2.words[0] & 1;
         var cmp = mod3.cmp(half);
         if (cmp < 0 || r2 === 1 && cmp === 0) return dm.div;
-        var up = new BN22(1);
+        var up = new BN24(1);
         up.negative = this.negative ^ num2.negative;
         return dm.div.iadd(up);
       };
-      BN22.prototype.modrn = function modrn(num2) {
+      BN24.prototype.modrn = function modrn(num2) {
         var isNegNum = num2 < 0;
         if (isNegNum) num2 = -num2;
         assert(num2 <= 67108863);
@@ -5875,10 +5875,10 @@ var require_bn = __commonJS({
         }
         return isNegNum ? -acc : acc;
       };
-      BN22.prototype.modn = function modn(num2) {
+      BN24.prototype.modn = function modn(num2) {
         return this.modrn(num2);
       };
-      BN22.prototype.idivn = function idivn(num2) {
+      BN24.prototype.idivn = function idivn(num2) {
         var isNegNum = num2 < 0;
         if (isNegNum) num2 = -num2;
         assert(num2 <= 67108863);
@@ -5891,10 +5891,10 @@ var require_bn = __commonJS({
         this._strip();
         return isNegNum ? this.ineg() : this;
       };
-      BN22.prototype.divn = function divn(num2) {
+      BN24.prototype.divn = function divn(num2) {
         return this.clone().idivn(num2);
       };
-      BN22.prototype.egcd = function egcd(p2) {
+      BN24.prototype.egcd = function egcd(p2) {
         assert(p2.negative === 0);
         assert(!p2.isZero());
         var x = this;
@@ -5904,10 +5904,10 @@ var require_bn = __commonJS({
         } else {
           x = x.clone();
         }
-        var A2 = new BN22(1);
-        var B = new BN22(0);
-        var C2 = new BN22(0);
-        var D2 = new BN22(1);
+        var A2 = new BN24(1);
+        var B = new BN24(0);
+        var C2 = new BN24(0);
+        var D2 = new BN24(1);
         var g2 = 0;
         while (x.isEven() && y.isEven()) {
           x.iushrn(1);
@@ -5957,7 +5957,7 @@ var require_bn = __commonJS({
           gcd: y.iushln(g2)
         };
       };
-      BN22.prototype._invmp = function _invmp(p2) {
+      BN24.prototype._invmp = function _invmp(p2) {
         assert(p2.negative === 0);
         assert(!p2.isZero());
         var a2 = this;
@@ -5967,8 +5967,8 @@ var require_bn = __commonJS({
         } else {
           a2 = a2.clone();
         }
-        var x1 = new BN22(1);
-        var x2 = new BN22(0);
+        var x1 = new BN24(1);
+        var x2 = new BN24(0);
         var delta = b2.clone();
         while (a2.cmpn(1) > 0 && b2.cmpn(1) > 0) {
           for (var i = 0, im = 1; (a2.words[0] & im) === 0 && i < 26; ++i, im <<= 1) ;
@@ -6010,7 +6010,7 @@ var require_bn = __commonJS({
         }
         return res;
       };
-      BN22.prototype.gcd = function gcd(num2) {
+      BN24.prototype.gcd = function gcd(num2) {
         if (this.isZero()) return num2.abs();
         if (num2.isZero()) return this.abs();
         var a2 = this.clone();
@@ -6040,19 +6040,19 @@ var require_bn = __commonJS({
         } while (true);
         return b2.iushln(shift);
       };
-      BN22.prototype.invm = function invm(num2) {
+      BN24.prototype.invm = function invm(num2) {
         return this.egcd(num2).a.umod(num2);
       };
-      BN22.prototype.isEven = function isEven() {
+      BN24.prototype.isEven = function isEven() {
         return (this.words[0] & 1) === 0;
       };
-      BN22.prototype.isOdd = function isOdd2() {
+      BN24.prototype.isOdd = function isOdd2() {
         return (this.words[0] & 1) === 1;
       };
-      BN22.prototype.andln = function andln(num2) {
+      BN24.prototype.andln = function andln(num2) {
         return this.words[0] & num2;
       };
-      BN22.prototype.bincn = function bincn(bit) {
+      BN24.prototype.bincn = function bincn(bit) {
         assert(typeof bit === "number");
         var r = bit % 26;
         var s3 = (bit - r) / 26;
@@ -6076,10 +6076,10 @@ var require_bn = __commonJS({
         }
         return this;
       };
-      BN22.prototype.isZero = function isZero() {
+      BN24.prototype.isZero = function isZero() {
         return this.length === 1 && this.words[0] === 0;
       };
-      BN22.prototype.cmpn = function cmpn(num2) {
+      BN24.prototype.cmpn = function cmpn(num2) {
         var negative = num2 < 0;
         if (this.negative !== 0 && !negative) return -1;
         if (this.negative === 0 && negative) return 1;
@@ -6098,14 +6098,14 @@ var require_bn = __commonJS({
         if (this.negative !== 0) return -res | 0;
         return res;
       };
-      BN22.prototype.cmp = function cmp(num2) {
+      BN24.prototype.cmp = function cmp(num2) {
         if (this.negative !== 0 && num2.negative === 0) return -1;
         if (this.negative === 0 && num2.negative !== 0) return 1;
         var res = this.ucmp(num2);
         if (this.negative !== 0) return -res | 0;
         return res;
       };
-      BN22.prototype.ucmp = function ucmp(num2) {
+      BN24.prototype.ucmp = function ucmp(num2) {
         if (this.length > num2.length) return 1;
         if (this.length < num2.length) return -1;
         var res = 0;
@@ -6122,112 +6122,112 @@ var require_bn = __commonJS({
         }
         return res;
       };
-      BN22.prototype.gtn = function gtn(num2) {
+      BN24.prototype.gtn = function gtn(num2) {
         return this.cmpn(num2) === 1;
       };
-      BN22.prototype.gt = function gt(num2) {
+      BN24.prototype.gt = function gt(num2) {
         return this.cmp(num2) === 1;
       };
-      BN22.prototype.gten = function gten(num2) {
+      BN24.prototype.gten = function gten(num2) {
         return this.cmpn(num2) >= 0;
       };
-      BN22.prototype.gte = function gte(num2) {
+      BN24.prototype.gte = function gte(num2) {
         return this.cmp(num2) >= 0;
       };
-      BN22.prototype.ltn = function ltn(num2) {
+      BN24.prototype.ltn = function ltn(num2) {
         return this.cmpn(num2) === -1;
       };
-      BN22.prototype.lt = function lt(num2) {
+      BN24.prototype.lt = function lt(num2) {
         return this.cmp(num2) === -1;
       };
-      BN22.prototype.lten = function lten(num2) {
+      BN24.prototype.lten = function lten(num2) {
         return this.cmpn(num2) <= 0;
       };
-      BN22.prototype.lte = function lte(num2) {
+      BN24.prototype.lte = function lte(num2) {
         return this.cmp(num2) <= 0;
       };
-      BN22.prototype.eqn = function eqn(num2) {
+      BN24.prototype.eqn = function eqn(num2) {
         return this.cmpn(num2) === 0;
       };
-      BN22.prototype.eq = function eq(num2) {
+      BN24.prototype.eq = function eq(num2) {
         return this.cmp(num2) === 0;
       };
-      BN22.red = function red(num2) {
+      BN24.red = function red(num2) {
         return new Red(num2);
       };
-      BN22.prototype.toRed = function toRed(ctx) {
+      BN24.prototype.toRed = function toRed(ctx) {
         assert(!this.red, "Already a number in reduction context");
         assert(this.negative === 0, "red works only with positives");
         return ctx.convertTo(this)._forceRed(ctx);
       };
-      BN22.prototype.fromRed = function fromRed() {
+      BN24.prototype.fromRed = function fromRed() {
         assert(this.red, "fromRed works only with numbers in reduction context");
         return this.red.convertFrom(this);
       };
-      BN22.prototype._forceRed = function _forceRed(ctx) {
+      BN24.prototype._forceRed = function _forceRed(ctx) {
         this.red = ctx;
         return this;
       };
-      BN22.prototype.forceRed = function forceRed(ctx) {
+      BN24.prototype.forceRed = function forceRed(ctx) {
         assert(!this.red, "Already a number in reduction context");
         return this._forceRed(ctx);
       };
-      BN22.prototype.redAdd = function redAdd(num2) {
+      BN24.prototype.redAdd = function redAdd(num2) {
         assert(this.red, "redAdd works only with red numbers");
         return this.red.add(this, num2);
       };
-      BN22.prototype.redIAdd = function redIAdd(num2) {
+      BN24.prototype.redIAdd = function redIAdd(num2) {
         assert(this.red, "redIAdd works only with red numbers");
         return this.red.iadd(this, num2);
       };
-      BN22.prototype.redSub = function redSub(num2) {
+      BN24.prototype.redSub = function redSub(num2) {
         assert(this.red, "redSub works only with red numbers");
         return this.red.sub(this, num2);
       };
-      BN22.prototype.redISub = function redISub(num2) {
+      BN24.prototype.redISub = function redISub(num2) {
         assert(this.red, "redISub works only with red numbers");
         return this.red.isub(this, num2);
       };
-      BN22.prototype.redShl = function redShl(num2) {
+      BN24.prototype.redShl = function redShl(num2) {
         assert(this.red, "redShl works only with red numbers");
         return this.red.shl(this, num2);
       };
-      BN22.prototype.redMul = function redMul(num2) {
+      BN24.prototype.redMul = function redMul(num2) {
         assert(this.red, "redMul works only with red numbers");
         this.red._verify2(this, num2);
         return this.red.mul(this, num2);
       };
-      BN22.prototype.redIMul = function redIMul(num2) {
+      BN24.prototype.redIMul = function redIMul(num2) {
         assert(this.red, "redMul works only with red numbers");
         this.red._verify2(this, num2);
         return this.red.imul(this, num2);
       };
-      BN22.prototype.redSqr = function redSqr() {
+      BN24.prototype.redSqr = function redSqr() {
         assert(this.red, "redSqr works only with red numbers");
         this.red._verify1(this);
         return this.red.sqr(this);
       };
-      BN22.prototype.redISqr = function redISqr() {
+      BN24.prototype.redISqr = function redISqr() {
         assert(this.red, "redISqr works only with red numbers");
         this.red._verify1(this);
         return this.red.isqr(this);
       };
-      BN22.prototype.redSqrt = function redSqrt() {
+      BN24.prototype.redSqrt = function redSqrt() {
         assert(this.red, "redSqrt works only with red numbers");
         this.red._verify1(this);
         return this.red.sqrt(this);
       };
-      BN22.prototype.redInvm = function redInvm() {
+      BN24.prototype.redInvm = function redInvm() {
         assert(this.red, "redInvm works only with red numbers");
         this.red._verify1(this);
         return this.red.invm(this);
       };
-      BN22.prototype.redNeg = function redNeg() {
+      BN24.prototype.redNeg = function redNeg() {
         assert(this.red, "redNeg works only with red numbers");
         this.red._verify1(this);
         return this.red.neg(this);
       };
-      BN22.prototype.redPow = function redPow(num2) {
+      BN24.prototype.redPow = function redPow(num2) {
         assert(this.red && !num2.red, "redPow(normalNum)");
         this.red._verify1(this);
         return this.red.pow(this, num2);
@@ -6240,13 +6240,13 @@ var require_bn = __commonJS({
       };
       function MPrime(name, p2) {
         this.name = name;
-        this.p = new BN22(p2, 16);
+        this.p = new BN24(p2, 16);
         this.n = this.p.bitLength();
-        this.k = new BN22(1).iushln(this.n).isub(this.p);
+        this.k = new BN24(1).iushln(this.n).isub(this.p);
         this.tmp = this._tmp();
       }
       MPrime.prototype._tmp = function _tmp() {
-        var tmp = new BN22(null);
+        var tmp = new BN24(null);
         tmp.words = new Array(Math.ceil(this.n / 13));
         return tmp;
       };
@@ -6372,7 +6372,7 @@ var require_bn = __commonJS({
         }
         return num2;
       };
-      BN22._prime = function prime(name) {
+      BN24._prime = function prime(name) {
         if (primes[name]) return primes[name];
         var prime2;
         if (name === "k256") {
@@ -6391,7 +6391,7 @@ var require_bn = __commonJS({
       };
       function Red(m) {
         if (typeof m === "string") {
-          var prime = BN22._prime(m);
+          var prime = BN24._prime(m);
           this.m = prime.p;
           this.prime = prime;
         } else {
@@ -6477,7 +6477,7 @@ var require_bn = __commonJS({
         var mod3 = this.m.andln(3);
         assert(mod3 % 2 === 1);
         if (mod3 === 3) {
-          var pow = this.m.add(new BN22(1)).iushrn(2);
+          var pow = this.m.add(new BN24(1)).iushrn(2);
           return this.pow(a2, pow);
         }
         var q2 = this.m.subn(1);
@@ -6487,11 +6487,11 @@ var require_bn = __commonJS({
           q2.iushrn(1);
         }
         assert(!q2.isZero());
-        var one = new BN22(1).toRed(this);
+        var one = new BN24(1).toRed(this);
         var nOne = one.redNeg();
         var lpow = this.m.subn(1).iushrn(1);
         var z = this.m.bitLength();
-        z = new BN22(2 * z * z).toRed(this);
+        z = new BN24(2 * z * z).toRed(this);
         while (this.pow(z, lpow).cmp(nOne) !== 0) {
           z.redIAdd(nOne);
         }
@@ -6505,7 +6505,7 @@ var require_bn = __commonJS({
             tmp = tmp.redSqr();
           }
           assert(i < m);
-          var b2 = this.pow(c, new BN22(1).iushln(m - i - 1));
+          var b2 = this.pow(c, new BN24(1).iushln(m - i - 1));
           r = r.redMul(b2);
           c = b2.redSqr();
           t = t.redMul(c);
@@ -6523,11 +6523,11 @@ var require_bn = __commonJS({
         }
       };
       Red.prototype.pow = function pow(a2, num2) {
-        if (num2.isZero()) return new BN22(1).toRed(this);
+        if (num2.isZero()) return new BN24(1).toRed(this);
         if (num2.cmpn(1) === 0) return a2.clone();
         var windowSize = 4;
         var wnd = new Array(1 << windowSize);
-        wnd[0] = new BN22(1).toRed(this);
+        wnd[0] = new BN24(1).toRed(this);
         wnd[1] = a2;
         for (var i = 2; i < wnd.length; i++) {
           wnd[i] = this.mul(wnd[i - 1], a2);
@@ -6571,7 +6571,7 @@ var require_bn = __commonJS({
         res.red = null;
         return res;
       };
-      BN22.mont = function mont(num2) {
+      BN24.mont = function mont(num2) {
         return new Mont(num2);
       };
       function Mont(m) {
@@ -6580,7 +6580,7 @@ var require_bn = __commonJS({
         if (this.shift % 26 !== 0) {
           this.shift += 26 - this.shift % 26;
         }
-        this.r = new BN22(1).iushln(this.shift);
+        this.r = new BN24(1).iushln(this.shift);
         this.r2 = this.imod(this.r.sqr());
         this.rinv = this.r._invmp(this.m);
         this.minv = this.rinv.mul(this.r).isubn(1).div(this.m);
@@ -6614,7 +6614,7 @@ var require_bn = __commonJS({
         return res._forceRed(this);
       };
       Mont.prototype.mul = function mul(a2, b2) {
-        if (a2.isZero() || b2.isZero()) return new BN22(0)._forceRed(this);
+        if (a2.isZero() || b2.isZero()) return new BN24(0)._forceRed(this);
         var t = a2.mul(b2);
         var c = t.maskn(this.shift).mul(this.minv).imaskn(this.shift).mul(this.m);
         var u = t.isub(c).iushrn(this.shift);
@@ -22767,7 +22767,7 @@ var require_index_cjs = __commonJS({
     "use strict";
     var buffer = __require("buffer");
     var ed255192 = require_ed25519();
-    var BN22 = require_bn();
+    var BN24 = require_bn();
     var bs582 = require_bs58();
     var sha2563 = require_sha256();
     var borsh = require_lib();
@@ -22804,7 +22804,7 @@ var require_index_cjs = __commonJS({
       n.default = e9;
       return Object.freeze(n);
     }
-    var BN__default = /* @__PURE__ */ _interopDefaultCompat(BN22);
+    var BN__default = /* @__PURE__ */ _interopDefaultCompat(BN24);
     var bs58__default = /* @__PURE__ */ _interopDefaultCompat(bs582);
     var BufferLayout__namespace = /* @__PURE__ */ _interopNamespaceCompat(BufferLayout);
     var require$$0__default = /* @__PURE__ */ _interopDefaultCompat(require$$0);
@@ -22878,7 +22878,7 @@ var require_index_cjs = __commonJS({
       return value._bn !== void 0;
     }
     var uniquePublicKeyCounter = 1;
-    var PublicKey38 = class _PublicKey2 extends Struct {
+    var PublicKey39 = class _PublicKey2 extends Struct {
       /**
        * Create a new PublicKey object
        * @param value ed25519 public key as buffer or base-58 encoded string
@@ -23040,9 +23040,9 @@ var require_index_cjs = __commonJS({
         return isOnCurve(pubkey.toBytes());
       }
     };
-    _PublicKey = PublicKey38;
-    PublicKey38.default = new _PublicKey("11111111111111111111111111111111");
-    SOLANA_SCHEMA.set(PublicKey38, {
+    _PublicKey = PublicKey39;
+    PublicKey39.default = new _PublicKey("11111111111111111111111111111111");
+    SOLANA_SCHEMA.set(PublicKey39, {
       kind: "struct",
       fields: [["_bn", "u256"]]
     });
@@ -23074,7 +23074,7 @@ var require_index_cjs = __commonJS({
        * The public key for this account
        */
       get publicKey() {
-        return new PublicKey38(this._publicKey);
+        return new PublicKey39(this._publicKey);
       }
       /**
        * The **unencrypted** secret key for this account. The first 32 bytes
@@ -23085,7 +23085,7 @@ var require_index_cjs = __commonJS({
         return buffer.Buffer.concat([this._secretKey, this._publicKey], 64);
       }
     };
-    var BPF_LOADER_DEPRECATED_PROGRAM_ID = new PublicKey38("BPFLoader1111111111111111111111111111111111");
+    var BPF_LOADER_DEPRECATED_PROGRAM_ID = new PublicKey39("BPFLoader1111111111111111111111111111111111");
     var PACKET_DATA_SIZE = 1280 - 40 - 8;
     var VERSION_PREFIX_MASK = 127;
     var SIGNATURE_LENGTH_IN_BYTES = 64;
@@ -23318,7 +23318,7 @@ var require_index_cjs = __commonJS({
           const [payerAddress] = writableSigners[0];
           assert(payerAddress === this.payer.toBase58(), "Expected first writable signer key to be the fee payer");
         }
-        const staticAccountKeys = [...writableSigners.map(([address3]) => new PublicKey38(address3)), ...readonlySigners.map(([address3]) => new PublicKey38(address3)), ...writableNonSigners.map(([address3]) => new PublicKey38(address3)), ...readonlyNonSigners.map(([address3]) => new PublicKey38(address3))];
+        const staticAccountKeys = [...writableSigners.map(([address3]) => new PublicKey39(address3)), ...readonlySigners.map(([address3]) => new PublicKey39(address3)), ...writableNonSigners.map(([address3]) => new PublicKey39(address3)), ...readonlyNonSigners.map(([address3]) => new PublicKey39(address3))];
         return [header, staticAccountKeys];
       }
       extractTableLookup(lookupTable) {
@@ -23342,7 +23342,7 @@ var require_index_cjs = __commonJS({
         const drainedKeys = new Array();
         for (const [address3, keyMeta] of this.keyMetaMap.entries()) {
           if (keyMetaFilter(keyMeta)) {
-            const key = new PublicKey38(address3);
+            const key = new PublicKey39(address3);
             const lookupTableIndex = lookupTableEntries.findIndex((entry) => entry.equals(key));
             if (lookupTableIndex >= 0) {
               assert(lookupTableIndex < 256, "Max lookup table index exceeded");
@@ -23377,7 +23377,7 @@ var require_index_cjs = __commonJS({
         this.instructions = void 0;
         this.indexToProgramIds = /* @__PURE__ */ new Map();
         this.header = args.header;
-        this.accountKeys = args.accountKeys.map((account) => new PublicKey38(account));
+        this.accountKeys = args.accountKeys.map((account) => new PublicKey39(account));
         this.recentBlockhash = args.recentBlockhash;
         this.instructions = args.instructions;
         this.instructions.forEach((ix) => this.indexToProgramIds.set(ix.programIdIndex, this.accountKeys[ix.programIdIndex]));
@@ -23503,7 +23503,7 @@ var require_index_cjs = __commonJS({
         let accountKeys = [];
         for (let i = 0; i < accountCount; i++) {
           const account = guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2);
-          accountKeys.push(new PublicKey38(buffer.Buffer.from(account)));
+          accountKeys.push(new PublicKey39(buffer.Buffer.from(account)));
         }
         const recentBlockhash = guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2);
         const instructionCount = decodeLength(byteArray);
@@ -23727,7 +23727,7 @@ var require_index_cjs = __commonJS({
         const staticAccountKeys = [];
         const staticAccountKeysLength = decodeLength(byteArray);
         for (let i = 0; i < staticAccountKeysLength; i++) {
-          staticAccountKeys.push(new PublicKey38(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2)));
+          staticAccountKeys.push(new PublicKey39(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2)));
         }
         const recentBlockhash = bs58__default.default.encode(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2));
         const instructionCount = decodeLength(byteArray);
@@ -23747,7 +23747,7 @@ var require_index_cjs = __commonJS({
         const addressTableLookupsCount = decodeLength(byteArray);
         const addressTableLookups = [];
         for (let i = 0; i < addressTableLookupsCount; i++) {
-          const accountKey = new PublicKey38(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2));
+          const accountKey = new PublicKey39(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2));
           const writableIndexesLength = decodeLength(byteArray);
           const writableIndexes = guardedSplice(byteArray, 0, writableIndexesLength);
           const readonlyIndexesLength = decodeLength(byteArray);
@@ -23853,7 +23853,7 @@ var require_index_cjs = __commonJS({
         const staticAccountKeysLength = guardedShift(byteArray);
         const staticAccountKeys = [];
         for (let i = 0; i < staticAccountKeysLength; i++) {
-          staticAccountKeys.push(new PublicKey38(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2)));
+          staticAccountKeys.push(new PublicKey39(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2)));
         }
         const transactionConfig = {
           computeUnitLimit: null,
@@ -24124,7 +24124,7 @@ var require_index_cjs = __commonJS({
         });
         programIds.forEach((programId) => {
           accountMetas.push({
-            pubkey: new PublicKey38(programId),
+            pubkey: new PublicKey39(programId),
             isSigner: false,
             isWritable: false
           });
@@ -24733,15 +24733,15 @@ Missing signature for public key${sigErrors.missing.length === 1 ? "" : "(s)"} [
     var DEFAULT_TICKS_PER_SLOT = 64;
     var NUM_SLOTS_PER_SECOND = NUM_TICKS_PER_SECOND / DEFAULT_TICKS_PER_SLOT;
     var MS_PER_SLOT = 1e3 / NUM_SLOTS_PER_SECOND;
-    var SYSVAR_CLOCK_PUBKEY2 = new PublicKey38("SysvarC1ock11111111111111111111111111111111");
-    var SYSVAR_EPOCH_SCHEDULE_PUBKEY = new PublicKey38("SysvarEpochSchedu1e111111111111111111111111");
-    var SYSVAR_INSTRUCTIONS_PUBKEY2 = new PublicKey38("Sysvar1nstructions1111111111111111111111111");
-    var SYSVAR_RECENT_BLOCKHASHES_PUBKEY = new PublicKey38("SysvarRecentB1ockHashes11111111111111111111");
-    var SYSVAR_RENT_PUBKEY5 = new PublicKey38("SysvarRent111111111111111111111111111111111");
-    var SYSVAR_REWARDS_PUBKEY = new PublicKey38("SysvarRewards111111111111111111111111111111");
-    var SYSVAR_SLOT_HASHES_PUBKEY = new PublicKey38("SysvarS1otHashes111111111111111111111111111");
-    var SYSVAR_SLOT_HISTORY_PUBKEY = new PublicKey38("SysvarS1otHistory11111111111111111111111111");
-    var SYSVAR_STAKE_HISTORY_PUBKEY = new PublicKey38("SysvarStakeHistory1111111111111111111111111");
+    var SYSVAR_CLOCK_PUBKEY2 = new PublicKey39("SysvarC1ock11111111111111111111111111111111");
+    var SYSVAR_EPOCH_SCHEDULE_PUBKEY = new PublicKey39("SysvarEpochSchedu1e111111111111111111111111");
+    var SYSVAR_INSTRUCTIONS_PUBKEY2 = new PublicKey39("Sysvar1nstructions1111111111111111111111111");
+    var SYSVAR_RECENT_BLOCKHASHES_PUBKEY = new PublicKey39("SysvarRecentB1ockHashes11111111111111111111");
+    var SYSVAR_RENT_PUBKEY5 = new PublicKey39("SysvarRent111111111111111111111111111111111");
+    var SYSVAR_REWARDS_PUBKEY = new PublicKey39("SysvarRewards111111111111111111111111111111");
+    var SYSVAR_SLOT_HASHES_PUBKEY = new PublicKey39("SysvarS1otHashes111111111111111111111111111");
+    var SYSVAR_SLOT_HISTORY_PUBKEY = new PublicKey39("SysvarS1otHistory11111111111111111111111111");
+    var SYSVAR_STAKE_HISTORY_PUBKEY = new PublicKey39("SysvarStakeHistory1111111111111111111111111");
     var SendTransactionError = class extends Error {
       constructor({
         action,
@@ -24932,8 +24932,8 @@ Message: ${transactionMessage}.
       static fromAccountData(buffer2) {
         const nonceAccount = NonceAccountLayout.decode(toBuffer(buffer2), 0);
         return new _NonceAccount({
-          authorizedPubkey: new PublicKey38(nonceAccount.authorizedPubkey),
-          nonce: new PublicKey38(nonceAccount.nonce).toString(),
+          authorizedPubkey: new PublicKey39(nonceAccount.authorizedPubkey),
+          nonce: new PublicKey39(nonceAccount.nonce).toString(),
           feeCalculator: nonceAccount.feeCalculator
         });
       }
@@ -24995,7 +24995,7 @@ Message: ${transactionMessage}.
           newAccountPubkey: instruction.keys[1].pubkey,
           lamports: lamports2,
           space,
-          programId: new PublicKey38(programId)
+          programId: new PublicKey39(programId)
         };
       }
       /**
@@ -25030,7 +25030,7 @@ Message: ${transactionMessage}.
           toPubkey: instruction.keys[2].pubkey,
           lamports: lamports2,
           seed,
-          programId: new PublicKey38(programId)
+          programId: new PublicKey39(programId)
         };
       }
       /**
@@ -25061,10 +25061,10 @@ Message: ${transactionMessage}.
         } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.AllocateWithSeed, instruction.data);
         return {
           accountPubkey: instruction.keys[0].pubkey,
-          basePubkey: new PublicKey38(base2),
+          basePubkey: new PublicKey39(base2),
           seed,
           space,
-          programId: new PublicKey38(programId)
+          programId: new PublicKey39(programId)
         };
       }
       /**
@@ -25078,7 +25078,7 @@ Message: ${transactionMessage}.
         } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.Assign, instruction.data);
         return {
           accountPubkey: instruction.keys[0].pubkey,
-          programId: new PublicKey38(programId)
+          programId: new PublicKey39(programId)
         };
       }
       /**
@@ -25094,9 +25094,9 @@ Message: ${transactionMessage}.
         } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.AssignWithSeed, instruction.data);
         return {
           accountPubkey: instruction.keys[0].pubkey,
-          basePubkey: new PublicKey38(base2),
+          basePubkey: new PublicKey39(base2),
           seed,
-          programId: new PublicKey38(programId)
+          programId: new PublicKey39(programId)
         };
       }
       /**
@@ -25115,11 +25115,11 @@ Message: ${transactionMessage}.
         return {
           fromPubkey: instruction.keys[0].pubkey,
           newAccountPubkey: instruction.keys[1].pubkey,
-          basePubkey: new PublicKey38(base2),
+          basePubkey: new PublicKey39(base2),
           seed,
           lamports: lamports2,
           space,
-          programId: new PublicKey38(programId)
+          programId: new PublicKey39(programId)
         };
       }
       /**
@@ -25133,7 +25133,7 @@ Message: ${transactionMessage}.
         } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.InitializeNonceAccount, instruction.data);
         return {
           noncePubkey: instruction.keys[0].pubkey,
-          authorizedPubkey: new PublicKey38(authorized2)
+          authorizedPubkey: new PublicKey39(authorized2)
         };
       }
       /**
@@ -25176,7 +25176,7 @@ Message: ${transactionMessage}.
         return {
           noncePubkey: instruction.keys[0].pubkey,
           authorizedPubkey: instruction.keys[1].pubkey,
-          newAuthorizedPubkey: new PublicKey38(authorized2)
+          newAuthorizedPubkey: new PublicKey39(authorized2)
         };
       }
       /**
@@ -25585,7 +25585,7 @@ Message: ${transactionMessage}.
         });
       }
     };
-    SystemProgram16.programId = new PublicKey38("11111111111111111111111111111111");
+    SystemProgram16.programId = new PublicKey39("11111111111111111111111111111111");
     var CHUNK_SIZE = PACKET_DATA_SIZE - 300;
     var Loader = class _Loader {
       /**
@@ -25752,7 +25752,7 @@ Message: ${transactionMessage}.
       }
     };
     Loader.chunkSize = CHUNK_SIZE;
-    var BPF_LOADER_PROGRAM_ID = new PublicKey38("BPFLoader2111111111111111111111111111111111");
+    var BPF_LOADER_PROGRAM_ID = new PublicKey39("BPFLoader2111111111111111111111111111111111");
     var BpfLoader = class {
       /**
        * Minimum number of signatures required to load a program not including
@@ -26550,8 +26550,8 @@ Message: ${transactionMessage}.
           deactivationSlot: meta.deactivationSlot,
           lastExtendedSlot: meta.lastExtendedSlot,
           lastExtendedSlotStartIndex: meta.lastExtendedStartIndex,
-          authority: meta.authority.length !== 0 ? new PublicKey38(meta.authority[0]) : void 0,
-          addresses: addresses.map((address3) => new PublicKey38(address3))
+          authority: meta.authority.length !== 0 ? new PublicKey39(meta.authority[0]) : void 0,
+          addresses: addresses.map((address3) => new PublicKey39(address3))
         };
       }
     };
@@ -26593,7 +26593,7 @@ Message: ${transactionMessage}.
       );
       return `${protocol}//${hostish}${websocketPort}${rest}`;
     }
-    var PublicKeyFromString = superstruct.coerce(superstruct.instance(PublicKey38), superstruct.string(), (value) => new PublicKey38(value));
+    var PublicKeyFromString = superstruct.coerce(superstruct.instance(PublicKey39), superstruct.string(), (value) => new PublicKey39(value));
     var RawAccountDataResult = superstruct.tuple([superstruct.string(), superstruct.literal("base64")]);
     var BufferFromRawAccountData = superstruct.coerce(superstruct.instance(buffer.Buffer), RawAccountDataResult, (value) => buffer.Buffer.from(value[0], "base64"));
     var BLOCKHASH_CACHE_TIMEOUT_MS = 30 * 1e3;
@@ -26678,7 +26678,7 @@ Message: ${transactionMessage}.
       if (version3 === 0) {
         return new MessageV0({
           header: response.header,
-          staticAccountKeys: response.accountKeys.map((accountKey) => new PublicKey38(accountKey)),
+          staticAccountKeys: response.accountKeys.map((accountKey) => new PublicKey39(accountKey)),
           recentBlockhash: response.recentBlockhash,
           compiledInstructions: response.instructions.map((ix) => ({
             programIdIndex: ix.programIdIndex,
@@ -26694,7 +26694,7 @@ Message: ${transactionMessage}.
         }
         return new MessageV1({
           header: response.header,
-          staticAccountKeys: response.accountKeys.map((accountKey) => new PublicKey38(accountKey)),
+          staticAccountKeys: response.accountKeys.map((accountKey) => new PublicKey39(accountKey)),
           recentBlockhash: response.recentBlockhash,
           compiledInstructions: response.instructions.map((ix) => ({
             programIdIndex: ix.programIdIndex,
@@ -27366,7 +27366,7 @@ Message: ${transactionMessage}.
     var COMMON_HTTP_HEADERS = {
       "solana-client": `js/${"1.99.0"}`
     };
-    var Connection4 = class {
+    var Connection5 = class {
       /**
        * Establish a JSON RPC connection
        *
@@ -30142,7 +30142,7 @@ Message: ${transactionMessage}.
        * @returns {PublicKey} PublicKey
        */
       get publicKey() {
-        return new PublicKey38(this._keypair.publicKey);
+        return new PublicKey39(this._keypair.publicKey);
       }
       /**
        * The raw secret key for this keypair
@@ -30220,7 +30220,7 @@ Message: ${transactionMessage}.
           lookupTable: instruction.keys[0].pubkey,
           authority: instruction.keys[1].pubkey,
           payer: instruction.keys.length > 2 ? instruction.keys[2].pubkey : void 0,
-          addresses: addresses.map((buffer2) => new PublicKey38(buffer2))
+          addresses: addresses.map((buffer2) => new PublicKey39(buffer2))
         };
       }
       static decodeCloseLookupTable(instruction) {
@@ -30272,7 +30272,7 @@ Message: ${transactionMessage}.
       constructor() {
       }
       static createLookupTable(params) {
-        const [lookupTableAddress, bumpSeed] = PublicKey38.findProgramAddressSync([params.authority.toBuffer(), codecsNumbers.getU64Encoder().encode(params.recentSlot)], this.programId);
+        const [lookupTableAddress, bumpSeed] = PublicKey39.findProgramAddressSync([params.authority.toBuffer(), codecsNumbers.getU64Encoder().encode(params.recentSlot)], this.programId);
         const type = LOOKUP_TABLE_INSTRUCTION_LAYOUTS.CreateLookupTable;
         const data = encodeData(type, {
           recentSlot: BigInt(params.recentSlot),
@@ -30391,7 +30391,7 @@ Message: ${transactionMessage}.
         });
       }
     };
-    AddressLookupTableProgram.programId = new PublicKey38("AddressLookupTab1e1111111111111111111111111");
+    AddressLookupTableProgram.programId = new PublicKey39("AddressLookupTab1e1111111111111111111111111");
     var ComputeBudgetInstruction = class {
       /**
        * @internal
@@ -30471,7 +30471,7 @@ Message: ${transactionMessage}.
        * @internal
        */
       static checkProgramId(programId) {
-        if (!programId.equals(ComputeBudgetProgram4.programId)) {
+        if (!programId.equals(ComputeBudgetProgram5.programId)) {
           throw new Error("invalid instruction; programId is not ComputeBudgetProgram");
         }
       }
@@ -30494,7 +30494,7 @@ Message: ${transactionMessage}.
         layout: BufferLayout__namespace.struct([BufferLayout__namespace.u8("instruction"), u642("microLamports")])
       }
     });
-    var ComputeBudgetProgram4 = class {
+    var ComputeBudgetProgram5 = class {
       /**
        * @internal
        */
@@ -30545,7 +30545,7 @@ Message: ${transactionMessage}.
         });
       }
     };
-    ComputeBudgetProgram4.programId = new PublicKey38("ComputeBudget111111111111111111111111111111");
+    ComputeBudgetProgram5.programId = new PublicKey39("ComputeBudget111111111111111111111111111111");
     var PRIVATE_KEY_BYTES$1 = 64;
     var PUBLIC_KEY_BYTES$1 = 32;
     var SIGNATURE_BYTES = 64;
@@ -30625,7 +30625,7 @@ Message: ${transactionMessage}.
         }
       }
     };
-    Ed25519Program.programId = new PublicKey38("Ed25519SigVerify111111111111111111111111111");
+    Ed25519Program.programId = new PublicKey39("Ed25519SigVerify111111111111111111111111111");
     var ecdsaSign = (msgHash, privKey) => {
       const signature3 = secp256k12.secp256k1.sign(msgHash, privKey);
       return [signature3.toCompactRawBytes(), signature3.recovery];
@@ -30759,9 +30759,9 @@ Message: ${transactionMessage}.
         }
       }
     };
-    Secp256k1Program.programId = new PublicKey38("KeccakSecp256k11111111111111111111111111111");
+    Secp256k1Program.programId = new PublicKey39("KeccakSecp256k11111111111111111111111111111");
     var _Lockup;
-    var STAKE_CONFIG_ID = new PublicKey38("StakeConfig11111111111111111111111111111111");
+    var STAKE_CONFIG_ID = new PublicKey39("StakeConfig11111111111111111111111111111111");
     var Authorized = class {
       /**
        * Create a new Authorized object
@@ -30792,7 +30792,7 @@ Message: ${transactionMessage}.
        */
     };
     _Lockup = Lockup;
-    Lockup.default = new _Lockup(0, 0, PublicKey38.default);
+    Lockup.default = new _Lockup(0, 0, PublicKey39.default);
     var StakeInstruction = class {
       /**
        * @internal
@@ -30830,8 +30830,8 @@ Message: ${transactionMessage}.
         } = decodeData$1(STAKE_INSTRUCTION_LAYOUTS.Initialize, instruction.data);
         return {
           stakePubkey: instruction.keys[0].pubkey,
-          authorized: new Authorized(new PublicKey38(authorized2.staker), new PublicKey38(authorized2.withdrawer)),
-          lockup: new Lockup(lockup2.unixTimestamp, lockup2.epoch, new PublicKey38(lockup2.custodian))
+          authorized: new Authorized(new PublicKey39(authorized2.staker), new PublicKey39(authorized2.withdrawer)),
+          lockup: new Lockup(lockup2.unixTimestamp, lockup2.epoch, new PublicKey39(lockup2.custodian))
         };
       }
       /**
@@ -30860,7 +30860,7 @@ Message: ${transactionMessage}.
         const o5 = {
           stakePubkey: instruction.keys[0].pubkey,
           authorizedPubkey: instruction.keys[2].pubkey,
-          newAuthorizedPubkey: new PublicKey38(newAuthorized),
+          newAuthorizedPubkey: new PublicKey39(newAuthorized),
           stakeAuthorizationType: {
             index: stakeAuthorizationType
           }
@@ -30886,8 +30886,8 @@ Message: ${transactionMessage}.
           stakePubkey: instruction.keys[0].pubkey,
           authorityBase: instruction.keys[1].pubkey,
           authoritySeed,
-          authorityOwner: new PublicKey38(authorityOwner),
-          newAuthorizedPubkey: new PublicKey38(newAuthorized),
+          authorityOwner: new PublicKey39(authorityOwner),
+          newAuthorizedPubkey: new PublicKey39(newAuthorized),
           stakeAuthorizationType: {
             index: stakeAuthorizationType
           }
@@ -31441,7 +31441,7 @@ Message: ${transactionMessage}.
         });
       }
     };
-    StakeProgram.programId = new PublicKey38("Stake11111111111111111111111111111111111111");
+    StakeProgram.programId = new PublicKey39("Stake11111111111111111111111111111111111111");
     StakeProgram.space = 200;
     var VoteInit = class {
       /** [0, 100] */
@@ -31493,7 +31493,7 @@ Message: ${transactionMessage}.
         return {
           votePubkey: instruction.keys[0].pubkey,
           nodePubkey: instruction.keys[3].pubkey,
-          voteInit: new VoteInit(new PublicKey38(voteInit2.nodePubkey), new PublicKey38(voteInit2.authorizedVoter), new PublicKey38(voteInit2.authorizedWithdrawer), voteInit2.commission)
+          voteInit: new VoteInit(new PublicKey39(voteInit2.nodePubkey), new PublicKey39(voteInit2.authorizedVoter), new PublicKey39(voteInit2.authorizedWithdrawer), voteInit2.commission)
         };
       }
       /**
@@ -31509,7 +31509,7 @@ Message: ${transactionMessage}.
         return {
           votePubkey: instruction.keys[0].pubkey,
           authorizedPubkey: instruction.keys[2].pubkey,
-          newAuthorizedPubkey: new PublicKey38(newAuthorized),
+          newAuthorizedPubkey: new PublicKey39(newAuthorized),
           voteAuthorizationType: {
             index: voteAuthorizationType
           }
@@ -31531,9 +31531,9 @@ Message: ${transactionMessage}.
         } = decodeData$1(VOTE_INSTRUCTION_LAYOUTS.AuthorizeWithSeed, instruction.data);
         return {
           currentAuthorityDerivedKeyBasePubkey: instruction.keys[2].pubkey,
-          currentAuthorityDerivedKeyOwnerPubkey: new PublicKey38(currentAuthorityDerivedKeyOwnerPubkey),
+          currentAuthorityDerivedKeyOwnerPubkey: new PublicKey39(currentAuthorityDerivedKeyOwnerPubkey),
           currentAuthorityDerivedKeySeed,
-          newAuthorizedPubkey: new PublicKey38(newAuthorized),
+          newAuthorizedPubkey: new PublicKey39(newAuthorized),
           voteAuthorizationType: {
             index: voteAuthorizationType
           },
@@ -31824,9 +31824,9 @@ Message: ${transactionMessage}.
         });
       }
     };
-    VoteProgram.programId = new PublicKey38("Vote111111111111111111111111111111111111111");
+    VoteProgram.programId = new PublicKey39("Vote111111111111111111111111111111111111111");
     VoteProgram.space = 3762;
-    var VALIDATOR_INFO_KEY = new PublicKey38("Va1idator1nfo111111111111111111111111111111");
+    var VALIDATOR_INFO_KEY = new PublicKey39("Va1idator1nfo111111111111111111111111111111");
     var InfoString = superstruct.type({
       name: superstruct.string(),
       website: superstruct.optional(superstruct.string()),
@@ -31860,7 +31860,7 @@ Message: ${transactionMessage}.
         if (configKeyCount !== 2) return null;
         const configKeys = [];
         for (let i = 0; i < 2; i++) {
-          const publicKey3 = new PublicKey38(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2));
+          const publicKey3 = new PublicKey39(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2));
           const isSigner = guardedShift(byteArray) === 1;
           configKeys.push({
             publicKey: publicKey3,
@@ -31878,7 +31878,7 @@ Message: ${transactionMessage}.
         return null;
       }
     };
-    var VOTE_PROGRAM_ID = new PublicKey38("Vote111111111111111111111111111111111111111");
+    var VOTE_PROGRAM_ID = new PublicKey39("Vote111111111111111111111111111111111111111");
     var VoteAccountLayout = BufferLayout__namespace.struct([
       publicKey2("nodePubkey"),
       publicKey2("authorizedWithdrawer"),
@@ -31935,8 +31935,8 @@ Message: ${transactionMessage}.
           rootSlot = null;
         }
         return new _VoteAccount({
-          nodePubkey: new PublicKey38(va.nodePubkey),
-          authorizedWithdrawer: new PublicKey38(va.authorizedWithdrawer),
+          nodePubkey: new PublicKey39(va.nodePubkey),
+          authorizedWithdrawer: new PublicKey39(va.authorizedWithdrawer),
           commission: va.commission,
           votes: va.votes,
           rootSlot,
@@ -31953,7 +31953,7 @@ Message: ${transactionMessage}.
     }) {
       return {
         epoch,
-        authorizedVoter: new PublicKey38(authorizedVoter)
+        authorizedVoter: new PublicKey39(authorizedVoter)
       };
     }
     function parsePriorVoters({
@@ -31962,7 +31962,7 @@ Message: ${transactionMessage}.
       targetEpoch
     }) {
       return {
-        authorizedPubkey: new PublicKey38(authorizedPubkey),
+        authorizedPubkey: new PublicKey39(authorizedPubkey),
         epochOfLastAuthorizedSwitch,
         targetEpoch
       };
@@ -32045,8 +32045,8 @@ Message: ${transactionMessage}.
     exports.BpfLoader = BpfLoader;
     exports.COMPUTE_BUDGET_INSTRUCTION_LAYOUTS = COMPUTE_BUDGET_INSTRUCTION_LAYOUTS;
     exports.ComputeBudgetInstruction = ComputeBudgetInstruction;
-    exports.ComputeBudgetProgram = ComputeBudgetProgram4;
-    exports.Connection = Connection4;
+    exports.ComputeBudgetProgram = ComputeBudgetProgram5;
+    exports.Connection = Connection5;
     exports.Ed25519Program = Ed25519Program;
     exports.Enum = Enum;
     exports.EpochSchedule = EpochSchedule;
@@ -32065,7 +32065,7 @@ Message: ${transactionMessage}.
     exports.NonceAccount = NonceAccount;
     exports.PACKET_DATA_SIZE = PACKET_DATA_SIZE;
     exports.PUBLIC_KEY_LENGTH = PUBLIC_KEY_LENGTH2;
-    exports.PublicKey = PublicKey38;
+    exports.PublicKey = PublicKey39;
     exports.SIGNATURE_LENGTH_IN_BYTES = SIGNATURE_LENGTH_IN_BYTES;
     exports.SOLANA_SCHEMA = SOLANA_SCHEMA;
     exports.STAKE_CONFIG_ID = STAKE_CONFIG_ID;
@@ -66935,9 +66935,9 @@ async function buildTopUpPayment({ identity: identity3, rail, amountRaw }) {
   const to = getAssociatedTokenAddressSync(mint, new import_web399.PublicKey(rail.payTo), true);
   const info = await getAccountInfo(to.toBase58());
   const ixs = [];
-  const { ComputeBudgetProgram: ComputeBudgetProgram4 } = await Promise.resolve().then(() => __toESM(require_index_cjs(), 1));
-  ixs.push(ComputeBudgetProgram4.setComputeUnitLimit({ units: 2e5 }));
-  ixs.push(ComputeBudgetProgram4.setComputeUnitPrice({ microLamports: 1 }));
+  const { ComputeBudgetProgram: ComputeBudgetProgram5 } = await Promise.resolve().then(() => __toESM(require_index_cjs(), 1));
+  ixs.push(ComputeBudgetProgram5.setComputeUnitLimit({ units: 2e5 }));
+  ixs.push(ComputeBudgetProgram5.setComputeUnitPrice({ microLamports: 1 }));
   if (!info) {
     const { createAssociatedTokenAccountIdempotentInstruction: createAssociatedTokenAccountIdempotentInstruction2 } = await Promise.resolve().then(() => (init_esm6(), esm_exports2));
     ixs.push(createAssociatedTokenAccountIdempotentInstruction2(
@@ -67394,7 +67394,7 @@ async function swapInstructions({ quoteResponse, userPublicKey, wrapAndUnwrapSol
   return getJson(IX, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ quoteResponse, userPublicKey, wrapAndUnwrapSol, useSharedAccounts: true, dynamicComputeUnitLimit: false })
+    body: JSON.stringify({ quoteResponse, userPublicKey, wrapAndUnwrapSol, useSharedAccounts: false, dynamicComputeUnitLimit: false })
   }, "jupiter swap-instructions");
 }
 function asIx(j2) {
@@ -123823,20 +123823,21 @@ async function launch({ identity: identity3, name, symbol, uri, devbuyLamports =
     const conn3 = new import_web3120.Connection(RPC_URL, "confirmed");
     const online = new OnlinePumpSdk(conn3);
     const global2 = await online.fetchGlobal();
-    const curve = await online.fetchBondingCurve(mint);
-    const ata = await online.fetchAssociatedUserAccountInfo ? await online.fetchAssociatedUserAccountInfo(mint, user) : void 0;
-    const buys = await sdk.buyInstructions({
+    const built = await sdk.createAndBuyInstructions({
       global: global2,
-      bondingCurveAccountInfo: curve,
-      bondingCurve: mint,
-      associatedUserAccountInfo: ata,
       mint,
+      name,
+      symbol,
+      uri,
+      creator: user,
       user,
-      amount: BigInt(0),
-      solAmount: BigInt(devbuyLamports),
-      slippage: 10
+      amount: new import_bn19.default(0),
+      solAmount: new import_bn19.default(String(devbuyLamports)),
+      isTokenizedAgent: false,
+      buyBackBps: 0
     });
-    for (const b2 of buys) ixs.push(b2);
+    ixs.length = 0;
+    ixs.push(...built.instructions || built);
   }
   const { blockhash: blockhash2, lastValidBlockHeight } = await getLatestBlockhash();
   const env = await signV1({
@@ -123868,11 +123869,12 @@ async function launch({ identity: identity3, name, symbol, uri, devbuyLamports =
   await append("pump.launch", out);
   return { ok: !status?.err && !!status, ...out };
 }
-var import_web3120, sdk;
+var import_web3120, import_bn19, sdk;
 var init_pump_sdk_launch = __esm({
   "strategies/pump-sdk-launch.mjs"() {
     import_web3120 = __toESM(require_index_cjs(), 1);
     init_esm7();
+    import_bn19 = __toESM(require_bn(), 1);
     init_signer_client();
     init_rpc();
     init_journal();
@@ -124763,22 +124765,22 @@ function divCeil(numerator, denominator) {
   const { div, mod: mod3 } = numerator.divmod(denominator);
   return mod3.isZero() ? div : div.addn(1);
 }
-var import_bn19, COEFFICIENT_SIZE_DEBT_FACTOR, EXPONENT_SIZE_DEBT_FACTOR, EXPONENT_MAX_DEBT_FACTOR, DECIMALS_DEBT_FACTOR, MAX_MASK_DEBT_FACTOR, PRECISION, TWO_POWER_64, TWO_POWER_69_MINUS_1, COEFFICIENT_PLUS_PRECISION, COEFFICIENT_PLUS_PRECISION_MINUS_1;
+var import_bn20, COEFFICIENT_SIZE_DEBT_FACTOR, EXPONENT_SIZE_DEBT_FACTOR, EXPONENT_MAX_DEBT_FACTOR, DECIMALS_DEBT_FACTOR, MAX_MASK_DEBT_FACTOR, PRECISION, TWO_POWER_64, TWO_POWER_69_MINUS_1, COEFFICIENT_PLUS_PRECISION, COEFFICIENT_PLUS_PRECISION_MINUS_1;
 var init_lend_DM_fboW2 = __esm({
   "node_modules/@jup-ag/lend/dist/shared/lend.DM_fboW2.mjs"() {
-    import_bn19 = __toESM(require_bn(), 1);
+    import_bn20 = __toESM(require_bn(), 1);
     COEFFICIENT_SIZE_DEBT_FACTOR = 35;
     EXPONENT_SIZE_DEBT_FACTOR = 15;
-    EXPONENT_MAX_DEBT_FACTOR = new import_bn19.default(1).shln(EXPONENT_SIZE_DEBT_FACTOR).subn(1);
-    DECIMALS_DEBT_FACTOR = new import_bn19.default(16384);
-    MAX_MASK_DEBT_FACTOR = new import_bn19.default(1).shln(COEFFICIENT_SIZE_DEBT_FACTOR + EXPONENT_SIZE_DEBT_FACTOR).subn(1);
+    EXPONENT_MAX_DEBT_FACTOR = new import_bn20.default(1).shln(EXPONENT_SIZE_DEBT_FACTOR).subn(1);
+    DECIMALS_DEBT_FACTOR = new import_bn20.default(16384);
+    MAX_MASK_DEBT_FACTOR = new import_bn20.default(1).shln(COEFFICIENT_SIZE_DEBT_FACTOR + EXPONENT_SIZE_DEBT_FACTOR).subn(1);
     PRECISION = 64;
-    TWO_POWER_64 = new import_bn19.default("18446744073709551615");
-    TWO_POWER_69_MINUS_1 = new import_bn19.default(1).shln(69).subn(1);
+    TWO_POWER_64 = new import_bn20.default("18446744073709551615");
+    TWO_POWER_69_MINUS_1 = new import_bn20.default(1).shln(69).subn(1);
     COEFFICIENT_PLUS_PRECISION = COEFFICIENT_SIZE_DEBT_FACTOR + PRECISION;
     COEFFICIENT_PLUS_PRECISION_MINUS_1 = COEFFICIENT_PLUS_PRECISION - 1;
-    new import_bn19.default(1).shln(COEFFICIENT_PLUS_PRECISION_MINUS_1).subn(1);
-    new import_bn19.default(1).shln(COEFFICIENT_PLUS_PRECISION_MINUS_1 - 1).subn(1);
+    new import_bn20.default(1).shln(COEFFICIENT_PLUS_PRECISION_MINUS_1).subn(1);
+    new import_bn20.default(1).shln(COEFFICIENT_PLUS_PRECISION_MINUS_1 - 1).subn(1);
   }
 });
 
@@ -124962,18 +124964,18 @@ async function getFlashloanIx({
   const cleanupIxs = includeWrapSol && isNativeMint(asset) ? await getUnwrapSolInstructions({ owner: signer, connection }) : [];
   return { borrowIx, paybackIx, setupIxs, cleanupIxs, feeAmount };
 }
-var import_web3125, import_bn20, import_anchor6, FLASHLOAN_FEE_PRECISION;
+var import_web3125, import_bn21, import_anchor6, FLASHLOAN_FEE_PRECISION;
 var init_flashloan = __esm({
   "node_modules/@jup-ag/lend/dist/flashloan/index.mjs"() {
     import_web3125 = __toESM(require_index_cjs(), 1);
-    import_bn20 = __toESM(require_bn(), 1);
+    import_bn21 = __toESM(require_bn(), 1);
     init_esm6();
     init_lend_Ce_TNXL0();
     init_lend_BhHkksLH();
     init_lend_DM_fboW2();
     init_lend_BkEMAdZj();
     import_anchor6 = __toESM(require_cjs(), 1);
-    FLASHLOAN_FEE_PRECISION = new import_bn20.default(1e4);
+    FLASHLOAN_FEE_PRECISION = new import_bn21.default(1e4);
   }
 });
 
@@ -125035,7 +125037,7 @@ async function build({ identity: identity3, candidate, slippageBps = 20 }) {
     connection: conn2,
     signer: owner,
     asset: new import_web3126.PublicKey(USDC3),
-    amount: new import_bn21.default(size.toString())
+    amount: new import_bn22.default(size.toString())
   });
   const ixs = [toIx2(createAssociatedTokenAccountIdempotentInstruction(owner, usdcAta, owner, new import_web3126.PublicKey(USDC3), TOKEN_PROGRAM_ID)), toIx2(borrowIx)];
   const a2 = await quote({ inputMint: USDC3, outputMint: candidate.mint, amount: size.toString(), slippageBps });
@@ -125136,13 +125138,13 @@ async function execute({ identity: identity3, candidate, floorUsdcRaw = 50000n, 
   await append("flashloan.settlement", rec);
   return { ok: !!status && !status.err && !tx?.meta?.err, ...rec };
 }
-var import_web3126, import_bn21, RPC_URL2, conn2, USDC3, WSOL3, CANDIDATES;
+var import_web3126, import_bn22, RPC_URL2, conn2, USDC3, WSOL3, CANDIDATES;
 var init_flashloan2 = __esm({
   "strategies/flashloan.mjs"() {
     import_web3126 = __toESM(require_index_cjs(), 1);
     init_flashloan();
     init_esm6();
-    import_bn21 = __toESM(require_bn(), 1);
+    import_bn22 = __toESM(require_bn(), 1);
     init_paths();
     init_util();
     init_rpc();
@@ -125400,21 +125402,21 @@ async function balances(identity3) {
   return out;
 }
 async function solanaSelfPay(rail, identity3, version3 = 2) {
-  const [{ PublicKey: PublicKey38, ComputeBudgetProgram: ComputeBudgetProgram4 }, spl, S2, R2] = await Promise.all([
+  const [{ PublicKey: PublicKey39, ComputeBudgetProgram: ComputeBudgetProgram5 }, spl, S2, R2] = await Promise.all([
     Promise.resolve().then(() => __toESM(require_index_cjs(), 1)),
     Promise.resolve().then(() => (init_esm6(), esm_exports2)),
     Promise.resolve().then(() => (init_signer_client(), signer_client_exports)),
     Promise.resolve().then(() => (init_rpc(), rpc_exports))
   ]);
   const amount = amountOf(rail);
-  const mint = new PublicKey38(rail.asset || USDC_SOL);
-  const owner = new PublicKey38(identity3.solana.public_key);
+  const mint = new PublicKey39(rail.asset || USDC_SOL);
+  const owner = new PublicKey39(identity3.solana.public_key);
   const from = spl.getAssociatedTokenAddressSync(mint, owner);
-  const to = spl.getAssociatedTokenAddressSync(mint, new PublicKey38(rail.payTo), true);
-  const feePayer = rail.extra?.feePayer ? new PublicKey38(rail.extra.feePayer) : owner;
-  const ixs = [ComputeBudgetProgram4.setComputeUnitLimit({ units: 2e5 }), ComputeBudgetProgram4.setComputeUnitPrice({ microLamports: 1 })];
+  const to = spl.getAssociatedTokenAddressSync(mint, new PublicKey39(rail.payTo), true);
+  const feePayer = rail.extra?.feePayer ? new PublicKey39(rail.extra.feePayer) : owner;
+  const ixs = [ComputeBudgetProgram5.setComputeUnitLimit({ units: 2e5 }), ComputeBudgetProgram5.setComputeUnitPrice({ microLamports: 1 })];
   if (!await R2.getAccountInfo(to.toBase58())) {
-    ixs.push(spl.createAssociatedTokenAccountIdempotentInstruction(feePayer, to, new PublicKey38(rail.payTo), mint, spl.TOKEN_PROGRAM_ID));
+    ixs.push(spl.createAssociatedTokenAccountIdempotentInstruction(feePayer, to, new PublicKey39(rail.payTo), mint, spl.TOKEN_PROGRAM_ID));
   }
   ixs.push(spl.createTransferCheckedInstruction(from, mint, to, owner, amount, 6, [], spl.TOKEN_PROGRAM_ID));
   const { blockhash: blockhash2 } = await R2.getLatestBlockhash();
@@ -125748,10 +125750,10 @@ async function bridgeSolToBase(identity3, amountRaw) {
   const alts = q2.steps[0]?.items?.[0]?.data?.addressLookupTableAddresses || [];
   if (!ins.length) throw new Error("relay: no deposit instructions");
   const web3 = await Promise.resolve().then(() => __toESM(require_index_cjs(), 1));
-  const { PublicKey: PublicKey38, TransactionInstruction: TransactionInstruction48, TransactionMessage: TransactionMessage2, VersionedTransaction: VersionedTransaction3, AddressLookupTableAccount, ComputeBudgetProgram: ComputeBudgetProgram4 } = web3;
+  const { PublicKey: PublicKey39, TransactionInstruction: TransactionInstruction48, TransactionMessage: TransactionMessage2, VersionedTransaction: VersionedTransaction3, AddressLookupTableAccount, ComputeBudgetProgram: ComputeBudgetProgram5 } = web3;
   const ixs = ins.map((i) => new TransactionInstruction48({
-    programId: new PublicKey38(i.programId),
-    keys: i.keys.map((k2) => ({ pubkey: new PublicKey38(k2.pubkey), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
+    programId: new PublicKey39(i.programId),
+    keys: i.keys.map((k2) => ({ pubkey: new PublicKey39(k2.pubkey), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
     data: (() => {
       const d = String(i.data || "");
       if (/^[0-9a-fA-F]+$/.test(d) && d.length % 2 === 0) return Buffer.from(d, "hex");
@@ -125767,15 +125769,15 @@ async function bridgeSolToBase(identity3, amountRaw) {
   for (const a2 of alts.slice(0, 4)) {
     try {
       const acc = await rpc("getAccountInfo", [a2, { encoding: "base64" }]);
-      if (acc?.value?.data) tables.push(new AddressLookupTableAccount({ key: new PublicKey38(a2), state: AddressLookupTableAccount.deserialize(Buffer.from(acc.value.data[0], "base64")) }));
+      if (acc?.value?.data) tables.push(new AddressLookupTableAccount({ key: new PublicKey39(a2), state: AddressLookupTableAccount.deserialize(Buffer.from(acc.value.data[0], "base64")) }));
     } catch {
     }
   }
   const { blockhash: blockhash2 } = await getLatestBlockhash();
   const msg = new TransactionMessage2({
-    payerKey: new PublicKey38(identity3.solana.public_key),
+    payerKey: new PublicKey39(identity3.solana.public_key),
     recentBlockhash: blockhash2,
-    instructions: [ComputeBudgetProgram4.setComputeUnitLimit({ units: 4e5 }), ...ixs]
+    instructions: [ComputeBudgetProgram5.setComputeUnitLimit({ units: 4e5 }), ...ixs]
   }).compileToV0Message(tables);
   const vtx = new VersionedTransaction3(msg);
   const signed = await request("sign_tx", { wireBase64: Buffer.from(vtx.serialize()).toString("base64") });
@@ -125795,6 +125797,59 @@ var init_relay_sol = __esm({
     bs58 = esm_default2.default || esm_default2;
     SOL_USDC2 = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
     BASE_USDC2 = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+  }
+});
+
+// strategies/devbuy-curve.mjs
+var devbuy_curve_exports = {};
+__export(devbuy_curve_exports, {
+  devBuyCurve: () => devBuyCurve
+});
+async function devBuyCurve({ identity: identity3, mint, lamports: lamports2 }) {
+  const user = new import_web3129.PublicKey(identity3.solana.public_key);
+  const conn3 = new import_web3129.Connection(RPC_URL, "confirmed");
+  const online = new OnlinePumpSdk(conn3);
+  const sdk3 = new PumpSdk();
+  const curve = await online.fetchBondingCurve(mint);
+  const curvePda = bondingCurvePda2(mint);
+  const curveAta = getAssociatedTokenAddressSync(mint, curvePda, true, T22);
+  const userAta = getAssociatedTokenAddressSync(mint, user, false, T22);
+  const global2 = await online.fetchGlobal();
+  const ixs = [
+    import_web3129.ComputeBudgetProgram.setComputeUnitLimit({ units: 4e5 }),
+    createAssociatedTokenAccountIdempotentInstruction(user, userAta, user, mint, T22),
+    createAssociatedTokenAccountIdempotentInstruction(user, curveAta, curvePda, mint, T22),
+    ...await sdk3.buyInstructions({
+      global: global2,
+      bondingCurveAccountInfo: await conn3.getAccountInfo(curvePda),
+      bondingCurve: curve,
+      associatedUserAccountInfo: null,
+      mint,
+      user,
+      amount: new import_bn23.default(1),
+      solAmount: new import_bn23.default(String(lamports2)),
+      slippage: 500,
+      tokenProgram: T22
+    })
+  ];
+  const mk = (ix) => ({ programId: ix.programId.toBase58(), keys: ix.keys.map((k2) => ({ pubkey: k2.pubkey.toBase58(), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })), dataHex: Buffer.from(ix.data).toString("hex") });
+  const { blockhash: blockhash2, lastValidBlockHeight } = await getLatestBlockhash();
+  const allow = [...new Set(ixs.flatMap((ix) => ix.keys.map((k2) => k2.pubkey.toBase58())))];
+  const env = await signV1({ instructions: ixs.map(mk), blockhash: blockhash2, lastValidBlockHeight, cuLimit: 4e5, allowedDestinations: allow, strategy: true });
+  const sim = await simulate(env.wireBase64, allow);
+  if (sim.value?.err) return { ok: false, err: sim.value.err };
+  return { ok: true, sig: await sendRaw(env.wireBase64) };
+}
+var import_web3129, import_bn23, T22;
+var init_devbuy_curve = __esm({
+  "strategies/devbuy-curve.mjs"() {
+    import_web3129 = __toESM(require_index_cjs(), 1);
+    init_esm6();
+    init_esm7();
+    import_bn23 = __toESM(require_bn(), 1);
+    init_signer_client();
+    init_rpc();
+    T22 = new import_web3129.PublicKey("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
   }
 });
 
@@ -125983,7 +126038,18 @@ async function dispatch(name, args, identity3) {
         } catch (e9) {
         }
       }
-      const r = await launch({ identity: identity3, name: args?.name, symbol: args?.symbol, uri, devbuyLamports: Number(args?.devbuy_lamports ?? process.env.AGENT_DEVBUY_LAMPORTS ?? 0) });
+      const devLamps = Number(args?.devbuy_lamports ?? process.env.AGENT_DEVBUY_LAMPORTS ?? 0);
+      const r = await launch({ identity: identity3, name: args?.name, symbol: args?.symbol, uri, devbuyLamports: 0 });
+      let devbuy = null;
+      if (devLamps > 0 && (r?.mint || r?.mintAddress)) {
+        try {
+          const { devBuyCurve: devBuyCurve2 } = await Promise.resolve().then(() => (init_devbuy_curve(), devbuy_curve_exports));
+          const { PublicKey: PublicKey39 } = await Promise.resolve().then(() => __toESM(require_index_cjs(), 1));
+          devbuy = await devBuyCurve2({ identity: identity3, mint: new PublicKey39(r.mint || r.mintAddress), lamports: devLamps });
+        } catch (e9) {
+          devbuy = { ok: false, err: String(e9.message || e9).slice(0, 80) };
+        }
+      }
       return r;
     }
     case "register_tool": {
@@ -126583,7 +126649,7 @@ async function bridgeSolToBaseUsdc(identity3, lamports2) {
   if (!wire3) return { ok: false, stage: "no_tx_payload" };
   let payload = wire3;
   try {
-    const vtx = import_web3129.VersionedTransaction.deserialize(Buffer.from(String(wire3).replace(/^0x/, ""), "hex"));
+    const vtx = import_web3130.VersionedTransaction.deserialize(Buffer.from(String(wire3).replace(/^0x/, ""), "hex"));
     const bh = await getLatestBlockhash();
     vtx.message.recentBlockhash = bh.blockhash;
     payload = Buffer.from(vtx.serialize()).toString("base64");
@@ -126602,10 +126668,10 @@ async function bridgeSolToBaseUsdc(identity3, lamports2) {
   }
   return { ok: !st?.err, signature: sig, orderId: q2.quote.orderId, outUsdcRaw: q2.quote.estimation?.dstChainTokenOut?.amount || null, status: st?.confirmationStatus || "unknown" };
 }
-var import_web3129;
+var import_web3130;
 var init_bridge_base = __esm({
   "lib/bridge-base.mjs"() {
-    import_web3129 = __toESM(require_index_cjs(), 1);
+    import_web3130 = __toESM(require_index_cjs(), 1);
     init_signer_client();
     init_rpc();
     init_bridge();
