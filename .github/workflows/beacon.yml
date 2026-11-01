@@ -1,0 +1,24 @@
+name: beacon
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: fetch live roster
+        run: |
+          mkdir -p docs
+          curl -fsS --max-time 25 http://64.176.200.115:9099/beacon.json -o docs/beacon.json || echo '{"at":0,"agents":[]}' > docs/beacon.json
+          head -c 200 docs/beacon.json
+      - name: commit if changed
+        run: |
+          git config user.name beacon
+          git config user.email beacon@users.noreply.github.com
+          git add docs/beacon.json
+          git diff --cached --quiet || git commit -m "beacon: $(date -u +%FT%TZ)"
+          git push
