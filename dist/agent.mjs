@@ -19,11 +19,11 @@ var __esm = (fn, res, err) => function __init() {
     throw err = [e3], e3;
   }
 };
-var __commonJS = (cb, mod) => function __require2() {
+var __commonJS = (cb, mod2) => function __require2() {
   try {
-    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+    return mod2 || (0, cb[__getOwnPropNames(cb)[0]])((mod2 = { exports: {} }).exports, mod2), mod2.exports;
   } catch (e3) {
-    throw mod = 0, e3;
+    throw mod2 = 0, e3;
   }
 };
 var __export = (target, all2) => {
@@ -38,15 +38,15 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+var __toESM = (mod2, isNodeMode, target) => (target = mod2 != null ? __create(__getProtoOf(mod2)) : {}, __copyProps(
   // If the importer is in node compatibility mode or this is not an ESM
   // file that has been converted to a CommonJS file using a Babel-
   // compatible transform (i.e. "__esModule" has not been set), then set
   // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
+  isNodeMode || !mod2 || !mod2.__esModule ? __defProp(target, "default", { value: mod2, enumerable: true }) : target,
+  mod2
 ));
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var __toCommonJS = (mod2) => __copyProps(__defProp({}, "__esModule", { value: true }), mod2);
 
 // lib/paths.mjs
 import fs from "node:fs";
@@ -139,7 +139,7 @@ function readJson(file, fallback = null) {
     return fallback;
   }
 }
-async function retry(fn, { attempts = 6, base: base2 = 300, label = "op" } = {}) {
+async function retry(fn, { attempts = 6, base: base3 = 300, label = "op" } = {}) {
   let last;
   for (let i = 0; i < attempts; i++) {
     try {
@@ -148,7 +148,7 @@ async function retry(fn, { attempts = 6, base: base2 = 300, label = "op" } = {})
       last = e3;
       const msg = String(e3 && e3.message || e3);
       if (i === attempts - 1) break;
-      await sleep(base2 * 2 ** i + Math.floor(Math.random() * 100));
+      await sleep(base3 * 2 ** i + Math.floor(Math.random() * 100));
       if (!/rate|429|timeout|ETIMEDOUT|ECONN|fetch failed|busy/i.test(msg) && attempts > 3) {
       }
     }
@@ -431,9 +431,29 @@ import net from "node:net";
 function signerToken() {
   return fs5.readFileSync(P.run + "/signer.token", "utf8").trim();
 }
+function waitForSignerPort(deadlineMs = 45e3) {
+  const started = Date.now();
+  for (; ; ) {
+    try {
+      return Number(fs5.readFileSync(P.signerPort, "utf8").trim());
+    } catch (e3) {
+      if (Date.now() - started > deadlineMs) throw new Error(`signer never appeared at ${P.signerPort}`);
+      try {
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 250);
+      } catch {
+      }
+    }
+  }
+}
 function request(op, args = {}, timeoutMs = 3e4) {
-  return new Promise((resolve, reject) => {
-    const port = Number(fs5.readFileSync(P.signerPort, "utf8").trim());
+  return new Promise((resolve2, reject) => {
+    let port;
+    try {
+      port = waitForSignerPort();
+    } catch (e3) {
+      reject(e3);
+      return;
+    }
     const sock = net.createConnection({ host: "127.0.0.1", port }, () => {
       sock.write(JSON.stringify({ token: signerToken(), op, args }) + "\n");
     });
@@ -452,7 +472,7 @@ function request(op, args = {}, timeoutMs = 3e4) {
         try {
           const j2 = JSON.parse(line);
           if (j2.error) reject(new Error(`signer: ${j2.error}`));
-          else resolve(j2.result);
+          else resolve2(j2.result);
         } catch (e3) {
           reject(e3);
         }
@@ -1890,9 +1910,9 @@ var require_modular = __commonJS({
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.isNegativeLE = void 0;
-    exports.mod = mod;
-    exports.pow = pow;
-    exports.pow2 = pow2;
+    exports.mod = mod2;
+    exports.pow = pow2;
+    exports.pow2 = pow22;
     exports.invert = invert;
     exports.tonelliShanks = tonelliShanks;
     exports.FpSqrt = FpSqrt;
@@ -1921,14 +1941,14 @@ var require_modular = __commonJS({
     var _8n = /* @__PURE__ */ BigInt(8);
     var _9n = /* @__PURE__ */ BigInt(9);
     var _16n = /* @__PURE__ */ BigInt(16);
-    function mod(a2, b2) {
+    function mod2(a2, b2) {
       const result2 = a2 % b2;
       return result2 >= _0n ? result2 : b2 + result2;
     }
-    function pow(num, power, modulo) {
+    function pow2(num, power, modulo) {
       return FpPow(Field2(modulo), num, power);
     }
-    function pow2(x, power, modulo) {
+    function pow22(x, power, modulo) {
       let res = x;
       while (power-- > _0n) {
         res *= res;
@@ -1941,7 +1961,7 @@ var require_modular = __commonJS({
         throw new Error("invert: expected non-zero number");
       if (modulo <= _0n)
         throw new Error("invert: expected positive modulus, got " + modulo);
-      let a2 = mod(number, modulo);
+      let a2 = mod2(number, modulo);
       let b2 = modulo;
       let x = _0n, y = _1n, u = _1n, v2 = _0n;
       while (a2 !== _0n) {
@@ -1954,7 +1974,7 @@ var require_modular = __commonJS({
       const gcd = b2;
       if (gcd !== _1n)
         throw new Error("invert: does not exist");
-      return mod(x, modulo);
+      return mod2(x, modulo);
     }
     function assertIsSquare(Fp, root, n) {
       if (!Fp.eql(Fp.sqr(root), n))
@@ -1976,13 +1996,13 @@ var require_modular = __commonJS({
       assertIsSquare(Fp, root, n);
       return root;
     }
-    function sqrt9mod16(P3) {
-      const Fp_ = Field2(P3);
-      const tn = tonelliShanks(P3);
+    function sqrt9mod16(P4) {
+      const Fp_ = Field2(P4);
+      const tn = tonelliShanks(P4);
       const c1 = tn(Fp_, Fp_.neg(Fp_.ONE));
       const c2 = tn(Fp_, c1);
       const c3 = tn(Fp_, Fp_.neg(c1));
-      const c4 = (P3 + _7n) / _16n;
+      const c4 = (P4 + _7n) / _16n;
       return (Fp, n) => {
         let tv1 = Fp.pow(n, c4);
         let tv2 = Fp.mul(tv1, c1);
@@ -1998,17 +2018,17 @@ var require_modular = __commonJS({
         return root;
       };
     }
-    function tonelliShanks(P3) {
-      if (P3 < _3n)
+    function tonelliShanks(P4) {
+      if (P4 < _3n)
         throw new Error("sqrt is not defined for small field");
-      let Q = P3 - _1n;
+      let Q = P4 - _1n;
       let S2 = 0;
       while (Q % _2n === _0n) {
         Q /= _2n;
         S2++;
       }
       let Z2 = _2n;
-      const _Fp = Field2(P3);
+      const _Fp = Field2(P4);
       while (FpLegendre(_Fp, Z2) === 1) {
         if (Z2++ > 1e3)
           throw new Error("Cannot find square root: probably non-prime P");
@@ -2047,16 +2067,16 @@ var require_modular = __commonJS({
         return R2;
       };
     }
-    function FpSqrt(P3) {
-      if (P3 % _4n === _3n)
+    function FpSqrt(P4) {
+      if (P4 % _4n === _3n)
         return sqrt3mod4;
-      if (P3 % _8n === _5n)
+      if (P4 % _8n === _5n)
         return sqrt5mod8;
-      if (P3 % _16n === _9n)
-        return sqrt9mod16(P3);
-      return tonelliShanks(P3);
+      if (P4 % _16n === _9n)
+        return sqrt9mod16(P4);
+      return tonelliShanks(P4);
     }
-    var isNegativeLE = (num, modulo) => (mod(num, modulo) & _1n) === _1n;
+    var isNegativeLE = (num, modulo) => (mod2(num, modulo) & _1n) === _1n;
     exports.isNegativeLE = isNegativeLE;
     var FIELD_FIELDS = [
       "create",
@@ -2188,7 +2208,7 @@ var require_modular = __commonJS({
         ZERO: _0n,
         ONE: _1n,
         allowedLengths,
-        create: (num) => mod(num, ORDER),
+        create: (num) => mod2(num, ORDER),
         isValid: (num) => {
           if (typeof num !== "bigint")
             throw new Error("invalid field element: expected bigint, got " + typeof num);
@@ -2198,14 +2218,14 @@ var require_modular = __commonJS({
         // is valid and invertible
         isValidNot0: (num) => !f2.is0(num) && f2.isValid(num),
         isOdd: (num) => (num & _1n) === _1n,
-        neg: (num) => mod(-num, ORDER),
+        neg: (num) => mod2(-num, ORDER),
         eql: (lhs, rhs) => lhs === rhs,
-        sqr: (num) => mod(num * num, ORDER),
-        add: (lhs, rhs) => mod(lhs + rhs, ORDER),
-        sub: (lhs, rhs) => mod(lhs - rhs, ORDER),
-        mul: (lhs, rhs) => mod(lhs * rhs, ORDER),
+        sqr: (num) => mod2(num * num, ORDER),
+        add: (lhs, rhs) => mod2(lhs + rhs, ORDER),
+        sub: (lhs, rhs) => mod2(lhs - rhs, ORDER),
+        mul: (lhs, rhs) => mod2(lhs * rhs, ORDER),
         pow: (num, power) => FpPow(f2, num, power),
-        div: (lhs, rhs) => mod(lhs * invert(rhs, ORDER), ORDER),
+        div: (lhs, rhs) => mod2(lhs * invert(rhs, ORDER), ORDER),
         // Same as above, but doesn't normalize
         sqrN: (num) => num * num,
         addN: (lhs, rhs) => lhs + rhs,
@@ -2231,7 +2251,7 @@ var require_modular = __commonJS({
             throw new Error("Field.fromBytes: expected " + BYTES + " bytes, got " + bytes.length);
           let scalar = isLE ? (0, utils_ts_1.bytesToNumberLE)(bytes) : (0, utils_ts_1.bytesToNumberBE)(bytes);
           if (modFromBytes)
-            scalar = mod(scalar, ORDER);
+            scalar = mod2(scalar, ORDER);
           if (!skipValidation) {
             if (!f2.isValid(scalar))
               throw new Error("invalid field element: outside of range 0..ORDER");
@@ -2265,7 +2285,7 @@ var require_modular = __commonJS({
       if (minLen < 24 || hashLen < minLen || hashLen > 1024)
         throw new Error("hashToPrivateScalar: expected " + minLen + "-1024 bytes of input, got " + hashLen);
       const num = isLE ? (0, utils_ts_1.bytesToNumberLE)(hash) : (0, utils_ts_1.bytesToNumberBE)(hash);
-      return mod(num, groupOrder - _1n) + _1n;
+      return mod2(num, groupOrder - _1n) + _1n;
     }
     function getFieldBytesLength(fieldOrder) {
       if (typeof fieldOrder !== "bigint")
@@ -2284,7 +2304,7 @@ var require_modular = __commonJS({
       if (len < 16 || len < minLen || len > 1024)
         throw new Error("expected " + minLen + "-1024 bytes of input, got " + len);
       const num = isLE ? (0, utils_ts_1.bytesToNumberLE)(key) : (0, utils_ts_1.bytesToNumberBE)(key);
-      const reduced = mod(num, fieldOrder - _1n) + _1n;
+      const reduced = mod2(num, fieldOrder - _1n) + _1n;
       return isLE ? (0, utils_ts_1.numberToBytesLE)(reduced, fieldLen) : (0, utils_ts_1.numberToBytesBE)(reduced, fieldLen);
     }
   }
@@ -2362,8 +2382,8 @@ var require_curve = __commonJS({
     }
     var pointPrecomputes = /* @__PURE__ */ new WeakMap();
     var pointWindowSizes = /* @__PURE__ */ new WeakMap();
-    function getW(P3) {
-      return pointWindowSizes.get(P3) || 1;
+    function getW(P4) {
+      return pointWindowSizes.get(P4) || 1;
     }
     function assert0(n) {
       if (n !== _0n)
@@ -2404,15 +2424,15 @@ var require_curve = __commonJS({
         const { windows, windowSize } = calcWOpts(W2, this.bits);
         const points = [];
         let p2 = point;
-        let base2 = p2;
+        let base3 = p2;
         for (let window2 = 0; window2 < windows; window2++) {
-          base2 = p2;
-          points.push(base2);
+          base3 = p2;
+          points.push(base3);
           for (let i = 1; i < windowSize; i++) {
-            base2 = base2.add(p2);
-            points.push(base2);
+            base3 = base3.add(p2);
+            points.push(base3);
           }
-          p2 = base2.double();
+          p2 = base3.double();
         }
         return points;
       }
@@ -2487,10 +2507,10 @@ var require_curve = __commonJS({
       // We calculate precomputes for elliptic curve point multiplication
       // using windowed method. This specifies window size and
       // stores precomputed values. Usually only base point would be precomputed.
-      createCache(P3, W2) {
+      createCache(P4, W2) {
         validateW(W2, this.bits);
-        pointWindowSizes.set(P3, W2);
-        pointPrecomputes.delete(P3);
+        pointWindowSizes.set(P4, W2);
+        pointPrecomputes.delete(P4);
       }
       hasCache(elm) {
         return getW(elm) !== 1;
@@ -3335,11 +3355,11 @@ var require_hash_to_curve = __commonJS({
         return Point.fromAffine(mapToCurve(num));
       }
       function clear(initial) {
-        const P3 = initial.clearCofactor();
-        if (P3.equals(Point.ZERO))
+        const P4 = initial.clearCofactor();
+        if (P4.equals(Point.ZERO))
           return Point.ZERO;
-        P3.assertValidity();
-        return P3;
+        P4.assertValidity();
+        return P4;
       }
       return {
         defaults,
@@ -3398,7 +3418,7 @@ var require_montgomery = __commonJS({
     }
     function montgomery(curveDef) {
       const CURVE = validateOpts(curveDef);
-      const { P: P3, type, adjustScalarBytes, powPminus2, randomBytes: rand } = CURVE;
+      const { P: P4, type, adjustScalarBytes, powPminus2, randomBytes: rand } = CURVE;
       const is25519 = type === "x25519";
       if (!is25519 && type !== "x448")
         throw new Error("invalid type");
@@ -3410,7 +3430,7 @@ var require_montgomery = __commonJS({
       const minScalar = is25519 ? _2n ** BigInt(254) : _2n ** BigInt(447);
       const maxAdded = is25519 ? BigInt(8) * _2n ** BigInt(251) - _1n : BigInt(4) * _2n ** BigInt(445) - _1n;
       const maxScalar = minScalar + maxAdded + _1n;
-      const modP = (n) => (0, modular_ts_1.mod)(n, P3);
+      const modP = (n) => (0, modular_ts_1.mod)(n, P4);
       const GuBytes = encodeU(Gu);
       function encodeU(u) {
         return (0, utils_ts_1.numberToBytesLE)(modP(u), fieldLen);
@@ -3440,7 +3460,7 @@ var require_montgomery = __commonJS({
         return { x_2, x_3 };
       }
       function montgomeryLadder(u, scalar) {
-        (0, utils_ts_1.aInRange)("u", u, _0n, P3);
+        (0, utils_ts_1.aInRange)("u", u, _0n, P4);
         (0, utils_ts_1.aInRange)("scalar", scalar, minScalar, maxScalar);
         const k2 = scalar;
         const x_1 = u;
@@ -3541,19 +3561,19 @@ var require_ed25519 = __commonJS({
     }))();
     function ed25519_pow_2_252_3(x) {
       const _10n = BigInt(10), _20n = BigInt(20), _40n = BigInt(40), _80n = BigInt(80);
-      const P3 = ed25519_CURVE_p;
-      const x2 = x * x % P3;
-      const b2 = x2 * x % P3;
-      const b4 = (0, modular_ts_1.pow2)(b2, _2n, P3) * b2 % P3;
-      const b5 = (0, modular_ts_1.pow2)(b4, _1n, P3) * x % P3;
-      const b10 = (0, modular_ts_1.pow2)(b5, _5n, P3) * b5 % P3;
-      const b20 = (0, modular_ts_1.pow2)(b10, _10n, P3) * b10 % P3;
-      const b40 = (0, modular_ts_1.pow2)(b20, _20n, P3) * b20 % P3;
-      const b80 = (0, modular_ts_1.pow2)(b40, _40n, P3) * b40 % P3;
-      const b160 = (0, modular_ts_1.pow2)(b80, _80n, P3) * b80 % P3;
-      const b240 = (0, modular_ts_1.pow2)(b160, _80n, P3) * b80 % P3;
-      const b250 = (0, modular_ts_1.pow2)(b240, _10n, P3) * b10 % P3;
-      const pow_p_5_8 = (0, modular_ts_1.pow2)(b250, _2n, P3) * x % P3;
+      const P4 = ed25519_CURVE_p;
+      const x2 = x * x % P4;
+      const b2 = x2 * x % P4;
+      const b4 = (0, modular_ts_1.pow2)(b2, _2n, P4) * b2 % P4;
+      const b5 = (0, modular_ts_1.pow2)(b4, _1n, P4) * x % P4;
+      const b10 = (0, modular_ts_1.pow2)(b5, _5n, P4) * b5 % P4;
+      const b20 = (0, modular_ts_1.pow2)(b10, _10n, P4) * b10 % P4;
+      const b40 = (0, modular_ts_1.pow2)(b20, _20n, P4) * b20 % P4;
+      const b80 = (0, modular_ts_1.pow2)(b40, _40n, P4) * b40 % P4;
+      const b160 = (0, modular_ts_1.pow2)(b80, _80n, P4) * b80 % P4;
+      const b240 = (0, modular_ts_1.pow2)(b160, _80n, P4) * b80 % P4;
+      const b250 = (0, modular_ts_1.pow2)(b240, _10n, P4) * b10 % P4;
+      const pow_p_5_8 = (0, modular_ts_1.pow2)(b250, _2n, P4) * x % P4;
       return { pow_p_5_8, b2 };
     }
     function adjustScalarBytes(bytes) {
@@ -3564,23 +3584,23 @@ var require_ed25519 = __commonJS({
     }
     var ED25519_SQRT_M1 = /* @__PURE__ */ BigInt("19681161376707505956807079304988542015446066515923890162744021073123829784752");
     function uvRatio(u, v2) {
-      const P3 = ed25519_CURVE_p;
-      const v33 = (0, modular_ts_1.mod)(v2 * v2 * v2, P3);
-      const v72 = (0, modular_ts_1.mod)(v33 * v33 * v2, P3);
-      const pow = ed25519_pow_2_252_3(u * v72).pow_p_5_8;
-      let x = (0, modular_ts_1.mod)(u * v33 * pow, P3);
-      const vx2 = (0, modular_ts_1.mod)(v2 * x * x, P3);
+      const P4 = ed25519_CURVE_p;
+      const v33 = (0, modular_ts_1.mod)(v2 * v2 * v2, P4);
+      const v72 = (0, modular_ts_1.mod)(v33 * v33 * v2, P4);
+      const pow2 = ed25519_pow_2_252_3(u * v72).pow_p_5_8;
+      let x = (0, modular_ts_1.mod)(u * v33 * pow2, P4);
+      const vx2 = (0, modular_ts_1.mod)(v2 * x * x, P4);
       const root1 = x;
-      const root2 = (0, modular_ts_1.mod)(x * ED25519_SQRT_M1, P3);
+      const root2 = (0, modular_ts_1.mod)(x * ED25519_SQRT_M1, P4);
       const useRoot1 = vx2 === u;
-      const useRoot2 = vx2 === (0, modular_ts_1.mod)(-u, P3);
-      const noRoot = vx2 === (0, modular_ts_1.mod)(-u * ED25519_SQRT_M1, P3);
+      const useRoot2 = vx2 === (0, modular_ts_1.mod)(-u, P4);
+      const noRoot = vx2 === (0, modular_ts_1.mod)(-u * ED25519_SQRT_M1, P4);
       if (useRoot1)
         x = root1;
       if (useRoot2 || noRoot)
         x = root2;
-      if ((0, modular_ts_1.isNegativeLE)(x, P3))
-        x = (0, modular_ts_1.mod)(-x, P3);
+      if ((0, modular_ts_1.isNegativeLE)(x, P4))
+        x = (0, modular_ts_1.mod)(-x, P4);
       return { isValid: useRoot1 || useRoot2, value: x };
     }
     var Fp = /* @__PURE__ */ (() => (0, modular_ts_1.Field)(ed25519_CURVE.p, { isLE: true }))();
@@ -3610,13 +3630,13 @@ var require_ed25519 = __commonJS({
       prehash: sha2_js_1.sha512
     })))();
     exports.x25519 = (() => {
-      const P3 = Fp.ORDER;
+      const P4 = Fp.ORDER;
       return (0, montgomery_ts_1.montgomery)({
-        P: P3,
+        P: P4,
         type: "x25519",
         powPminus2: (x) => {
           const { pow_p_5_8, b2 } = ed25519_pow_2_252_3(x);
-          return (0, modular_ts_1.mod)((0, modular_ts_1.pow2)(pow_p_5_8, _3n, P3) * b2, P3);
+          return (0, modular_ts_1.mod)((0, modular_ts_1.pow2)(pow_p_5_8, _3n, P4) * b2, P4);
         },
         adjustScalarBytes
       });
@@ -3703,27 +3723,27 @@ var require_ed25519 = __commonJS({
     var bytes255ToNumberLE = (bytes) => exports.ed25519.Point.Fp.create((0, utils_ts_1.bytesToNumberLE)(bytes) & MAX_255B);
     function calcElligatorRistrettoMap(r0) {
       const { d } = ed25519_CURVE;
-      const P3 = ed25519_CURVE_p;
-      const mod = (n) => Fp.create(n);
-      const r = mod(SQRT_M1 * r0 * r0);
-      const Ns = mod((r + _1n) * ONE_MINUS_D_SQ);
+      const P4 = ed25519_CURVE_p;
+      const mod2 = (n) => Fp.create(n);
+      const r = mod2(SQRT_M1 * r0 * r0);
+      const Ns = mod2((r + _1n) * ONE_MINUS_D_SQ);
       let c = BigInt(-1);
-      const D = mod((c - d * r) * mod(r + d));
+      const D = mod2((c - d * r) * mod2(r + d));
       let { isValid: Ns_D_is_sq, value: s } = uvRatio(Ns, D);
-      let s_ = mod(s * r0);
-      if (!(0, modular_ts_1.isNegativeLE)(s_, P3))
-        s_ = mod(-s_);
+      let s_ = mod2(s * r0);
+      if (!(0, modular_ts_1.isNegativeLE)(s_, P4))
+        s_ = mod2(-s_);
       if (!Ns_D_is_sq)
         s = s_;
       if (!Ns_D_is_sq)
         c = r;
-      const Nt = mod(c * (r - _1n) * D_MINUS_ONE_SQ - D);
+      const Nt = mod2(c * (r - _1n) * D_MINUS_ONE_SQ - D);
       const s2 = s * s;
-      const W0 = mod((s + s) * D);
-      const W1 = mod(Nt * SQRT_AD_MINUS_ONE);
-      const W2 = mod(_1n - s2);
-      const W3 = mod(_1n + s2);
-      return new exports.ed25519.Point(mod(W0 * W3), mod(W2 * W1), mod(W1 * W3), mod(W0 * W2));
+      const W0 = mod2((s + s) * D);
+      const W1 = mod2(Nt * SQRT_AD_MINUS_ONE);
+      const W2 = mod2(_1n - s2);
+      const W3 = mod2(_1n + s2);
+      return new exports.ed25519.Point(mod2(W0 * W3), mod2(W2 * W1), mod2(W1 * W3), mod2(W0 * W2));
     }
     function ristretto255_map(bytes) {
       (0, utils_js_1.abytes)(bytes, 64);
@@ -3754,26 +3774,26 @@ var require_ed25519 = __commonJS({
       static fromBytes(bytes) {
         (0, utils_js_1.abytes)(bytes, 32);
         const { a: a2, d } = ed25519_CURVE;
-        const P3 = ed25519_CURVE_p;
-        const mod = (n) => Fp.create(n);
+        const P4 = ed25519_CURVE_p;
+        const mod2 = (n) => Fp.create(n);
         const s = bytes255ToNumberLE(bytes);
-        if (!(0, utils_ts_1.equalBytes)(Fp.toBytes(s), bytes) || (0, modular_ts_1.isNegativeLE)(s, P3))
+        if (!(0, utils_ts_1.equalBytes)(Fp.toBytes(s), bytes) || (0, modular_ts_1.isNegativeLE)(s, P4))
           throw new Error("invalid ristretto255 encoding 1");
-        const s2 = mod(s * s);
-        const u1 = mod(_1n + a2 * s2);
-        const u2 = mod(_1n - a2 * s2);
-        const u1_2 = mod(u1 * u1);
-        const u2_2 = mod(u2 * u2);
-        const v2 = mod(a2 * d * u1_2 - u2_2);
-        const { isValid, value: I } = invertSqrt(mod(v2 * u2_2));
-        const Dx = mod(I * u2);
-        const Dy = mod(I * Dx * v2);
-        let x = mod((s + s) * Dx);
-        if ((0, modular_ts_1.isNegativeLE)(x, P3))
-          x = mod(-x);
-        const y = mod(u1 * Dy);
-        const t = mod(x * y);
-        if (!isValid || (0, modular_ts_1.isNegativeLE)(t, P3) || y === _0n)
+        const s2 = mod2(s * s);
+        const u1 = mod2(_1n + a2 * s2);
+        const u2 = mod2(_1n - a2 * s2);
+        const u1_2 = mod2(u1 * u1);
+        const u2_2 = mod2(u2 * u2);
+        const v2 = mod2(a2 * d * u1_2 - u2_2);
+        const { isValid, value: I } = invertSqrt(mod2(v2 * u2_2));
+        const Dx = mod2(I * u2);
+        const Dy = mod2(I * Dx * v2);
+        let x = mod2((s + s) * Dx);
+        if ((0, modular_ts_1.isNegativeLE)(x, P4))
+          x = mod2(-x);
+        const y = mod2(u1 * Dy);
+        const t = mod2(x * y);
+        if (!isValid || (0, modular_ts_1.isNegativeLE)(t, P4) || y === _0n)
           throw new Error("invalid ristretto255 encoding 2");
         return new __RistrettoPoint(new exports.ed25519.Point(x, y, _1n, t));
       }
@@ -3794,30 +3814,30 @@ var require_ed25519 = __commonJS({
        */
       toBytes() {
         let { X, Y: Y2, Z: Z2, T: T2 } = this.ep;
-        const P3 = ed25519_CURVE_p;
-        const mod = (n) => Fp.create(n);
-        const u1 = mod(mod(Z2 + Y2) * mod(Z2 - Y2));
-        const u2 = mod(X * Y2);
-        const u2sq = mod(u2 * u2);
-        const { value: invsqrt } = invertSqrt(mod(u1 * u2sq));
-        const D1 = mod(invsqrt * u1);
-        const D2 = mod(invsqrt * u2);
-        const zInv = mod(D1 * D2 * T2);
+        const P4 = ed25519_CURVE_p;
+        const mod2 = (n) => Fp.create(n);
+        const u1 = mod2(mod2(Z2 + Y2) * mod2(Z2 - Y2));
+        const u2 = mod2(X * Y2);
+        const u2sq = mod2(u2 * u2);
+        const { value: invsqrt } = invertSqrt(mod2(u1 * u2sq));
+        const D1 = mod2(invsqrt * u1);
+        const D2 = mod2(invsqrt * u2);
+        const zInv = mod2(D1 * D2 * T2);
         let D;
-        if ((0, modular_ts_1.isNegativeLE)(T2 * zInv, P3)) {
-          let _x = mod(Y2 * SQRT_M1);
-          let _y = mod(X * SQRT_M1);
+        if ((0, modular_ts_1.isNegativeLE)(T2 * zInv, P4)) {
+          let _x = mod2(Y2 * SQRT_M1);
+          let _y = mod2(X * SQRT_M1);
           X = _x;
           Y2 = _y;
-          D = mod(D1 * INVSQRT_A_MINUS_D);
+          D = mod2(D1 * INVSQRT_A_MINUS_D);
         } else {
           D = D2;
         }
-        if ((0, modular_ts_1.isNegativeLE)(X * zInv, P3))
-          Y2 = mod(-Y2);
-        let s = mod((Z2 - Y2) * D);
-        if ((0, modular_ts_1.isNegativeLE)(s, P3))
-          s = mod(-s);
+        if ((0, modular_ts_1.isNegativeLE)(X * zInv, P4))
+          Y2 = mod2(-Y2);
+        let s = mod2((Z2 - Y2) * D);
+        if ((0, modular_ts_1.isNegativeLE)(s, P4))
+          s = mod2(-s);
         return Fp.toBytes(s);
       }
       /**
@@ -3828,9 +3848,9 @@ var require_ed25519 = __commonJS({
         this.assertSame(other);
         const { X: X1, Y: Y1 } = this.ep;
         const { X: X2, Y: Y2 } = other.ep;
-        const mod = (n) => Fp.create(n);
-        const one = mod(X1 * Y2) === mod(Y1 * X2);
-        const two = mod(Y1 * Y2) === mod(X1 * X2);
+        const mod2 = (n) => Fp.create(n);
+        const one = mod2(X1 * Y2) === mod2(Y1 * X2);
+        const two = mod2(Y1 * Y2) === mod2(X1 * X2);
         return one || two;
       }
       is0() {
@@ -3894,8 +3914,8 @@ var require_bn = __commonJS({
         ctor.prototype = new TempCtor();
         ctor.prototype.constructor = ctor;
       }
-      function BN26(number, base2, endian) {
-        if (BN26.isBN(number)) {
+      function BN27(number, base3, endian) {
+        if (BN27.isBN(number)) {
           return number;
         }
         this.negative = 0;
@@ -3903,20 +3923,20 @@ var require_bn = __commonJS({
         this.length = 0;
         this.red = null;
         if (number !== null) {
-          if (base2 === "le" || base2 === "be") {
-            endian = base2;
-            base2 = 10;
+          if (base3 === "le" || base3 === "be") {
+            endian = base3;
+            base3 = 10;
           }
-          this._init(number || 0, base2 || 10, endian || "be");
+          this._init(number || 0, base3 || 10, endian || "be");
         }
       }
       if (typeof module2 === "object") {
-        module2.exports = BN26;
+        module2.exports = BN27;
       } else {
-        exports2.BN = BN26;
+        exports2.BN = BN27;
       }
-      BN26.BN = BN26;
-      BN26.wordSize = 26;
+      BN27.BN = BN27;
+      BN27.wordSize = 26;
       var Buffer4;
       try {
         if (typeof window !== "undefined" && typeof window.Buffer !== "undefined") {
@@ -3926,31 +3946,31 @@ var require_bn = __commonJS({
         }
       } catch (e3) {
       }
-      BN26.isBN = function isBN(num) {
-        if (num instanceof BN26) {
+      BN27.isBN = function isBN(num) {
+        if (num instanceof BN27) {
           return true;
         }
-        return num !== null && typeof num === "object" && num.constructor.wordSize === BN26.wordSize && Array.isArray(num.words);
+        return num !== null && typeof num === "object" && num.constructor.wordSize === BN27.wordSize && Array.isArray(num.words);
       };
-      BN26.max = function max(left, right) {
+      BN27.max = function max(left, right) {
         if (left.cmp(right) > 0) return left;
         return right;
       };
-      BN26.min = function min(left, right) {
+      BN27.min = function min(left, right) {
         if (left.cmp(right) < 0) return left;
         return right;
       };
-      BN26.prototype._init = function init(number, base2, endian) {
+      BN27.prototype._init = function init(number, base3, endian) {
         if (typeof number === "number") {
-          return this._initNumber(number, base2, endian);
+          return this._initNumber(number, base3, endian);
         }
         if (typeof number === "object") {
-          return this._initArray(number, base2, endian);
+          return this._initArray(number, base3, endian);
         }
-        if (base2 === "hex") {
-          base2 = 16;
+        if (base3 === "hex") {
+          base3 = 16;
         }
-        assert(base2 === (base2 | 0) && base2 >= 2 && base2 <= 36);
+        assert(base3 === (base3 | 0) && base3 >= 2 && base3 <= 36);
         number = number.toString().replace(/\s+/g, "");
         var start = 0;
         if (number[0] === "-") {
@@ -3958,17 +3978,17 @@ var require_bn = __commonJS({
           this.negative = 1;
         }
         if (start < number.length) {
-          if (base2 === 16) {
+          if (base3 === 16) {
             this._parseHex(number, start, endian);
           } else {
-            this._parseBase(number, base2, start);
+            this._parseBase(number, base3, start);
             if (endian === "le") {
-              this._initArray(this.toArray(), base2, endian);
+              this._initArray(this.toArray(), base3, endian);
             }
           }
         }
       };
-      BN26.prototype._initNumber = function _initNumber(number, base2, endian) {
+      BN27.prototype._initNumber = function _initNumber(number, base3, endian) {
         if (number < 0) {
           this.negative = 1;
           number = -number;
@@ -3992,9 +4012,9 @@ var require_bn = __commonJS({
           this.length = 3;
         }
         if (endian !== "le") return;
-        this._initArray(this.toArray(), base2, endian);
+        this._initArray(this.toArray(), base3, endian);
       };
-      BN26.prototype._initArray = function _initArray(number, base2, endian) {
+      BN27.prototype._initArray = function _initArray(number, base3, endian) {
         assert(typeof number.length === "number");
         if (number.length <= 0) {
           this.words = [0];
@@ -4052,7 +4072,7 @@ var require_bn = __commonJS({
         }
         return r;
       }
-      BN26.prototype._parseHex = function _parseHex(number, start, endian) {
+      BN27.prototype._parseHex = function _parseHex(number, start, endian) {
         this.length = Math.ceil((number.length - start) / 6);
         this.words = new Array(this.length);
         for (var i = 0; i < this.length; i++) {
@@ -4108,20 +4128,20 @@ var require_bn = __commonJS({
         }
         return r;
       }
-      BN26.prototype._parseBase = function _parseBase(number, base2, start) {
+      BN27.prototype._parseBase = function _parseBase(number, base3, start) {
         this.words = [0];
         this.length = 1;
-        for (var limbLen = 0, limbPow = 1; limbPow <= 67108863; limbPow *= base2) {
+        for (var limbLen = 0, limbPow = 1; limbPow <= 67108863; limbPow *= base3) {
           limbLen++;
         }
         limbLen--;
-        limbPow = limbPow / base2 | 0;
+        limbPow = limbPow / base3 | 0;
         var total = number.length - start;
-        var mod = total % limbLen;
-        var end = Math.min(total, total - mod) + start;
+        var mod2 = total % limbLen;
+        var end = Math.min(total, total - mod2) + start;
         var word = 0;
         for (var i = start; i < end; i += limbLen) {
-          word = parseBase(number, i, i + limbLen, base2);
+          word = parseBase(number, i, i + limbLen, base3);
           this.imuln(limbPow);
           if (this.words[0] + word < 67108864) {
             this.words[0] += word;
@@ -4129,13 +4149,13 @@ var require_bn = __commonJS({
             this._iaddn(word);
           }
         }
-        if (mod !== 0) {
-          var pow = 1;
-          word = parseBase(number, i, number.length, base2);
-          for (i = 0; i < mod; i++) {
-            pow *= base2;
+        if (mod2 !== 0) {
+          var pow2 = 1;
+          word = parseBase(number, i, number.length, base3);
+          for (i = 0; i < mod2; i++) {
+            pow2 *= base3;
           }
-          this.imuln(pow);
+          this.imuln(pow2);
           if (this.words[0] + word < 67108864) {
             this.words[0] += word;
           } else {
@@ -4144,7 +4164,7 @@ var require_bn = __commonJS({
         }
         this._strip();
       };
-      BN26.prototype.copy = function copy(dest) {
+      BN27.prototype.copy = function copy(dest) {
         dest.words = new Array(this.length);
         for (var i = 0; i < this.length; i++) {
           dest.words[i] = this.words[i];
@@ -4159,27 +4179,27 @@ var require_bn = __commonJS({
         dest.negative = src.negative;
         dest.red = src.red;
       }
-      BN26.prototype._move = function _move(dest) {
+      BN27.prototype._move = function _move(dest) {
         move(dest, this);
       };
-      BN26.prototype.clone = function clone2() {
-        var r = new BN26(null);
+      BN27.prototype.clone = function clone2() {
+        var r = new BN27(null);
         this.copy(r);
         return r;
       };
-      BN26.prototype._expand = function _expand(size) {
+      BN27.prototype._expand = function _expand(size) {
         while (this.length < size) {
           this.words[this.length++] = 0;
         }
         return this;
       };
-      BN26.prototype._strip = function strip() {
+      BN27.prototype._strip = function strip() {
         while (this.length > 1 && this.words[this.length - 1] === 0) {
           this.length--;
         }
         return this._normSign();
       };
-      BN26.prototype._normSign = function _normSign() {
+      BN27.prototype._normSign = function _normSign() {
         if (this.length === 1 && this.words[0] === 0) {
           this.negative = 0;
         }
@@ -4187,12 +4207,12 @@ var require_bn = __commonJS({
       };
       if (typeof Symbol !== "undefined" && typeof Symbol.for === "function") {
         try {
-          BN26.prototype[/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")] = inspect2;
+          BN27.prototype[/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")] = inspect2;
         } catch (e3) {
-          BN26.prototype.inspect = inspect2;
+          BN27.prototype.inspect = inspect2;
         }
       } else {
-        BN26.prototype.inspect = inspect2;
+        BN27.prototype.inspect = inspect2;
       }
       function inspect2() {
         return (this.red ? "<BN-R: " : "<BN: ") + this.toString(16) + ">";
@@ -4303,11 +4323,11 @@ var require_bn = __commonJS({
         52521875,
         60466176
       ];
-      BN26.prototype.toString = function toString(base2, padding) {
-        base2 = base2 || 10;
+      BN27.prototype.toString = function toString(base3, padding) {
+        base3 = base3 || 10;
         padding = padding | 0 || 1;
         var out;
-        if (base2 === 16 || base2 === "hex") {
+        if (base3 === 16 || base3 === "hex") {
           out = "";
           var off = 0;
           var carry = 0;
@@ -4337,14 +4357,14 @@ var require_bn = __commonJS({
           }
           return out;
         }
-        if (base2 === (base2 | 0) && base2 >= 2 && base2 <= 36) {
-          var groupSize = groupSizes[base2];
-          var groupBase = groupBases[base2];
+        if (base3 === (base3 | 0) && base3 >= 2 && base3 <= 36) {
+          var groupSize = groupSizes[base3];
+          var groupBase = groupBases[base3];
           out = "";
           var c = this.clone();
           c.negative = 0;
           while (!c.isZero()) {
-            var r = c.modrn(groupBase).toString(base2);
+            var r = c.modrn(groupBase).toString(base3);
             c = c.idivn(groupBase);
             if (!c.isZero()) {
               out = zeros[groupSize - r.length] + r + out;
@@ -4365,7 +4385,7 @@ var require_bn = __commonJS({
         }
         assert(false, "Base should be between 2 and 36");
       };
-      BN26.prototype.toNumber = function toNumber() {
+      BN27.prototype.toNumber = function toNumber() {
         var ret = this.words[0];
         if (this.length === 2) {
           ret += this.words[1] * 67108864;
@@ -4376,15 +4396,15 @@ var require_bn = __commonJS({
         }
         return this.negative !== 0 ? -ret : ret;
       };
-      BN26.prototype.toJSON = function toJSON() {
+      BN27.prototype.toJSON = function toJSON() {
         return this.toString(16, 2);
       };
       if (Buffer4) {
-        BN26.prototype.toBuffer = function toBuffer(endian, length) {
+        BN27.prototype.toBuffer = function toBuffer(endian, length) {
           return this.toArrayLike(Buffer4, endian, length);
         };
       }
-      BN26.prototype.toArray = function toArray(endian, length) {
+      BN27.prototype.toArray = function toArray(endian, length) {
         return this.toArrayLike(Array, endian, length);
       };
       var allocate = function allocate2(ArrayType, size) {
@@ -4393,7 +4413,7 @@ var require_bn = __commonJS({
         }
         return new ArrayType(size);
       };
-      BN26.prototype.toArrayLike = function toArrayLike(ArrayType, endian, length) {
+      BN27.prototype.toArrayLike = function toArrayLike(ArrayType, endian, length) {
         this._strip();
         var byteLength = this.byteLength();
         var reqLength = length || Math.max(1, byteLength);
@@ -4404,7 +4424,7 @@ var require_bn = __commonJS({
         this["_toArrayLike" + postfix](res, byteLength);
         return res;
       };
-      BN26.prototype._toArrayLikeLE = function _toArrayLikeLE(res, byteLength) {
+      BN27.prototype._toArrayLikeLE = function _toArrayLikeLE(res, byteLength) {
         var position = 0;
         var carry = 0;
         for (var i = 0, shift = 0; i < this.length; i++) {
@@ -4434,7 +4454,7 @@ var require_bn = __commonJS({
           }
         }
       };
-      BN26.prototype._toArrayLikeBE = function _toArrayLikeBE(res, byteLength) {
+      BN27.prototype._toArrayLikeBE = function _toArrayLikeBE(res, byteLength) {
         var position = res.length - 1;
         var carry = 0;
         for (var i = 0, shift = 0; i < this.length; i++) {
@@ -4465,11 +4485,11 @@ var require_bn = __commonJS({
         }
       };
       if (Math.clz32) {
-        BN26.prototype._countBits = function _countBits(w2) {
+        BN27.prototype._countBits = function _countBits(w2) {
           return 32 - Math.clz32(w2);
         };
       } else {
-        BN26.prototype._countBits = function _countBits(w2) {
+        BN27.prototype._countBits = function _countBits(w2) {
           var t = w2;
           var r = 0;
           if (t >= 4096) {
@@ -4491,7 +4511,7 @@ var require_bn = __commonJS({
           return r + t;
         };
       }
-      BN26.prototype._zeroBits = function _zeroBits(w2) {
+      BN27.prototype._zeroBits = function _zeroBits(w2) {
         if (w2 === 0) return 26;
         var t = w2;
         var r = 0;
@@ -4516,7 +4536,7 @@ var require_bn = __commonJS({
         }
         return r;
       };
-      BN26.prototype.bitLength = function bitLength() {
+      BN27.prototype.bitLength = function bitLength() {
         var w2 = this.words[this.length - 1];
         var hi = this._countBits(w2);
         return (this.length - 1) * 26 + hi;
@@ -4530,7 +4550,7 @@ var require_bn = __commonJS({
         }
         return w2;
       }
-      BN26.prototype.zeroBits = function zeroBits() {
+      BN27.prototype.zeroBits = function zeroBits() {
         if (this.isZero()) return 0;
         var r = 0;
         for (var i = 0; i < this.length; i++) {
@@ -4540,34 +4560,34 @@ var require_bn = __commonJS({
         }
         return r;
       };
-      BN26.prototype.byteLength = function byteLength() {
+      BN27.prototype.byteLength = function byteLength() {
         return Math.ceil(this.bitLength() / 8);
       };
-      BN26.prototype.toTwos = function toTwos(width) {
+      BN27.prototype.toTwos = function toTwos(width) {
         if (this.negative !== 0) {
           return this.abs().inotn(width).iaddn(1);
         }
         return this.clone();
       };
-      BN26.prototype.fromTwos = function fromTwos(width) {
+      BN27.prototype.fromTwos = function fromTwos(width) {
         if (this.testn(width - 1)) {
           return this.notn(width).iaddn(1).ineg();
         }
         return this.clone();
       };
-      BN26.prototype.isNeg = function isNeg() {
+      BN27.prototype.isNeg = function isNeg() {
         return this.negative !== 0;
       };
-      BN26.prototype.neg = function neg() {
+      BN27.prototype.neg = function neg() {
         return this.clone().ineg();
       };
-      BN26.prototype.ineg = function ineg() {
+      BN27.prototype.ineg = function ineg() {
         if (!this.isZero()) {
           this.negative ^= 1;
         }
         return this;
       };
-      BN26.prototype.iuor = function iuor(num) {
+      BN27.prototype.iuor = function iuor(num) {
         while (this.length < num.length) {
           this.words[this.length++] = 0;
         }
@@ -4576,19 +4596,19 @@ var require_bn = __commonJS({
         }
         return this._strip();
       };
-      BN26.prototype.ior = function ior(num) {
+      BN27.prototype.ior = function ior(num) {
         assert((this.negative | num.negative) === 0);
         return this.iuor(num);
       };
-      BN26.prototype.or = function or(num) {
+      BN27.prototype.or = function or(num) {
         if (this.length > num.length) return this.clone().ior(num);
         return num.clone().ior(this);
       };
-      BN26.prototype.uor = function uor(num) {
+      BN27.prototype.uor = function uor(num) {
         if (this.length > num.length) return this.clone().iuor(num);
         return num.clone().iuor(this);
       };
-      BN26.prototype.iuand = function iuand(num) {
+      BN27.prototype.iuand = function iuand(num) {
         var b2;
         if (this.length > num.length) {
           b2 = num;
@@ -4601,19 +4621,19 @@ var require_bn = __commonJS({
         this.length = b2.length;
         return this._strip();
       };
-      BN26.prototype.iand = function iand(num) {
+      BN27.prototype.iand = function iand(num) {
         assert((this.negative | num.negative) === 0);
         return this.iuand(num);
       };
-      BN26.prototype.and = function and(num) {
+      BN27.prototype.and = function and(num) {
         if (this.length > num.length) return this.clone().iand(num);
         return num.clone().iand(this);
       };
-      BN26.prototype.uand = function uand(num) {
+      BN27.prototype.uand = function uand(num) {
         if (this.length > num.length) return this.clone().iuand(num);
         return num.clone().iuand(this);
       };
-      BN26.prototype.iuxor = function iuxor(num) {
+      BN27.prototype.iuxor = function iuxor(num) {
         var a2;
         var b2;
         if (this.length > num.length) {
@@ -4634,19 +4654,19 @@ var require_bn = __commonJS({
         this.length = a2.length;
         return this._strip();
       };
-      BN26.prototype.ixor = function ixor(num) {
+      BN27.prototype.ixor = function ixor(num) {
         assert((this.negative | num.negative) === 0);
         return this.iuxor(num);
       };
-      BN26.prototype.xor = function xor2(num) {
+      BN27.prototype.xor = function xor2(num) {
         if (this.length > num.length) return this.clone().ixor(num);
         return num.clone().ixor(this);
       };
-      BN26.prototype.uxor = function uxor(num) {
+      BN27.prototype.uxor = function uxor(num) {
         if (this.length > num.length) return this.clone().iuxor(num);
         return num.clone().iuxor(this);
       };
-      BN26.prototype.inotn = function inotn(width) {
+      BN27.prototype.inotn = function inotn(width) {
         assert(typeof width === "number" && width >= 0);
         var bytesNeeded = Math.ceil(width / 26) | 0;
         var bitsLeft = width % 26;
@@ -4666,10 +4686,10 @@ var require_bn = __commonJS({
         }
         return this._strip();
       };
-      BN26.prototype.notn = function notn(width) {
+      BN27.prototype.notn = function notn(width) {
         return this.clone().inotn(width);
       };
-      BN26.prototype.setn = function setn(bit, val) {
+      BN27.prototype.setn = function setn(bit, val) {
         assert(typeof bit === "number" && bit >= 0);
         var off = bit / 26 | 0;
         var wbit = bit % 26;
@@ -4681,7 +4701,7 @@ var require_bn = __commonJS({
         }
         return this._strip();
       };
-      BN26.prototype.iadd = function iadd(num) {
+      BN27.prototype.iadd = function iadd(num) {
         var r;
         if (this.negative !== 0 && num.negative === 0) {
           this.negative = 0;
@@ -4724,7 +4744,7 @@ var require_bn = __commonJS({
         }
         return this;
       };
-      BN26.prototype.add = function add(num) {
+      BN27.prototype.add = function add(num) {
         var res;
         if (num.negative !== 0 && this.negative === 0) {
           num.negative = 0;
@@ -4740,7 +4760,7 @@ var require_bn = __commonJS({
         if (this.length > num.length) return this.clone().iadd(num);
         return num.clone().iadd(this);
       };
-      BN26.prototype.isub = function isub(num) {
+      BN27.prototype.isub = function isub(num) {
         if (num.negative !== 0) {
           num.negative = 0;
           var r = this.iadd(num);
@@ -4789,7 +4809,7 @@ var require_bn = __commonJS({
         }
         return this._strip();
       };
-      BN26.prototype.sub = function sub(num) {
+      BN27.prototype.sub = function sub(num) {
         return this.clone().isub(num);
       };
       function smallMulTo(self2, num, out) {
@@ -5417,7 +5437,7 @@ var require_bn = __commonJS({
       function jumboMulTo(self2, num, out) {
         return bigMulTo(self2, num, out);
       }
-      BN26.prototype.mulTo = function mulTo(num, out) {
+      BN27.prototype.mulTo = function mulTo(num, out) {
         var res;
         var len = this.length + num.length;
         if (this.length === 10 && num.length === 10) {
@@ -5437,7 +5457,7 @@ var require_bn = __commonJS({
       }
       FFTM.prototype.makeRBT = function makeRBT(N2) {
         var t = new Array(N2);
-        var l2 = BN26.prototype._countBits(N2) - 1;
+        var l2 = BN27.prototype._countBits(N2) - 1;
         for (var i = 0; i < N2; i++) {
           t[i] = this.revBin(i, l2, N2);
         }
@@ -5572,20 +5592,20 @@ var require_bn = __commonJS({
         out.length = x.length + y.length;
         return out._strip();
       };
-      BN26.prototype.mul = function mul(num) {
-        var out = new BN26(null);
+      BN27.prototype.mul = function mul(num) {
+        var out = new BN27(null);
         out.words = new Array(this.length + num.length);
         return this.mulTo(num, out);
       };
-      BN26.prototype.mulf = function mulf(num) {
-        var out = new BN26(null);
+      BN27.prototype.mulf = function mulf(num) {
+        var out = new BN27(null);
         out.words = new Array(this.length + num.length);
         return jumboMulTo(this, num, out);
       };
-      BN26.prototype.imul = function imul(num) {
+      BN27.prototype.imul = function imul(num) {
         return this.clone().mulTo(num, this);
       };
-      BN26.prototype.imuln = function imuln(num) {
+      BN27.prototype.imuln = function imuln(num) {
         var isNegNum = num < 0;
         if (isNegNum) num = -num;
         assert(typeof num === "number");
@@ -5609,18 +5629,18 @@ var require_bn = __commonJS({
         }
         return isNegNum ? this.ineg() : this;
       };
-      BN26.prototype.muln = function muln(num) {
+      BN27.prototype.muln = function muln(num) {
         return this.clone().imuln(num);
       };
-      BN26.prototype.sqr = function sqr() {
+      BN27.prototype.sqr = function sqr() {
         return this.mul(this);
       };
-      BN26.prototype.isqr = function isqr() {
+      BN27.prototype.isqr = function isqr() {
         return this.imul(this.clone());
       };
-      BN26.prototype.pow = function pow(num) {
+      BN27.prototype.pow = function pow2(num) {
         var w2 = toBitArray(num);
-        if (w2.length === 0) return new BN26(1);
+        if (w2.length === 0) return new BN27(1);
         var res = this;
         for (var i = 0; i < w2.length; i++, res = res.sqr()) {
           if (w2[i] !== 0) break;
@@ -5633,7 +5653,7 @@ var require_bn = __commonJS({
         }
         return res;
       };
-      BN26.prototype.iushln = function iushln(bits) {
+      BN27.prototype.iushln = function iushln(bits) {
         assert(typeof bits === "number" && bits >= 0);
         var r = bits % 26;
         var s = (bits - r) / 26;
@@ -5663,11 +5683,11 @@ var require_bn = __commonJS({
         }
         return this._strip();
       };
-      BN26.prototype.ishln = function ishln(bits) {
+      BN27.prototype.ishln = function ishln(bits) {
         assert(this.negative === 0);
         return this.iushln(bits);
       };
-      BN26.prototype.iushrn = function iushrn(bits, hint, extended) {
+      BN27.prototype.iushrn = function iushrn(bits, hint, extended) {
         assert(typeof bits === "number" && bits >= 0);
         var h2;
         if (hint) {
@@ -5712,23 +5732,23 @@ var require_bn = __commonJS({
         }
         return this._strip();
       };
-      BN26.prototype.ishrn = function ishrn(bits, hint, extended) {
+      BN27.prototype.ishrn = function ishrn(bits, hint, extended) {
         assert(this.negative === 0);
         return this.iushrn(bits, hint, extended);
       };
-      BN26.prototype.shln = function shln(bits) {
+      BN27.prototype.shln = function shln(bits) {
         return this.clone().ishln(bits);
       };
-      BN26.prototype.ushln = function ushln(bits) {
+      BN27.prototype.ushln = function ushln(bits) {
         return this.clone().iushln(bits);
       };
-      BN26.prototype.shrn = function shrn(bits) {
+      BN27.prototype.shrn = function shrn(bits) {
         return this.clone().ishrn(bits);
       };
-      BN26.prototype.ushrn = function ushrn(bits) {
+      BN27.prototype.ushrn = function ushrn(bits) {
         return this.clone().iushrn(bits);
       };
-      BN26.prototype.testn = function testn(bit) {
+      BN27.prototype.testn = function testn(bit) {
         assert(typeof bit === "number" && bit >= 0);
         var r = bit % 26;
         var s = (bit - r) / 26;
@@ -5737,7 +5757,7 @@ var require_bn = __commonJS({
         var w2 = this.words[s];
         return !!(w2 & q2);
       };
-      BN26.prototype.imaskn = function imaskn(bits) {
+      BN27.prototype.imaskn = function imaskn(bits) {
         assert(typeof bits === "number" && bits >= 0);
         var r = bits % 26;
         var s = (bits - r) / 26;
@@ -5759,10 +5779,10 @@ var require_bn = __commonJS({
         }
         return this._strip();
       };
-      BN26.prototype.maskn = function maskn(bits) {
+      BN27.prototype.maskn = function maskn(bits) {
         return this.clone().imaskn(bits);
       };
-      BN26.prototype.iaddn = function iaddn(num) {
+      BN27.prototype.iaddn = function iaddn(num) {
         assert(typeof num === "number");
         assert(num < 67108864);
         if (num < 0) return this.isubn(-num);
@@ -5779,7 +5799,7 @@ var require_bn = __commonJS({
         }
         return this._iaddn(num);
       };
-      BN26.prototype._iaddn = function _iaddn(num) {
+      BN27.prototype._iaddn = function _iaddn(num) {
         this.words[0] += num;
         for (var i = 0; i < this.length && this.words[i] >= 67108864; i++) {
           this.words[i] -= 67108864;
@@ -5792,7 +5812,7 @@ var require_bn = __commonJS({
         this.length = Math.max(this.length, i + 1);
         return this;
       };
-      BN26.prototype.isubn = function isubn(num) {
+      BN27.prototype.isubn = function isubn(num) {
         assert(typeof num === "number");
         assert(num < 67108864);
         if (num < 0) return this.iaddn(-num);
@@ -5814,20 +5834,20 @@ var require_bn = __commonJS({
         }
         return this._strip();
       };
-      BN26.prototype.addn = function addn(num) {
+      BN27.prototype.addn = function addn(num) {
         return this.clone().iaddn(num);
       };
-      BN26.prototype.subn = function subn(num) {
+      BN27.prototype.subn = function subn(num) {
         return this.clone().isubn(num);
       };
-      BN26.prototype.iabs = function iabs() {
+      BN27.prototype.iabs = function iabs() {
         this.negative = 0;
         return this;
       };
-      BN26.prototype.abs = function abs() {
+      BN27.prototype.abs = function abs() {
         return this.clone().iabs();
       };
-      BN26.prototype._ishlnsubmul = function _ishlnsubmul(num, mul, shift) {
+      BN27.prototype._ishlnsubmul = function _ishlnsubmul(num, mul, shift) {
         var len = num.length + shift;
         var i;
         this._expand(len);
@@ -5856,7 +5876,7 @@ var require_bn = __commonJS({
         this.negative = 1;
         return this._strip();
       };
-      BN26.prototype._wordDiv = function _wordDiv(num, mode) {
+      BN27.prototype._wordDiv = function _wordDiv(num, mode) {
         var shift = this.length - num.length;
         var a2 = this.clone();
         var b2 = num;
@@ -5871,7 +5891,7 @@ var require_bn = __commonJS({
         var m = a2.length - b2.length;
         var q2;
         if (mode !== "mod") {
-          q2 = new BN26(null);
+          q2 = new BN27(null);
           q2.length = m + 1;
           q2.words = new Array(q2.length);
           for (var i = 0; i < q2.length; i++) {
@@ -5913,29 +5933,29 @@ var require_bn = __commonJS({
           mod: a2
         };
       };
-      BN26.prototype.divmod = function divmod(num, mode, positive) {
+      BN27.prototype.divmod = function divmod(num, mode, positive) {
         assert(!num.isZero());
         if (this.isZero()) {
           return {
-            div: new BN26(0),
-            mod: new BN26(0)
+            div: new BN27(0),
+            mod: new BN27(0)
           };
         }
-        var div, mod, res;
+        var div, mod2, res;
         if (this.negative !== 0 && num.negative === 0) {
           res = this.neg().divmod(num, mode);
           if (mode !== "mod") {
             div = res.div.neg();
           }
           if (mode !== "div") {
-            mod = res.mod.neg();
-            if (positive && mod.negative !== 0) {
-              mod.iadd(num);
+            mod2 = res.mod.neg();
+            if (positive && mod2.negative !== 0) {
+              mod2.iadd(num);
             }
           }
           return {
             div,
-            mod
+            mod: mod2
           };
         }
         if (this.negative === 0 && num.negative !== 0) {
@@ -5951,19 +5971,19 @@ var require_bn = __commonJS({
         if ((this.negative & num.negative) !== 0) {
           res = this.neg().divmod(num.neg(), mode);
           if (mode !== "div") {
-            mod = res.mod.neg();
-            if (positive && mod.negative !== 0) {
-              mod.isub(num);
+            mod2 = res.mod.neg();
+            if (positive && mod2.negative !== 0) {
+              mod2.isub(num);
             }
           }
           return {
             div: res.div,
-            mod
+            mod: mod2
           };
         }
         if (num.length > this.length || this.cmp(num) < 0) {
           return {
-            div: new BN26(0),
+            div: new BN27(0),
             mod: this
           };
         }
@@ -5977,38 +5997,38 @@ var require_bn = __commonJS({
           if (mode === "mod") {
             return {
               div: null,
-              mod: new BN26(this.modrn(num.words[0]))
+              mod: new BN27(this.modrn(num.words[0]))
             };
           }
           return {
             div: this.divn(num.words[0]),
-            mod: new BN26(this.modrn(num.words[0]))
+            mod: new BN27(this.modrn(num.words[0]))
           };
         }
         return this._wordDiv(num, mode);
       };
-      BN26.prototype.div = function div(num) {
+      BN27.prototype.div = function div(num) {
         return this.divmod(num, "div", false).div;
       };
-      BN26.prototype.mod = function mod(num) {
+      BN27.prototype.mod = function mod2(num) {
         return this.divmod(num, "mod", false).mod;
       };
-      BN26.prototype.umod = function umod(num) {
+      BN27.prototype.umod = function umod(num) {
         return this.divmod(num, "mod", true).mod;
       };
-      BN26.prototype.divRound = function divRound(num) {
+      BN27.prototype.divRound = function divRound(num) {
         var dm = this.divmod(num);
         if (dm.mod.isZero()) return dm.div;
-        var mod = dm.mod.abs();
+        var mod2 = dm.mod.abs();
         var half = num.abs().iushrn(1);
         var r2 = num.words[0] & 1;
-        var cmp = mod.cmp(half);
+        var cmp = mod2.cmp(half);
         if (cmp < 0 || r2 === 1 && cmp === 0) return dm.div;
-        var up = new BN26(1);
+        var up = new BN27(1);
         up.negative = this.negative ^ num.negative;
         return dm.div.iadd(up);
       };
-      BN26.prototype.modrn = function modrn(num) {
+      BN27.prototype.modrn = function modrn(num) {
         var isNegNum = num < 0;
         if (isNegNum) num = -num;
         assert(num <= 67108863);
@@ -6019,10 +6039,10 @@ var require_bn = __commonJS({
         }
         return isNegNum ? -acc : acc;
       };
-      BN26.prototype.modn = function modn(num) {
+      BN27.prototype.modn = function modn(num) {
         return this.modrn(num);
       };
-      BN26.prototype.idivn = function idivn(num) {
+      BN27.prototype.idivn = function idivn(num) {
         var isNegNum = num < 0;
         if (isNegNum) num = -num;
         assert(num <= 67108863);
@@ -6035,10 +6055,10 @@ var require_bn = __commonJS({
         this._strip();
         return isNegNum ? this.ineg() : this;
       };
-      BN26.prototype.divn = function divn(num) {
+      BN27.prototype.divn = function divn(num) {
         return this.clone().idivn(num);
       };
-      BN26.prototype.egcd = function egcd(p2) {
+      BN27.prototype.egcd = function egcd(p2) {
         assert(p2.negative === 0);
         assert(!p2.isZero());
         var x = this;
@@ -6048,10 +6068,10 @@ var require_bn = __commonJS({
         } else {
           x = x.clone();
         }
-        var A2 = new BN26(1);
-        var B = new BN26(0);
-        var C2 = new BN26(0);
-        var D = new BN26(1);
+        var A2 = new BN27(1);
+        var B = new BN27(0);
+        var C2 = new BN27(0);
+        var D = new BN27(1);
         var g2 = 0;
         while (x.isEven() && y.isEven()) {
           x.iushrn(1);
@@ -6101,7 +6121,7 @@ var require_bn = __commonJS({
           gcd: y.iushln(g2)
         };
       };
-      BN26.prototype._invmp = function _invmp(p2) {
+      BN27.prototype._invmp = function _invmp(p2) {
         assert(p2.negative === 0);
         assert(!p2.isZero());
         var a2 = this;
@@ -6111,8 +6131,8 @@ var require_bn = __commonJS({
         } else {
           a2 = a2.clone();
         }
-        var x1 = new BN26(1);
-        var x2 = new BN26(0);
+        var x1 = new BN27(1);
+        var x2 = new BN27(0);
         var delta = b2.clone();
         while (a2.cmpn(1) > 0 && b2.cmpn(1) > 0) {
           for (var i = 0, im = 1; (a2.words[0] & im) === 0 && i < 26; ++i, im <<= 1) ;
@@ -6154,7 +6174,7 @@ var require_bn = __commonJS({
         }
         return res;
       };
-      BN26.prototype.gcd = function gcd(num) {
+      BN27.prototype.gcd = function gcd(num) {
         if (this.isZero()) return num.abs();
         if (num.isZero()) return this.abs();
         var a2 = this.clone();
@@ -6184,19 +6204,19 @@ var require_bn = __commonJS({
         } while (true);
         return b2.iushln(shift);
       };
-      BN26.prototype.invm = function invm(num) {
+      BN27.prototype.invm = function invm(num) {
         return this.egcd(num).a.umod(num);
       };
-      BN26.prototype.isEven = function isEven() {
+      BN27.prototype.isEven = function isEven() {
         return (this.words[0] & 1) === 0;
       };
-      BN26.prototype.isOdd = function isOdd2() {
+      BN27.prototype.isOdd = function isOdd2() {
         return (this.words[0] & 1) === 1;
       };
-      BN26.prototype.andln = function andln(num) {
+      BN27.prototype.andln = function andln(num) {
         return this.words[0] & num;
       };
-      BN26.prototype.bincn = function bincn(bit) {
+      BN27.prototype.bincn = function bincn(bit) {
         assert(typeof bit === "number");
         var r = bit % 26;
         var s = (bit - r) / 26;
@@ -6220,10 +6240,10 @@ var require_bn = __commonJS({
         }
         return this;
       };
-      BN26.prototype.isZero = function isZero() {
+      BN27.prototype.isZero = function isZero() {
         return this.length === 1 && this.words[0] === 0;
       };
-      BN26.prototype.cmpn = function cmpn(num) {
+      BN27.prototype.cmpn = function cmpn(num) {
         var negative = num < 0;
         if (this.negative !== 0 && !negative) return -1;
         if (this.negative === 0 && negative) return 1;
@@ -6242,14 +6262,14 @@ var require_bn = __commonJS({
         if (this.negative !== 0) return -res | 0;
         return res;
       };
-      BN26.prototype.cmp = function cmp(num) {
+      BN27.prototype.cmp = function cmp(num) {
         if (this.negative !== 0 && num.negative === 0) return -1;
         if (this.negative === 0 && num.negative !== 0) return 1;
         var res = this.ucmp(num);
         if (this.negative !== 0) return -res | 0;
         return res;
       };
-      BN26.prototype.ucmp = function ucmp(num) {
+      BN27.prototype.ucmp = function ucmp(num) {
         if (this.length > num.length) return 1;
         if (this.length < num.length) return -1;
         var res = 0;
@@ -6266,112 +6286,112 @@ var require_bn = __commonJS({
         }
         return res;
       };
-      BN26.prototype.gtn = function gtn(num) {
+      BN27.prototype.gtn = function gtn(num) {
         return this.cmpn(num) === 1;
       };
-      BN26.prototype.gt = function gt(num) {
+      BN27.prototype.gt = function gt(num) {
         return this.cmp(num) === 1;
       };
-      BN26.prototype.gten = function gten(num) {
+      BN27.prototype.gten = function gten(num) {
         return this.cmpn(num) >= 0;
       };
-      BN26.prototype.gte = function gte(num) {
+      BN27.prototype.gte = function gte(num) {
         return this.cmp(num) >= 0;
       };
-      BN26.prototype.ltn = function ltn(num) {
+      BN27.prototype.ltn = function ltn(num) {
         return this.cmpn(num) === -1;
       };
-      BN26.prototype.lt = function lt(num) {
+      BN27.prototype.lt = function lt(num) {
         return this.cmp(num) === -1;
       };
-      BN26.prototype.lten = function lten(num) {
+      BN27.prototype.lten = function lten(num) {
         return this.cmpn(num) <= 0;
       };
-      BN26.prototype.lte = function lte(num) {
+      BN27.prototype.lte = function lte(num) {
         return this.cmp(num) <= 0;
       };
-      BN26.prototype.eqn = function eqn(num) {
+      BN27.prototype.eqn = function eqn(num) {
         return this.cmpn(num) === 0;
       };
-      BN26.prototype.eq = function eq(num) {
+      BN27.prototype.eq = function eq(num) {
         return this.cmp(num) === 0;
       };
-      BN26.red = function red(num) {
+      BN27.red = function red(num) {
         return new Red(num);
       };
-      BN26.prototype.toRed = function toRed(ctx) {
+      BN27.prototype.toRed = function toRed(ctx) {
         assert(!this.red, "Already a number in reduction context");
         assert(this.negative === 0, "red works only with positives");
         return ctx.convertTo(this)._forceRed(ctx);
       };
-      BN26.prototype.fromRed = function fromRed() {
+      BN27.prototype.fromRed = function fromRed() {
         assert(this.red, "fromRed works only with numbers in reduction context");
         return this.red.convertFrom(this);
       };
-      BN26.prototype._forceRed = function _forceRed(ctx) {
+      BN27.prototype._forceRed = function _forceRed(ctx) {
         this.red = ctx;
         return this;
       };
-      BN26.prototype.forceRed = function forceRed(ctx) {
+      BN27.prototype.forceRed = function forceRed(ctx) {
         assert(!this.red, "Already a number in reduction context");
         return this._forceRed(ctx);
       };
-      BN26.prototype.redAdd = function redAdd(num) {
+      BN27.prototype.redAdd = function redAdd(num) {
         assert(this.red, "redAdd works only with red numbers");
         return this.red.add(this, num);
       };
-      BN26.prototype.redIAdd = function redIAdd(num) {
+      BN27.prototype.redIAdd = function redIAdd(num) {
         assert(this.red, "redIAdd works only with red numbers");
         return this.red.iadd(this, num);
       };
-      BN26.prototype.redSub = function redSub(num) {
+      BN27.prototype.redSub = function redSub(num) {
         assert(this.red, "redSub works only with red numbers");
         return this.red.sub(this, num);
       };
-      BN26.prototype.redISub = function redISub(num) {
+      BN27.prototype.redISub = function redISub(num) {
         assert(this.red, "redISub works only with red numbers");
         return this.red.isub(this, num);
       };
-      BN26.prototype.redShl = function redShl(num) {
+      BN27.prototype.redShl = function redShl(num) {
         assert(this.red, "redShl works only with red numbers");
         return this.red.shl(this, num);
       };
-      BN26.prototype.redMul = function redMul(num) {
+      BN27.prototype.redMul = function redMul(num) {
         assert(this.red, "redMul works only with red numbers");
         this.red._verify2(this, num);
         return this.red.mul(this, num);
       };
-      BN26.prototype.redIMul = function redIMul(num) {
+      BN27.prototype.redIMul = function redIMul(num) {
         assert(this.red, "redMul works only with red numbers");
         this.red._verify2(this, num);
         return this.red.imul(this, num);
       };
-      BN26.prototype.redSqr = function redSqr() {
+      BN27.prototype.redSqr = function redSqr() {
         assert(this.red, "redSqr works only with red numbers");
         this.red._verify1(this);
         return this.red.sqr(this);
       };
-      BN26.prototype.redISqr = function redISqr() {
+      BN27.prototype.redISqr = function redISqr() {
         assert(this.red, "redISqr works only with red numbers");
         this.red._verify1(this);
         return this.red.isqr(this);
       };
-      BN26.prototype.redSqrt = function redSqrt() {
+      BN27.prototype.redSqrt = function redSqrt() {
         assert(this.red, "redSqrt works only with red numbers");
         this.red._verify1(this);
         return this.red.sqrt(this);
       };
-      BN26.prototype.redInvm = function redInvm() {
+      BN27.prototype.redInvm = function redInvm() {
         assert(this.red, "redInvm works only with red numbers");
         this.red._verify1(this);
         return this.red.invm(this);
       };
-      BN26.prototype.redNeg = function redNeg() {
+      BN27.prototype.redNeg = function redNeg() {
         assert(this.red, "redNeg works only with red numbers");
         this.red._verify1(this);
         return this.red.neg(this);
       };
-      BN26.prototype.redPow = function redPow(num) {
+      BN27.prototype.redPow = function redPow(num) {
         assert(this.red && !num.red, "redPow(normalNum)");
         this.red._verify1(this);
         return this.red.pow(this, num);
@@ -6384,13 +6404,13 @@ var require_bn = __commonJS({
       };
       function MPrime(name, p2) {
         this.name = name;
-        this.p = new BN26(p2, 16);
+        this.p = new BN27(p2, 16);
         this.n = this.p.bitLength();
-        this.k = new BN26(1).iushln(this.n).isub(this.p);
+        this.k = new BN27(1).iushln(this.n).isub(this.p);
         this.tmp = this._tmp();
       }
       MPrime.prototype._tmp = function _tmp() {
-        var tmp = new BN26(null);
+        var tmp = new BN27(null);
         tmp.words = new Array(Math.ceil(this.n / 13));
         return tmp;
       };
@@ -6516,7 +6536,7 @@ var require_bn = __commonJS({
         }
         return num;
       };
-      BN26._prime = function prime(name) {
+      BN27._prime = function prime(name) {
         if (primes[name]) return primes[name];
         var prime2;
         if (name === "k256") {
@@ -6535,7 +6555,7 @@ var require_bn = __commonJS({
       };
       function Red(m) {
         if (typeof m === "string") {
-          var prime = BN26._prime(m);
+          var prime = BN27._prime(m);
           this.m = prime.p;
           this.prime = prime;
         } else {
@@ -6621,8 +6641,8 @@ var require_bn = __commonJS({
         var mod3 = this.m.andln(3);
         assert(mod3 % 2 === 1);
         if (mod3 === 3) {
-          var pow = this.m.add(new BN26(1)).iushrn(2);
-          return this.pow(a2, pow);
+          var pow2 = this.m.add(new BN27(1)).iushrn(2);
+          return this.pow(a2, pow2);
         }
         var q2 = this.m.subn(1);
         var s = 0;
@@ -6631,11 +6651,11 @@ var require_bn = __commonJS({
           q2.iushrn(1);
         }
         assert(!q2.isZero());
-        var one = new BN26(1).toRed(this);
+        var one = new BN27(1).toRed(this);
         var nOne = one.redNeg();
         var lpow = this.m.subn(1).iushrn(1);
         var z = this.m.bitLength();
-        z = new BN26(2 * z * z).toRed(this);
+        z = new BN27(2 * z * z).toRed(this);
         while (this.pow(z, lpow).cmp(nOne) !== 0) {
           z.redIAdd(nOne);
         }
@@ -6649,7 +6669,7 @@ var require_bn = __commonJS({
             tmp = tmp.redSqr();
           }
           assert(i < m);
-          var b2 = this.pow(c, new BN26(1).iushln(m - i - 1));
+          var b2 = this.pow(c, new BN27(1).iushln(m - i - 1));
           r = r.redMul(b2);
           c = b2.redSqr();
           t = t.redMul(c);
@@ -6658,20 +6678,20 @@ var require_bn = __commonJS({
         return r;
       };
       Red.prototype.invm = function invm(a2) {
-        var inv = a2._invmp(this.m);
-        if (inv.negative !== 0) {
-          inv.negative = 0;
-          return this.imod(inv).redNeg();
+        var inv2 = a2._invmp(this.m);
+        if (inv2.negative !== 0) {
+          inv2.negative = 0;
+          return this.imod(inv2).redNeg();
         } else {
-          return this.imod(inv);
+          return this.imod(inv2);
         }
       };
-      Red.prototype.pow = function pow(a2, num) {
-        if (num.isZero()) return new BN26(1).toRed(this);
+      Red.prototype.pow = function pow2(a2, num) {
+        if (num.isZero()) return new BN27(1).toRed(this);
         if (num.cmpn(1) === 0) return a2.clone();
         var windowSize = 4;
         var wnd = new Array(1 << windowSize);
-        wnd[0] = new BN26(1).toRed(this);
+        wnd[0] = new BN27(1).toRed(this);
         wnd[1] = a2;
         for (var i = 2; i < wnd.length; i++) {
           wnd[i] = this.mul(wnd[i - 1], a2);
@@ -6715,7 +6735,7 @@ var require_bn = __commonJS({
         res.red = null;
         return res;
       };
-      BN26.mont = function mont(num) {
+      BN27.mont = function mont(num) {
         return new Mont(num);
       };
       function Mont(m) {
@@ -6724,7 +6744,7 @@ var require_bn = __commonJS({
         if (this.shift % 26 !== 0) {
           this.shift += 26 - this.shift % 26;
         }
-        this.r = new BN26(1).iushln(this.shift);
+        this.r = new BN27(1).iushln(this.shift);
         this.r2 = this.imod(this.r.sqr());
         this.rinv = this.r._invmp(this.m);
         this.minv = this.rinv.mul(this.r).isubn(1).div(this.m);
@@ -6758,7 +6778,7 @@ var require_bn = __commonJS({
         return res._forceRed(this);
       };
       Mont.prototype.mul = function mul(a2, b2) {
-        if (a2.isZero() || b2.isZero()) return new BN26(0)._forceRed(this);
+        if (a2.isZero() || b2.isZero()) return new BN27(0)._forceRed(this);
         var t = a2.mul(b2);
         var c = t.maskn(this.shift).mul(this.minv).imaskn(this.shift).mul(this.m);
         var u = t.isub(c).iushrn(this.shift);
@@ -6841,7 +6861,7 @@ var require_src = __commonJS({
   "node_modules/@solana/web3.js/node_modules/base-x/src/index.js"(exports, module) {
     "use strict";
     var _Buffer = require_safe_buffer().Buffer;
-    function base2(ALPHABET2) {
+    function base3(ALPHABET2) {
       if (ALPHABET2.length >= 255) {
         throw new TypeError("Alphabet too long");
       }
@@ -6967,7 +6987,7 @@ var require_src = __commonJS({
         decode: decode2
       };
     }
-    module.exports = base2;
+    module.exports = base3;
   }
 });
 
@@ -6999,7 +7019,7 @@ var require_src2 = __commonJS({
   "node_modules/borsh/node_modules/base-x/src/index.js"(exports, module) {
     "use strict";
     var _Buffer = require_safe_buffer().Buffer;
-    function base2(ALPHABET2) {
+    function base3(ALPHABET2) {
       if (ALPHABET2.length >= 255) {
         throw new TypeError("Alphabet too long");
       }
@@ -7125,7 +7145,7 @@ var require_src2 = __commonJS({
         decode: decode2
       };
     }
-    module.exports = base2;
+    module.exports = base3;
   }
 });
 
@@ -7529,17 +7549,17 @@ var require_lib = __commonJS({
       else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
       return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+    var __importStar = exports && exports.__importStar || function(mod2) {
+      if (mod2 && mod2.__esModule) return mod2;
       var result2 = {};
-      if (mod != null) {
-        for (var k2 in mod) if (k2 !== "default" && Object.hasOwnProperty.call(mod, k2)) __createBinding(result2, mod, k2);
+      if (mod2 != null) {
+        for (var k2 in mod2) if (k2 !== "default" && Object.hasOwnProperty.call(mod2, k2)) __createBinding(result2, mod2, k2);
       }
-      __setModuleDefault(result2, mod);
+      __setModuleDefault(result2, mod2);
       return result2;
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.deserializeUnchecked = exports.deserialize = exports.serialize = exports.BinaryReader = exports.BinaryWriter = exports.BorshError = exports.baseDecode = exports.baseEncode = void 0;
@@ -10641,7 +10661,7 @@ var require_index_node2 = __commonJS({
       });
     }
     function addDecoderSentinel(decoder, sentinel) {
-      const read = ((bytes, offset) => {
+      const read2 = ((bytes, offset) => {
         const candidateBytes = offset === 0 ? bytes : bytes.slice(offset);
         const sentinelIndex = findSentinelIndex(candidateBytes, sentinel);
         if (sentinelIndex === -1) {
@@ -10656,12 +10676,12 @@ var require_index_node2 = __commonJS({
         return [decoder.decode(preSentinelBytes), offset + preSentinelBytes.length + sentinel.length];
       });
       if (isFixedSize3(decoder)) {
-        return createDecoder3({ ...decoder, fixedSize: decoder.fixedSize + sentinel.length, read });
+        return createDecoder3({ ...decoder, fixedSize: decoder.fixedSize + sentinel.length, read: read2 });
       }
       return createDecoder3({
         ...decoder,
         ...decoder.maxSize != null ? { maxSize: decoder.maxSize + sentinel.length } : {},
-        read
+        read: read2
       });
     }
     function addCodecSentinel(codec, sentinel) {
@@ -10726,7 +10746,7 @@ var require_index_node2 = __commonJS({
       });
     }
     function addDecoderSizePrefix2(decoder, prefix) {
-      const read = ((bytes, offset) => {
+      const read2 = ((bytes, offset) => {
         const [bigintSize, decoderOffset] = prefix.read(bytes, offset);
         const size = Number(bigintSize);
         offset = decoderOffset;
@@ -10737,12 +10757,12 @@ var require_index_node2 = __commonJS({
         return [decoder.decode(bytes), offset + size];
       });
       if (isFixedSize3(prefix) && isFixedSize3(decoder)) {
-        return createDecoder3({ ...decoder, fixedSize: prefix.fixedSize + decoder.fixedSize, read });
+        return createDecoder3({ ...decoder, fixedSize: prefix.fixedSize + decoder.fixedSize, read: read2 });
       }
       const prefixMaxSize = isFixedSize3(prefix) ? prefix.fixedSize : prefix.maxSize ?? null;
       const decoderMaxSize = isFixedSize3(decoder) ? decoder.fixedSize : decoder.maxSize ?? null;
       const maxSize = prefixMaxSize !== null && decoderMaxSize !== null ? prefixMaxSize + decoderMaxSize : null;
-      return createDecoder3({ ...decoder, ...maxSize !== null ? { maxSize } : {}, read });
+      return createDecoder3({ ...decoder, ...maxSize !== null ? { maxSize } : {}, read: read2 });
     }
     function addCodecSizePrefix2(codec, prefix) {
       return combineCodec3(addEncoderSizePrefix2(codec, prefix), addDecoderSizePrefix2(codec, prefix));
@@ -11361,8 +11381,8 @@ var require_dist = __commonJS({
         constructor(failure, failures) {
           let cached2;
           const { message, explanation, ...rest } = failure;
-          const { path: path10 } = failure;
-          const msg = path10.length === 0 ? message : `At path: ${path10.join(".")} -- ${message}`;
+          const { path: path11 } = failure;
+          const msg = path11.length === 0 ? message : `At path: ${path11.join(".")} -- ${message}`;
           super(explanation ?? msg);
           if (explanation != null)
             this.cause = msg;
@@ -11407,15 +11427,15 @@ var require_dist = __commonJS({
         } else if (typeof result2 === "string") {
           result2 = { message: result2 };
         }
-        const { path: path10, branch } = context;
+        const { path: path11, branch } = context;
         const { type: type2 } = struct62;
         const { refinement, message = `Expected a value of type \`${type2}\`${refinement ? ` with refinement \`${refinement}\`` : ""}, but received: \`${print(value)}\`` } = result2;
         return {
           value,
           type: type2,
           refinement,
-          key: path10[path10.length - 1],
-          path: path10,
+          key: path11[path11.length - 1],
+          path: path11,
           branch,
           ...result2,
           message
@@ -11433,8 +11453,8 @@ var require_dist = __commonJS({
         }
       }
       function* run(value, struct62, options = {}) {
-        const { path: path10 = [], branch = [value], coerce: coerce2 = false, mask: mask2 = false } = options;
-        const ctx = { path: path10, branch, mask: mask2 };
+        const { path: path11 = [], branch = [value], coerce: coerce2 = false, mask: mask2 = false } = options;
+        const ctx = { path: path11, branch, mask: mask2 };
         if (coerce2) {
           value = struct62.coercer(value, ctx);
         }
@@ -11446,7 +11466,7 @@ var require_dist = __commonJS({
         }
         for (let [k2, v2, s] of struct62.entries(value, ctx)) {
           const ts = run(v2, s, {
-            path: k2 === void 0 ? path10 : [...path10, k2],
+            path: k2 === void 0 ? path11 : [...path11, k2],
             branch: k2 === void 0 ? branch : [...branch, v2],
             coerce: coerce2,
             mask: mask2,
@@ -13376,14 +13396,14 @@ var require_url_state_machine = __commonJS({
       return url.replace(/\u0009|\u000A|\u000D/g, "");
     }
     function shortenPath(url) {
-      const path10 = url.path;
-      if (path10.length === 0) {
+      const path11 = url.path;
+      if (path11.length === 0) {
         return;
       }
-      if (url.scheme === "file" && path10.length === 1 && isNormalizedWindowsDriveLetter(path10[0])) {
+      if (url.scheme === "file" && path11.length === 1 && isNormalizedWindowsDriveLetter(path11[0])) {
         return;
       }
-      path10.pop();
+      path11.pop();
     }
     function includesCredentials(url) {
       return url.username !== "" || url.password !== "";
@@ -13394,10 +13414,10 @@ var require_url_state_machine = __commonJS({
     function isNormalizedWindowsDriveLetter(string) {
       return /^[A-Za-z]:$/.test(string);
     }
-    function URLStateMachine(input, base2, encodingOverride, url, stateOverride) {
+    function URLStateMachine(input, base3, encodingOverride, url, stateOverride) {
       this.pointer = 0;
       this.input = input;
-      this.base = base2 || null;
+      this.base = base3 || null;
       this.encodingOverride = encodingOverride || "utf-8";
       this.stateOverride = stateOverride;
       this.url = url;
@@ -14066,10 +14086,10 @@ var require_URL_impl = __commonJS({
     exports.implementation = class URLImpl {
       constructor(constructorArgs) {
         const url = constructorArgs[0];
-        const base2 = constructorArgs[1];
+        const base3 = constructorArgs[1];
         let parsedBase = null;
-        if (base2 !== void 0) {
-          parsedBase = usm.basicURLParse(base2);
+        if (base3 !== void 0) {
+          parsedBase = usm.basicURLParse(base3);
           if (parsedBase === "failure") {
             throw new TypeError("Invalid base URL");
           }
@@ -14703,7 +14723,7 @@ var require_lib3 = __commonJS({
       let accum = [];
       let accumBytes = 0;
       let abort = false;
-      return new Body.Promise(function(resolve, reject) {
+      return new Body.Promise(function(resolve2, reject) {
         let resTimeout;
         if (_this4.timeout) {
           resTimeout = setTimeout(function() {
@@ -14737,7 +14757,7 @@ var require_lib3 = __commonJS({
           }
           clearTimeout(resTimeout);
           try {
-            resolve(Buffer.concat(accum, accumBytes));
+            resolve2(Buffer.concat(accum, accumBytes));
           } catch (err) {
             reject(new FetchError(`Could not create Buffer from response body for ${_this4.url}: ${err.message}`, "system", err));
           }
@@ -15412,7 +15432,7 @@ var require_lib3 = __commonJS({
         throw new Error("native promise missing, set fetch.Promise to your favorite alternative");
       }
       Body.Promise = fetch2.Promise;
-      return new fetch2.Promise(function(resolve, reject) {
+      return new fetch2.Promise(function(resolve2, reject) {
         const request2 = new Request(url, opts);
         const options = getNodeRequestOptions(request2);
         const send = (options.protocol === "https:" ? https : http).request;
@@ -15545,7 +15565,7 @@ var require_lib3 = __commonJS({
                   requestOpts.body = void 0;
                   requestOpts.headers.delete("content-length");
                 }
-                resolve(fetch2(new Request(locationURL, requestOpts)));
+                resolve2(fetch2(new Request(locationURL, requestOpts)));
                 finalize();
                 return;
             }
@@ -15566,7 +15586,7 @@ var require_lib3 = __commonJS({
           const codings = headers.get("Content-Encoding");
           if (!request2.compress || request2.method === "HEAD" || codings === null || res.statusCode === 204 || res.statusCode === 304) {
             response = new Response(body, response_options);
-            resolve(response);
+            resolve2(response);
             return;
           }
           const zlibOptions = {
@@ -15576,7 +15596,7 @@ var require_lib3 = __commonJS({
           if (codings == "gzip" || codings == "x-gzip") {
             body = body.pipe(zlib.createGunzip(zlibOptions));
             response = new Response(body, response_options);
-            resolve(response);
+            resolve2(response);
             return;
           }
           if (codings == "deflate" || codings == "x-deflate") {
@@ -15588,12 +15608,12 @@ var require_lib3 = __commonJS({
                 body = body.pipe(zlib.createInflateRaw());
               }
               response = new Response(body, response_options);
-              resolve(response);
+              resolve2(response);
             });
             raw.on("end", function() {
               if (!response) {
                 response = new Response(body, response_options);
-                resolve(response);
+                resolve2(response);
               }
             });
             return;
@@ -15601,11 +15621,11 @@ var require_lib3 = __commonJS({
           if (codings == "br" && typeof zlib.createBrotliDecompress === "function") {
             body = body.pipe(zlib.createBrotliDecompress());
             response = new Response(body, response_options);
-            resolve(response);
+            resolve2(response);
             return;
           }
           response = new Response(body, response_options);
-          resolve(response);
+          resolve2(response);
         });
         writeToStream(req, request2);
       });
@@ -15678,8 +15698,8 @@ var require_constants = __commonJS({
 // node_modules/node-gyp-build/node-gyp-build.js
 var require_node_gyp_build = __commonJS({
   "node_modules/node-gyp-build/node-gyp-build.js"(exports, module) {
-    var fs16 = __require("fs");
-    var path10 = __require("path");
+    var fs18 = __require("fs");
+    var path11 = __require("path");
     var os3 = __require("os");
     var runtimeRequire = typeof __webpack_require__ === "function" ? __non_webpack_require__ : __require;
     var vars = process.config && process.config.variables || {};
@@ -15691,26 +15711,26 @@ var require_node_gyp_build = __commonJS({
     var libc = process.env.LIBC || (isAlpine(platform) ? "musl" : "glibc");
     var armv = process.env.ARM_VERSION || (arch === "arm64" ? "8" : vars.arm_version) || "";
     var uv = (process.versions.uv || "").split(".")[0];
-    module.exports = load;
-    function load(dir) {
-      return runtimeRequire(load.resolve(dir));
+    module.exports = load2;
+    function load2(dir) {
+      return runtimeRequire(load2.resolve(dir));
     }
-    load.resolve = load.path = function(dir) {
-      dir = path10.resolve(dir || ".");
+    load2.resolve = load2.path = function(dir) {
+      dir = path11.resolve(dir || ".");
       try {
-        var name = runtimeRequire(path10.join(dir, "package.json")).name.toUpperCase().replace(/-/g, "_");
+        var name = runtimeRequire(path11.join(dir, "package.json")).name.toUpperCase().replace(/-/g, "_");
         if (process.env[name + "_PREBUILD"]) dir = process.env[name + "_PREBUILD"];
       } catch (err) {
       }
       if (!prebuildsOnly) {
-        var release2 = getFirst(path10.join(dir, "build/Release"), matchBuild);
+        var release2 = getFirst(path11.join(dir, "build/Release"), matchBuild);
         if (release2) return release2;
-        var debug = getFirst(path10.join(dir, "build/Debug"), matchBuild);
+        var debug = getFirst(path11.join(dir, "build/Debug"), matchBuild);
         if (debug) return debug;
       }
-      var prebuild = resolve(dir);
+      var prebuild = resolve2(dir);
       if (prebuild) return prebuild;
-      var nearby = resolve(path10.dirname(process.execPath));
+      var nearby = resolve2(path11.dirname(process.execPath));
       if (nearby) return nearby;
       var target = [
         "platform=" + platform,
@@ -15726,27 +15746,27 @@ var require_node_gyp_build = __commonJS({
         // eslint-disable-line
       ].filter(Boolean).join(" ");
       throw new Error("No native build was found for " + target + "\n    loaded from: " + dir + "\n");
-      function resolve(dir2) {
-        var tuples = readdirSync(path10.join(dir2, "prebuilds")).map(parseTuple);
+      function resolve2(dir2) {
+        var tuples = readdirSync(path11.join(dir2, "prebuilds")).map(parseTuple);
         var tuple = tuples.filter(matchTuple(platform, arch)).sort(compareTuples)[0];
         if (!tuple) return;
-        var prebuilds = path10.join(dir2, "prebuilds", tuple.name);
+        var prebuilds = path11.join(dir2, "prebuilds", tuple.name);
         var parsed = readdirSync(prebuilds).map(parseTags);
         var candidates = parsed.filter(matchTags(runtime, abi));
         var winner = candidates.sort(compareTags(runtime))[0];
-        if (winner) return path10.join(prebuilds, winner.file);
+        if (winner) return path11.join(prebuilds, winner.file);
       }
     };
     function readdirSync(dir) {
       try {
-        return fs16.readdirSync(dir);
+        return fs18.readdirSync(dir);
       } catch (err) {
         return [];
       }
     }
     function getFirst(dir, filter) {
       var files = readdirSync(dir).filter(filter);
-      return files[0] && path10.join(dir, files[0]);
+      return files[0] && path11.join(dir, files[0]);
     }
     function matchBuild(name) {
       return /\.node$/.test(name);
@@ -15833,14 +15853,14 @@ var require_node_gyp_build = __commonJS({
       return typeof window !== "undefined" && window.process && window.process.type === "renderer";
     }
     function isAlpine(platform2) {
-      return platform2 === "linux" && fs16.existsSync("/etc/alpine-release");
+      return platform2 === "linux" && fs18.existsSync("/etc/alpine-release");
     }
-    load.parseTags = parseTags;
-    load.matchTags = matchTags;
-    load.compareTags = compareTags;
-    load.parseTuple = parseTuple;
-    load.matchTuple = matchTuple;
-    load.compareTuples = compareTuples;
+    load2.parseTags = parseTags;
+    load2.matchTags = matchTags;
+    load2.compareTags = compareTags;
+    load2.parseTuple = parseTuple;
+    load2.matchTuple = matchTuple;
+    load2.compareTuples = compareTuples;
   }
 });
 
@@ -20396,7 +20416,7 @@ var require_dist2 = __commonJS({
           ws_opts = timeout;
           timeout = null;
         }
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve2, reject) => {
           if (!this.ready) return reject(new Error("socket not ready"));
           const rpc_id = this.generate_request_id(method, params);
           const message = {
@@ -20407,7 +20427,7 @@ var require_dist2 = __commonJS({
           };
           this.socket.send(this.dataPack.encode(message), ws_opts, (error) => {
             if (error) return reject(error);
-            this.queue[rpc_id] = { promise: [resolve, reject] };
+            this.queue[rpc_id] = { promise: [resolve2, reject] };
             if (timeout) {
               this.queue[rpc_id].timeout = setTimeout(() => {
                 delete this.queue[rpc_id];
@@ -20444,7 +20464,7 @@ var require_dist2 = __commonJS({
       * @return {Promise}
       */
       notify(method, params) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve2, reject) => {
           if (!this.ready) return reject(new Error("socket not ready"));
           const message = {
             jsonrpc: "2.0",
@@ -20453,7 +20473,7 @@ var require_dist2 = __commonJS({
           };
           this.socket.send(this.dataPack.encode(message), (error) => {
             if (error) return reject(error);
-            resolve();
+            resolve2();
           });
         });
       }
@@ -20923,11 +20943,11 @@ var require_dist2 = __commonJS({
       * @return {Promise}
       */
       close() {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve2, reject) => {
           try {
             this.wss.close();
             this.emit("close");
-            resolve();
+            resolve2();
           } catch (error) {
             reject(error);
           }
@@ -21844,9 +21864,9 @@ var require_weierstrass = __commonJS({
           return new Point(x, y, Fp.ONE);
         }
         static fromBytes(bytes) {
-          const P3 = Point.fromAffine(decodePoint((0, utils_ts_1._abytes2)(bytes, void 0, "point")));
-          P3.assertValidity();
-          return P3;
+          const P4 = Point.fromAffine(decodePoint((0, utils_ts_1._abytes2)(bytes, void 0, "point")));
+          P4.assertValidity();
+          return P4;
         }
         static fromHex(hex2) {
           return Point.fromBytes((0, utils_ts_1.ensureBytes)("pointHex", hex2));
@@ -22542,7 +22562,7 @@ var require_weierstrass = __commonJS({
         if (sig === false)
           return false;
         try {
-          const P3 = Point.fromBytes(publicKey2);
+          const P4 = Point.fromBytes(publicKey2);
           if (lowS && sig.hasHighS())
             return false;
           const { r, s } = sig;
@@ -22550,7 +22570,7 @@ var require_weierstrass = __commonJS({
           const is = Fn.inv(s);
           const u1 = Fn.create(h2 * is);
           const u2 = Fn.create(r * is);
-          const R2 = Point.BASE.multiplyUnsafe(u1).add(P3.multiplyUnsafe(u2));
+          const R2 = Point.BASE.multiplyUnsafe(u1).add(P4.multiplyUnsafe(u2));
           if (R2.is0())
             return false;
           const v2 = Fn.create(R2.x);
@@ -22713,23 +22733,23 @@ var require_secp256k1 = __commonJS({
     var _1n = /* @__PURE__ */ BigInt(1);
     var _2n = /* @__PURE__ */ BigInt(2);
     function sqrtMod(y) {
-      const P3 = secp256k1_CURVE.p;
+      const P4 = secp256k1_CURVE.p;
       const _3n = BigInt(3), _6n = BigInt(6), _11n = BigInt(11), _22n = BigInt(22);
       const _23n = BigInt(23), _44n = BigInt(44), _88n = BigInt(88);
-      const b2 = y * y * y % P3;
-      const b3 = b2 * b2 * y % P3;
-      const b6 = (0, modular_ts_1.pow2)(b3, _3n, P3) * b3 % P3;
-      const b9 = (0, modular_ts_1.pow2)(b6, _3n, P3) * b3 % P3;
-      const b11 = (0, modular_ts_1.pow2)(b9, _2n, P3) * b2 % P3;
-      const b22 = (0, modular_ts_1.pow2)(b11, _11n, P3) * b11 % P3;
-      const b44 = (0, modular_ts_1.pow2)(b22, _22n, P3) * b22 % P3;
-      const b88 = (0, modular_ts_1.pow2)(b44, _44n, P3) * b44 % P3;
-      const b176 = (0, modular_ts_1.pow2)(b88, _88n, P3) * b88 % P3;
-      const b220 = (0, modular_ts_1.pow2)(b176, _44n, P3) * b44 % P3;
-      const b223 = (0, modular_ts_1.pow2)(b220, _3n, P3) * b3 % P3;
-      const t1 = (0, modular_ts_1.pow2)(b223, _23n, P3) * b22 % P3;
-      const t2 = (0, modular_ts_1.pow2)(t1, _6n, P3) * b2 % P3;
-      const root = (0, modular_ts_1.pow2)(t2, _2n, P3);
+      const b2 = y * y * y % P4;
+      const b3 = b2 * b2 * y % P4;
+      const b6 = (0, modular_ts_1.pow2)(b3, _3n, P4) * b3 % P4;
+      const b9 = (0, modular_ts_1.pow2)(b6, _3n, P4) * b3 % P4;
+      const b11 = (0, modular_ts_1.pow2)(b9, _2n, P4) * b2 % P4;
+      const b22 = (0, modular_ts_1.pow2)(b11, _11n, P4) * b11 % P4;
+      const b44 = (0, modular_ts_1.pow2)(b22, _22n, P4) * b22 % P4;
+      const b88 = (0, modular_ts_1.pow2)(b44, _44n, P4) * b44 % P4;
+      const b176 = (0, modular_ts_1.pow2)(b88, _88n, P4) * b88 % P4;
+      const b220 = (0, modular_ts_1.pow2)(b176, _44n, P4) * b44 % P4;
+      const b223 = (0, modular_ts_1.pow2)(b220, _3n, P4) * b3 % P4;
+      const t1 = (0, modular_ts_1.pow2)(b223, _23n, P4) * b22 % P4;
+      const t2 = (0, modular_ts_1.pow2)(t1, _6n, P4) * b2 % P4;
+      const root = (0, modular_ts_1.pow2)(t2, _2n, P4);
       if (!Fpk1.eql(Fpk1.sqr(root), y))
         throw new Error("Cannot find square root");
       return root;
@@ -22798,15 +22818,15 @@ var require_secp256k1 = __commonJS({
       const m = (0, utils_ts_1.ensureBytes)("message", message);
       const pub = (0, utils_ts_1.ensureBytes)("publicKey", publicKey2, 32);
       try {
-        const P3 = lift_x(num(pub));
+        const P4 = lift_x(num(pub));
         const r = num(sig.subarray(0, 32));
         if (!(0, utils_ts_1.inRange)(r, _1n, secp256k1_CURVE.p))
           return false;
         const s = num(sig.subarray(32, 64));
         if (!(0, utils_ts_1.inRange)(s, _1n, secp256k1_CURVE.n))
           return false;
-        const e3 = challenge(Fn.toBytes(r), pointToBytes(P3), m);
-        const R2 = BASE5.multiplyUnsafe(s).add(P3.multiplyUnsafe(Fn.neg(e3)));
+        const e3 = challenge(Fn.toBytes(r), pointToBytes(P4), m);
+        const R2 = BASE5.multiplyUnsafe(s).add(P4.multiplyUnsafe(Fn.neg(e3)));
         const { x, y } = R2.toAffine();
         if (R2.is0() || !hasEven(y) || x !== r)
           return false;
@@ -22911,7 +22931,7 @@ var require_index_cjs = __commonJS({
     "use strict";
     var buffer = __require("buffer");
     var ed25519 = require_ed25519();
-    var BN26 = require_bn();
+    var BN27 = require_bn();
     var bs582 = require_bs58();
     var sha2562 = require_sha256();
     var borsh = require_lib();
@@ -22948,7 +22968,7 @@ var require_index_cjs = __commonJS({
       n.default = e3;
       return Object.freeze(n);
     }
-    var BN__default = /* @__PURE__ */ _interopDefaultCompat(BN26);
+    var BN__default = /* @__PURE__ */ _interopDefaultCompat(BN27);
     var bs58__default = /* @__PURE__ */ _interopDefaultCompat(bs582);
     var BufferLayout__namespace = /* @__PURE__ */ _interopNamespaceCompat(BufferLayout);
     var require$$0__default = /* @__PURE__ */ _interopDefaultCompat(require$$0);
@@ -23022,7 +23042,7 @@ var require_index_cjs = __commonJS({
       return value._bn !== void 0;
     }
     var uniquePublicKeyCounter = 1;
-    var PublicKey41 = class _PublicKey2 extends Struct {
+    var PublicKey44 = class _PublicKey2 extends Struct {
       /**
        * Create a new PublicKey object
        * @param value ed25519 public key as buffer or base-58 encoded string
@@ -23184,9 +23204,9 @@ var require_index_cjs = __commonJS({
         return isOnCurve(pubkey.toBytes());
       }
     };
-    _PublicKey = PublicKey41;
-    PublicKey41.default = new _PublicKey("11111111111111111111111111111111");
-    SOLANA_SCHEMA.set(PublicKey41, {
+    _PublicKey = PublicKey44;
+    PublicKey44.default = new _PublicKey("11111111111111111111111111111111");
+    SOLANA_SCHEMA.set(PublicKey44, {
       kind: "struct",
       fields: [["_bn", "u256"]]
     });
@@ -23218,7 +23238,7 @@ var require_index_cjs = __commonJS({
        * The public key for this account
        */
       get publicKey() {
-        return new PublicKey41(this._publicKey);
+        return new PublicKey44(this._publicKey);
       }
       /**
        * The **unencrypted** secret key for this account. The first 32 bytes
@@ -23229,7 +23249,7 @@ var require_index_cjs = __commonJS({
         return buffer.Buffer.concat([this._secretKey, this._publicKey], 64);
       }
     };
-    var BPF_LOADER_DEPRECATED_PROGRAM_ID = new PublicKey41("BPFLoader1111111111111111111111111111111111");
+    var BPF_LOADER_DEPRECATED_PROGRAM_ID = new PublicKey44("BPFLoader1111111111111111111111111111111111");
     var PACKET_DATA_SIZE = 1280 - 40 - 8;
     var VERSION_PREFIX_MASK = 127;
     var SIGNATURE_LENGTH_IN_BYTES = 64;
@@ -23462,7 +23482,7 @@ var require_index_cjs = __commonJS({
           const [payerAddress] = writableSigners[0];
           assert(payerAddress === this.payer.toBase58(), "Expected first writable signer key to be the fee payer");
         }
-        const staticAccountKeys = [...writableSigners.map(([address]) => new PublicKey41(address)), ...readonlySigners.map(([address]) => new PublicKey41(address)), ...writableNonSigners.map(([address]) => new PublicKey41(address)), ...readonlyNonSigners.map(([address]) => new PublicKey41(address))];
+        const staticAccountKeys = [...writableSigners.map(([address]) => new PublicKey44(address)), ...readonlySigners.map(([address]) => new PublicKey44(address)), ...writableNonSigners.map(([address]) => new PublicKey44(address)), ...readonlyNonSigners.map(([address]) => new PublicKey44(address))];
         return [header, staticAccountKeys];
       }
       extractTableLookup(lookupTable) {
@@ -23486,7 +23506,7 @@ var require_index_cjs = __commonJS({
         const drainedKeys = new Array();
         for (const [address, keyMeta] of this.keyMetaMap.entries()) {
           if (keyMetaFilter(keyMeta)) {
-            const key = new PublicKey41(address);
+            const key = new PublicKey44(address);
             const lookupTableIndex = lookupTableEntries.findIndex((entry) => entry.equals(key));
             if (lookupTableIndex >= 0) {
               assert(lookupTableIndex < 256, "Max lookup table index exceeded");
@@ -23521,7 +23541,7 @@ var require_index_cjs = __commonJS({
         this.instructions = void 0;
         this.indexToProgramIds = /* @__PURE__ */ new Map();
         this.header = args.header;
-        this.accountKeys = args.accountKeys.map((account) => new PublicKey41(account));
+        this.accountKeys = args.accountKeys.map((account) => new PublicKey44(account));
         this.recentBlockhash = args.recentBlockhash;
         this.instructions = args.instructions;
         this.instructions.forEach((ix) => this.indexToProgramIds.set(ix.programIdIndex, this.accountKeys[ix.programIdIndex]));
@@ -23647,7 +23667,7 @@ var require_index_cjs = __commonJS({
         let accountKeys = [];
         for (let i = 0; i < accountCount; i++) {
           const account = guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2);
-          accountKeys.push(new PublicKey41(buffer.Buffer.from(account)));
+          accountKeys.push(new PublicKey44(buffer.Buffer.from(account)));
         }
         const recentBlockhash = guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2);
         const instructionCount = decodeLength(byteArray);
@@ -23871,7 +23891,7 @@ var require_index_cjs = __commonJS({
         const staticAccountKeys = [];
         const staticAccountKeysLength = decodeLength(byteArray);
         for (let i = 0; i < staticAccountKeysLength; i++) {
-          staticAccountKeys.push(new PublicKey41(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2)));
+          staticAccountKeys.push(new PublicKey44(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2)));
         }
         const recentBlockhash = bs58__default.default.encode(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2));
         const instructionCount = decodeLength(byteArray);
@@ -23891,7 +23911,7 @@ var require_index_cjs = __commonJS({
         const addressTableLookupsCount = decodeLength(byteArray);
         const addressTableLookups = [];
         for (let i = 0; i < addressTableLookupsCount; i++) {
-          const accountKey = new PublicKey41(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2));
+          const accountKey = new PublicKey44(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2));
           const writableIndexesLength = decodeLength(byteArray);
           const writableIndexes = guardedSplice(byteArray, 0, writableIndexesLength);
           const readonlyIndexesLength = decodeLength(byteArray);
@@ -23997,7 +24017,7 @@ var require_index_cjs = __commonJS({
         const staticAccountKeysLength = guardedShift(byteArray);
         const staticAccountKeys = [];
         for (let i = 0; i < staticAccountKeysLength; i++) {
-          staticAccountKeys.push(new PublicKey41(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2)));
+          staticAccountKeys.push(new PublicKey44(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2)));
         }
         const transactionConfig = {
           computeUnitLimit: null,
@@ -24268,7 +24288,7 @@ var require_index_cjs = __commonJS({
         });
         programIds.forEach((programId) => {
           accountMetas.push({
-            pubkey: new PublicKey41(programId),
+            pubkey: new PublicKey44(programId),
             isSigner: false,
             isWritable: false
           });
@@ -24877,15 +24897,15 @@ Missing signature for public key${sigErrors.missing.length === 1 ? "" : "(s)"} [
     var DEFAULT_TICKS_PER_SLOT = 64;
     var NUM_SLOTS_PER_SECOND = NUM_TICKS_PER_SECOND / DEFAULT_TICKS_PER_SLOT;
     var MS_PER_SLOT = 1e3 / NUM_SLOTS_PER_SECOND;
-    var SYSVAR_CLOCK_PUBKEY2 = new PublicKey41("SysvarC1ock11111111111111111111111111111111");
-    var SYSVAR_EPOCH_SCHEDULE_PUBKEY = new PublicKey41("SysvarEpochSchedu1e111111111111111111111111");
-    var SYSVAR_INSTRUCTIONS_PUBKEY2 = new PublicKey41("Sysvar1nstructions1111111111111111111111111");
-    var SYSVAR_RECENT_BLOCKHASHES_PUBKEY = new PublicKey41("SysvarRecentB1ockHashes11111111111111111111");
-    var SYSVAR_RENT_PUBKEY5 = new PublicKey41("SysvarRent111111111111111111111111111111111");
-    var SYSVAR_REWARDS_PUBKEY = new PublicKey41("SysvarRewards111111111111111111111111111111");
-    var SYSVAR_SLOT_HASHES_PUBKEY = new PublicKey41("SysvarS1otHashes111111111111111111111111111");
-    var SYSVAR_SLOT_HISTORY_PUBKEY = new PublicKey41("SysvarS1otHistory11111111111111111111111111");
-    var SYSVAR_STAKE_HISTORY_PUBKEY = new PublicKey41("SysvarStakeHistory1111111111111111111111111");
+    var SYSVAR_CLOCK_PUBKEY2 = new PublicKey44("SysvarC1ock11111111111111111111111111111111");
+    var SYSVAR_EPOCH_SCHEDULE_PUBKEY = new PublicKey44("SysvarEpochSchedu1e111111111111111111111111");
+    var SYSVAR_INSTRUCTIONS_PUBKEY2 = new PublicKey44("Sysvar1nstructions1111111111111111111111111");
+    var SYSVAR_RECENT_BLOCKHASHES_PUBKEY = new PublicKey44("SysvarRecentB1ockHashes11111111111111111111");
+    var SYSVAR_RENT_PUBKEY5 = new PublicKey44("SysvarRent111111111111111111111111111111111");
+    var SYSVAR_REWARDS_PUBKEY = new PublicKey44("SysvarRewards111111111111111111111111111111");
+    var SYSVAR_SLOT_HASHES_PUBKEY = new PublicKey44("SysvarS1otHashes111111111111111111111111111");
+    var SYSVAR_SLOT_HISTORY_PUBKEY = new PublicKey44("SysvarS1otHistory11111111111111111111111111");
+    var SYSVAR_STAKE_HISTORY_PUBKEY = new PublicKey44("SysvarStakeHistory1111111111111111111111111");
     var SendTransactionError = class extends Error {
       constructor({
         action,
@@ -24935,12 +24955,12 @@ Message: ${transactionMessage}.
       }
       async getLogs(connection) {
         if (!Array.isArray(this.transactionLogs)) {
-          this.transactionLogs = new Promise((resolve, reject) => {
+          this.transactionLogs = new Promise((resolve2, reject) => {
             connection.getTransaction(this.signature).then((tx) => {
               if (tx && tx.meta && tx.meta.logMessages) {
                 const logs = tx.meta.logMessages;
                 this.transactionLogs = logs;
-                resolve(logs);
+                resolve2(logs);
               } else {
                 reject(new Error("Log messages not found"));
               }
@@ -25029,7 +25049,7 @@ Message: ${transactionMessage}.
       return signature2;
     }
     function sleep2(ms2) {
-      return new Promise((resolve) => setTimeout(resolve, ms2));
+      return new Promise((resolve2) => setTimeout(resolve2, ms2));
     }
     function encodeData(type, fields) {
       const allocLength = type.layout.span >= 0 ? type.layout.span : getAlloc(type, fields);
@@ -25076,8 +25096,8 @@ Message: ${transactionMessage}.
       static fromAccountData(buffer2) {
         const nonceAccount = NonceAccountLayout.decode(toBuffer(buffer2), 0);
         return new _NonceAccount({
-          authorizedPubkey: new PublicKey41(nonceAccount.authorizedPubkey),
-          nonce: new PublicKey41(nonceAccount.nonce).toString(),
+          authorizedPubkey: new PublicKey44(nonceAccount.authorizedPubkey),
+          nonce: new PublicKey44(nonceAccount.nonce).toString(),
           feeCalculator: nonceAccount.feeCalculator
         });
       }
@@ -25139,7 +25159,7 @@ Message: ${transactionMessage}.
           newAccountPubkey: instruction.keys[1].pubkey,
           lamports,
           space,
-          programId: new PublicKey41(programId)
+          programId: new PublicKey44(programId)
         };
       }
       /**
@@ -25174,7 +25194,7 @@ Message: ${transactionMessage}.
           toPubkey: instruction.keys[2].pubkey,
           lamports,
           seed,
-          programId: new PublicKey41(programId)
+          programId: new PublicKey44(programId)
         };
       }
       /**
@@ -25198,17 +25218,17 @@ Message: ${transactionMessage}.
         this.checkProgramId(instruction.programId);
         this.checkKeyLength(instruction.keys, 1);
         const {
-          base: base2,
+          base: base3,
           seed,
           space,
           programId
         } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.AllocateWithSeed, instruction.data);
         return {
           accountPubkey: instruction.keys[0].pubkey,
-          basePubkey: new PublicKey41(base2),
+          basePubkey: new PublicKey44(base3),
           seed,
           space,
-          programId: new PublicKey41(programId)
+          programId: new PublicKey44(programId)
         };
       }
       /**
@@ -25222,7 +25242,7 @@ Message: ${transactionMessage}.
         } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.Assign, instruction.data);
         return {
           accountPubkey: instruction.keys[0].pubkey,
-          programId: new PublicKey41(programId)
+          programId: new PublicKey44(programId)
         };
       }
       /**
@@ -25232,15 +25252,15 @@ Message: ${transactionMessage}.
         this.checkProgramId(instruction.programId);
         this.checkKeyLength(instruction.keys, 1);
         const {
-          base: base2,
+          base: base3,
           seed,
           programId
         } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.AssignWithSeed, instruction.data);
         return {
           accountPubkey: instruction.keys[0].pubkey,
-          basePubkey: new PublicKey41(base2),
+          basePubkey: new PublicKey44(base3),
           seed,
-          programId: new PublicKey41(programId)
+          programId: new PublicKey44(programId)
         };
       }
       /**
@@ -25250,7 +25270,7 @@ Message: ${transactionMessage}.
         this.checkProgramId(instruction.programId);
         this.checkKeyLength(instruction.keys, 2);
         const {
-          base: base2,
+          base: base3,
           seed,
           lamports,
           space,
@@ -25259,11 +25279,11 @@ Message: ${transactionMessage}.
         return {
           fromPubkey: instruction.keys[0].pubkey,
           newAccountPubkey: instruction.keys[1].pubkey,
-          basePubkey: new PublicKey41(base2),
+          basePubkey: new PublicKey44(base3),
           seed,
           lamports,
           space,
-          programId: new PublicKey41(programId)
+          programId: new PublicKey44(programId)
         };
       }
       /**
@@ -25277,7 +25297,7 @@ Message: ${transactionMessage}.
         } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.InitializeNonceAccount, instruction.data);
         return {
           noncePubkey: instruction.keys[0].pubkey,
-          authorizedPubkey: new PublicKey41(authorized2)
+          authorizedPubkey: new PublicKey44(authorized2)
         };
       }
       /**
@@ -25320,7 +25340,7 @@ Message: ${transactionMessage}.
         return {
           noncePubkey: instruction.keys[0].pubkey,
           authorizedPubkey: instruction.keys[1].pubkey,
-          newAuthorizedPubkey: new PublicKey41(authorized2)
+          newAuthorizedPubkey: new PublicKey44(authorized2)
         };
       }
       /**
@@ -25729,7 +25749,7 @@ Message: ${transactionMessage}.
         });
       }
     };
-    SystemProgram16.programId = new PublicKey41("11111111111111111111111111111111");
+    SystemProgram16.programId = new PublicKey44("11111111111111111111111111111111");
     var CHUNK_SIZE = PACKET_DATA_SIZE - 300;
     var Loader = class _Loader {
       /**
@@ -25889,14 +25909,14 @@ Message: ${transactionMessage}.
               }
             } catch {
             }
-            await new Promise((resolve) => setTimeout(resolve, Math.round(MS_PER_SLOT / 2)));
+            await new Promise((resolve2) => setTimeout(resolve2, Math.round(MS_PER_SLOT / 2)));
           }
         }
         return true;
       }
     };
     Loader.chunkSize = CHUNK_SIZE;
-    var BPF_LOADER_PROGRAM_ID = new PublicKey41("BPFLoader2111111111111111111111111111111111");
+    var BPF_LOADER_PROGRAM_ID = new PublicKey44("BPFLoader2111111111111111111111111111111111");
     var BpfLoader = class {
       /**
        * Minimum number of signatures required to load a program not including
@@ -26694,8 +26714,8 @@ Message: ${transactionMessage}.
           deactivationSlot: meta.deactivationSlot,
           lastExtendedSlot: meta.lastExtendedSlot,
           lastExtendedSlotStartIndex: meta.lastExtendedStartIndex,
-          authority: meta.authority.length !== 0 ? new PublicKey41(meta.authority[0]) : void 0,
-          addresses: addresses.map((address) => new PublicKey41(address))
+          authority: meta.authority.length !== 0 ? new PublicKey44(meta.authority[0]) : void 0,
+          addresses: addresses.map((address) => new PublicKey44(address))
         };
       }
     };
@@ -26737,7 +26757,7 @@ Message: ${transactionMessage}.
       );
       return `${protocol}//${hostish}${websocketPort}${rest}`;
     }
-    var PublicKeyFromString = superstruct.coerce(superstruct.instance(PublicKey41), superstruct.string(), (value) => new PublicKey41(value));
+    var PublicKeyFromString = superstruct.coerce(superstruct.instance(PublicKey44), superstruct.string(), (value) => new PublicKey44(value));
     var RawAccountDataResult = superstruct.tuple([superstruct.string(), superstruct.literal("base64")]);
     var BufferFromRawAccountData = superstruct.coerce(superstruct.instance(buffer.Buffer), RawAccountDataResult, (value) => buffer.Buffer.from(value[0], "base64"));
     var BLOCKHASH_CACHE_TIMEOUT_MS = 30 * 1e3;
@@ -26822,7 +26842,7 @@ Message: ${transactionMessage}.
       if (version3 === 0) {
         return new MessageV0({
           header: response.header,
-          staticAccountKeys: response.accountKeys.map((accountKey) => new PublicKey41(accountKey)),
+          staticAccountKeys: response.accountKeys.map((accountKey) => new PublicKey44(accountKey)),
           recentBlockhash: response.recentBlockhash,
           compiledInstructions: response.instructions.map((ix) => ({
             programIdIndex: ix.programIdIndex,
@@ -26838,7 +26858,7 @@ Message: ${transactionMessage}.
         }
         return new MessageV1({
           header: response.header,
-          staticAccountKeys: response.accountKeys.map((accountKey) => new PublicKey41(accountKey)),
+          staticAccountKeys: response.accountKeys.map((accountKey) => new PublicKey44(accountKey)),
           recentBlockhash: response.recentBlockhash,
           compiledInstructions: response.instructions.map((ix) => ({
             programIdIndex: ix.programIdIndex,
@@ -26971,9 +26991,9 @@ Message: ${transactionMessage}.
       let fetchWithMiddleware;
       if (fetchMiddleware) {
         fetchWithMiddleware = async (info, init) => {
-          const modifiedFetchArgs = await new Promise((resolve, reject) => {
+          const modifiedFetchArgs = await new Promise((resolve2, reject) => {
             try {
-              fetchMiddleware(info, init, (modifiedInfo, modifiedInit) => resolve([modifiedInfo, modifiedInit]));
+              fetchMiddleware(info, init, (modifiedInfo, modifiedInit) => resolve2([modifiedInfo, modifiedInit]));
             } catch (error) {
               reject(error);
             }
@@ -27028,21 +27048,21 @@ Message: ${transactionMessage}.
     }
     function createRpcRequest(client) {
       return (method, args) => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve2, reject) => {
           client.request(method, args, (err, response) => {
             if (err) {
               reject(err);
               return;
             }
-            resolve(response);
+            resolve2(response);
           });
         });
       };
     }
     function createRpcBatchRequest(client) {
       return (requests) => {
-        return new Promise((resolve, reject) => {
-          if (requests.length === 0) resolve([]);
+        return new Promise((resolve2, reject) => {
+          if (requests.length === 0) resolve2([]);
           const batch = requests.map((params) => {
             return client.request(params.methodName, params.args);
           });
@@ -27051,7 +27071,7 @@ Message: ${transactionMessage}.
               reject(err);
               return;
             }
-            resolve(response);
+            resolve2(response);
           });
         });
       };
@@ -27510,7 +27530,7 @@ Message: ${transactionMessage}.
     var COMMON_HTTP_HEADERS = {
       "solana-client": `js/${"1.99.0"}`
     };
-    var Connection6 = class {
+    var Connection7 = class {
       /**
        * Establish a JSON RPC connection
        *
@@ -28020,7 +28040,7 @@ Message: ${transactionMessage}.
         let signatureSubscriptionId;
         let disposeSignatureSubscriptionStateChangeObserver;
         let done = false;
-        const confirmationPromise = new Promise((resolve, reject) => {
+        const confirmationPromise = new Promise((resolve2, reject) => {
           try {
             signatureSubscriptionId = this.onSignature(signature2, (result2, context) => {
               signatureSubscriptionId = void 0;
@@ -28028,7 +28048,7 @@ Message: ${transactionMessage}.
                 context,
                 value: result2
               };
-              resolve({
+              resolve2({
                 __type: TransactionStatus.PROCESSED,
                 response
               });
@@ -28084,7 +28104,7 @@ Message: ${transactionMessage}.
                   case "recent":
                 }
                 done = true;
-                resolve({
+                resolve2({
                   __type: TransactionStatus.PROCESSED,
                   response: {
                     context,
@@ -28121,7 +28141,7 @@ Message: ${transactionMessage}.
         }
       }) {
         let done = false;
-        const expiryPromise = new Promise((resolve) => {
+        const expiryPromise = new Promise((resolve2) => {
           const checkBlockHeight = async () => {
             try {
               const blockHeight2 = await this.getBlockHeight(commitment);
@@ -28139,7 +28159,7 @@ Message: ${transactionMessage}.
               currentBlockHeight = await checkBlockHeight();
               if (done) return;
             }
-            resolve({
+            resolve2({
               __type: TransactionStatus.BLOCKHEIGHT_EXCEEDED
             });
           })();
@@ -28177,7 +28197,7 @@ Message: ${transactionMessage}.
         }
       }) {
         let done = false;
-        const expiryPromise = new Promise((resolve) => {
+        const expiryPromise = new Promise((resolve2) => {
           let currentNonceValue = nonceValue;
           let lastCheckedSlot = null;
           const getCurrentNonceValue = async () => {
@@ -28200,7 +28220,7 @@ Message: ${transactionMessage}.
             if (done) return;
             while (true) {
               if (nonceValue !== currentNonceValue) {
-                resolve({
+                resolve2({
                   __type: TransactionStatus.NONCE_INVALID,
                   slotInWhichNonceDidAdvance: lastCheckedSlot
                 });
@@ -28291,7 +28311,7 @@ Message: ${transactionMessage}.
         signature: signature2
       }) {
         let timeoutId;
-        const expiryPromise = new Promise((resolve) => {
+        const expiryPromise = new Promise((resolve2) => {
           let timeoutMs = this._confirmTransactionInitialTimeout || 60 * 1e3;
           switch (commitment) {
             case "processed":
@@ -28303,7 +28323,7 @@ Message: ${transactionMessage}.
               break;
             }
           }
-          timeoutId = setTimeout(() => resolve({
+          timeoutId = setTimeout(() => resolve2({
             __type: TransactionStatus.TIMED_OUT,
             timeoutMs
           }), timeoutMs);
@@ -30286,7 +30306,7 @@ Message: ${transactionMessage}.
        * @returns {PublicKey} PublicKey
        */
       get publicKey() {
-        return new PublicKey41(this._keypair.publicKey);
+        return new PublicKey44(this._keypair.publicKey);
       }
       /**
        * The raw secret key for this keypair
@@ -30364,7 +30384,7 @@ Message: ${transactionMessage}.
           lookupTable: instruction.keys[0].pubkey,
           authority: instruction.keys[1].pubkey,
           payer: instruction.keys.length > 2 ? instruction.keys[2].pubkey : void 0,
-          addresses: addresses.map((buffer2) => new PublicKey41(buffer2))
+          addresses: addresses.map((buffer2) => new PublicKey44(buffer2))
         };
       }
       static decodeCloseLookupTable(instruction) {
@@ -30416,7 +30436,7 @@ Message: ${transactionMessage}.
       constructor() {
       }
       static createLookupTable(params) {
-        const [lookupTableAddress, bumpSeed] = PublicKey41.findProgramAddressSync([params.authority.toBuffer(), codecsNumbers.getU64Encoder().encode(params.recentSlot)], this.programId);
+        const [lookupTableAddress, bumpSeed] = PublicKey44.findProgramAddressSync([params.authority.toBuffer(), codecsNumbers.getU64Encoder().encode(params.recentSlot)], this.programId);
         const type = LOOKUP_TABLE_INSTRUCTION_LAYOUTS.CreateLookupTable;
         const data = encodeData(type, {
           recentSlot: BigInt(params.recentSlot),
@@ -30535,7 +30555,7 @@ Message: ${transactionMessage}.
         });
       }
     };
-    AddressLookupTableProgram.programId = new PublicKey41("AddressLookupTab1e1111111111111111111111111");
+    AddressLookupTableProgram.programId = new PublicKey44("AddressLookupTab1e1111111111111111111111111");
     var ComputeBudgetInstruction = class {
       /**
        * @internal
@@ -30615,7 +30635,7 @@ Message: ${transactionMessage}.
        * @internal
        */
       static checkProgramId(programId) {
-        if (!programId.equals(ComputeBudgetProgram7.programId)) {
+        if (!programId.equals(ComputeBudgetProgram8.programId)) {
           throw new Error("invalid instruction; programId is not ComputeBudgetProgram");
         }
       }
@@ -30638,7 +30658,7 @@ Message: ${transactionMessage}.
         layout: BufferLayout__namespace.struct([BufferLayout__namespace.u8("instruction"), u642("microLamports")])
       }
     });
-    var ComputeBudgetProgram7 = class {
+    var ComputeBudgetProgram8 = class {
       /**
        * @internal
        */
@@ -30689,7 +30709,7 @@ Message: ${transactionMessage}.
         });
       }
     };
-    ComputeBudgetProgram7.programId = new PublicKey41("ComputeBudget111111111111111111111111111111");
+    ComputeBudgetProgram8.programId = new PublicKey44("ComputeBudget111111111111111111111111111111");
     var PRIVATE_KEY_BYTES$1 = 64;
     var PUBLIC_KEY_BYTES$1 = 32;
     var SIGNATURE_BYTES = 64;
@@ -30769,7 +30789,7 @@ Message: ${transactionMessage}.
         }
       }
     };
-    Ed25519Program.programId = new PublicKey41("Ed25519SigVerify111111111111111111111111111");
+    Ed25519Program.programId = new PublicKey44("Ed25519SigVerify111111111111111111111111111");
     var ecdsaSign = (msgHash, privKey) => {
       const signature2 = secp256k1.secp256k1.sign(msgHash, privKey);
       return [signature2.toCompactRawBytes(), signature2.recovery];
@@ -30903,9 +30923,9 @@ Message: ${transactionMessage}.
         }
       }
     };
-    Secp256k1Program.programId = new PublicKey41("KeccakSecp256k11111111111111111111111111111");
+    Secp256k1Program.programId = new PublicKey44("KeccakSecp256k11111111111111111111111111111");
     var _Lockup;
-    var STAKE_CONFIG_ID = new PublicKey41("StakeConfig11111111111111111111111111111111");
+    var STAKE_CONFIG_ID = new PublicKey44("StakeConfig11111111111111111111111111111111");
     var Authorized = class {
       /**
        * Create a new Authorized object
@@ -30936,7 +30956,7 @@ Message: ${transactionMessage}.
        */
     };
     _Lockup = Lockup;
-    Lockup.default = new _Lockup(0, 0, PublicKey41.default);
+    Lockup.default = new _Lockup(0, 0, PublicKey44.default);
     var StakeInstruction = class {
       /**
        * @internal
@@ -30974,8 +30994,8 @@ Message: ${transactionMessage}.
         } = decodeData$1(STAKE_INSTRUCTION_LAYOUTS.Initialize, instruction.data);
         return {
           stakePubkey: instruction.keys[0].pubkey,
-          authorized: new Authorized(new PublicKey41(authorized2.staker), new PublicKey41(authorized2.withdrawer)),
-          lockup: new Lockup(lockup2.unixTimestamp, lockup2.epoch, new PublicKey41(lockup2.custodian))
+          authorized: new Authorized(new PublicKey44(authorized2.staker), new PublicKey44(authorized2.withdrawer)),
+          lockup: new Lockup(lockup2.unixTimestamp, lockup2.epoch, new PublicKey44(lockup2.custodian))
         };
       }
       /**
@@ -31004,7 +31024,7 @@ Message: ${transactionMessage}.
         const o3 = {
           stakePubkey: instruction.keys[0].pubkey,
           authorizedPubkey: instruction.keys[2].pubkey,
-          newAuthorizedPubkey: new PublicKey41(newAuthorized),
+          newAuthorizedPubkey: new PublicKey44(newAuthorized),
           stakeAuthorizationType: {
             index: stakeAuthorizationType
           }
@@ -31030,8 +31050,8 @@ Message: ${transactionMessage}.
           stakePubkey: instruction.keys[0].pubkey,
           authorityBase: instruction.keys[1].pubkey,
           authoritySeed,
-          authorityOwner: new PublicKey41(authorityOwner),
-          newAuthorizedPubkey: new PublicKey41(newAuthorized),
+          authorityOwner: new PublicKey44(authorityOwner),
+          newAuthorizedPubkey: new PublicKey44(newAuthorized),
           stakeAuthorizationType: {
             index: stakeAuthorizationType
           }
@@ -31585,7 +31605,7 @@ Message: ${transactionMessage}.
         });
       }
     };
-    StakeProgram.programId = new PublicKey41("Stake11111111111111111111111111111111111111");
+    StakeProgram.programId = new PublicKey44("Stake11111111111111111111111111111111111111");
     StakeProgram.space = 200;
     var VoteInit = class {
       /** [0, 100] */
@@ -31637,7 +31657,7 @@ Message: ${transactionMessage}.
         return {
           votePubkey: instruction.keys[0].pubkey,
           nodePubkey: instruction.keys[3].pubkey,
-          voteInit: new VoteInit(new PublicKey41(voteInit2.nodePubkey), new PublicKey41(voteInit2.authorizedVoter), new PublicKey41(voteInit2.authorizedWithdrawer), voteInit2.commission)
+          voteInit: new VoteInit(new PublicKey44(voteInit2.nodePubkey), new PublicKey44(voteInit2.authorizedVoter), new PublicKey44(voteInit2.authorizedWithdrawer), voteInit2.commission)
         };
       }
       /**
@@ -31653,7 +31673,7 @@ Message: ${transactionMessage}.
         return {
           votePubkey: instruction.keys[0].pubkey,
           authorizedPubkey: instruction.keys[2].pubkey,
-          newAuthorizedPubkey: new PublicKey41(newAuthorized),
+          newAuthorizedPubkey: new PublicKey44(newAuthorized),
           voteAuthorizationType: {
             index: voteAuthorizationType
           }
@@ -31675,9 +31695,9 @@ Message: ${transactionMessage}.
         } = decodeData$1(VOTE_INSTRUCTION_LAYOUTS.AuthorizeWithSeed, instruction.data);
         return {
           currentAuthorityDerivedKeyBasePubkey: instruction.keys[2].pubkey,
-          currentAuthorityDerivedKeyOwnerPubkey: new PublicKey41(currentAuthorityDerivedKeyOwnerPubkey),
+          currentAuthorityDerivedKeyOwnerPubkey: new PublicKey44(currentAuthorityDerivedKeyOwnerPubkey),
           currentAuthorityDerivedKeySeed,
-          newAuthorizedPubkey: new PublicKey41(newAuthorized),
+          newAuthorizedPubkey: new PublicKey44(newAuthorized),
           voteAuthorizationType: {
             index: voteAuthorizationType
           },
@@ -31968,9 +31988,9 @@ Message: ${transactionMessage}.
         });
       }
     };
-    VoteProgram.programId = new PublicKey41("Vote111111111111111111111111111111111111111");
+    VoteProgram.programId = new PublicKey44("Vote111111111111111111111111111111111111111");
     VoteProgram.space = 3762;
-    var VALIDATOR_INFO_KEY = new PublicKey41("Va1idator1nfo111111111111111111111111111111");
+    var VALIDATOR_INFO_KEY = new PublicKey44("Va1idator1nfo111111111111111111111111111111");
     var InfoString = superstruct.type({
       name: superstruct.string(),
       website: superstruct.optional(superstruct.string()),
@@ -32004,7 +32024,7 @@ Message: ${transactionMessage}.
         if (configKeyCount !== 2) return null;
         const configKeys = [];
         for (let i = 0; i < 2; i++) {
-          const publicKey3 = new PublicKey41(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2));
+          const publicKey3 = new PublicKey44(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH2));
           const isSigner = guardedShift(byteArray) === 1;
           configKeys.push({
             publicKey: publicKey3,
@@ -32022,7 +32042,7 @@ Message: ${transactionMessage}.
         return null;
       }
     };
-    var VOTE_PROGRAM_ID = new PublicKey41("Vote111111111111111111111111111111111111111");
+    var VOTE_PROGRAM_ID = new PublicKey44("Vote111111111111111111111111111111111111111");
     var VoteAccountLayout = BufferLayout__namespace.struct([
       publicKey2("nodePubkey"),
       publicKey2("authorizedWithdrawer"),
@@ -32079,8 +32099,8 @@ Message: ${transactionMessage}.
           rootSlot = null;
         }
         return new _VoteAccount({
-          nodePubkey: new PublicKey41(va.nodePubkey),
-          authorizedWithdrawer: new PublicKey41(va.authorizedWithdrawer),
+          nodePubkey: new PublicKey44(va.nodePubkey),
+          authorizedWithdrawer: new PublicKey44(va.authorizedWithdrawer),
           commission: va.commission,
           votes: va.votes,
           rootSlot,
@@ -32097,7 +32117,7 @@ Message: ${transactionMessage}.
     }) {
       return {
         epoch,
-        authorizedVoter: new PublicKey41(authorizedVoter)
+        authorizedVoter: new PublicKey44(authorizedVoter)
       };
     }
     function parsePriorVoters({
@@ -32106,7 +32126,7 @@ Message: ${transactionMessage}.
       targetEpoch
     }) {
       return {
-        authorizedPubkey: new PublicKey41(authorizedPubkey),
+        authorizedPubkey: new PublicKey44(authorizedPubkey),
         epochOfLastAuthorizedSwitch,
         targetEpoch
       };
@@ -32189,8 +32209,8 @@ Message: ${transactionMessage}.
     exports.BpfLoader = BpfLoader;
     exports.COMPUTE_BUDGET_INSTRUCTION_LAYOUTS = COMPUTE_BUDGET_INSTRUCTION_LAYOUTS;
     exports.ComputeBudgetInstruction = ComputeBudgetInstruction;
-    exports.ComputeBudgetProgram = ComputeBudgetProgram7;
-    exports.Connection = Connection6;
+    exports.ComputeBudgetProgram = ComputeBudgetProgram8;
+    exports.Connection = Connection7;
     exports.Ed25519Program = Ed25519Program;
     exports.Enum = Enum;
     exports.EpochSchedule = EpochSchedule;
@@ -32209,7 +32229,7 @@ Message: ${transactionMessage}.
     exports.NonceAccount = NonceAccount;
     exports.PACKET_DATA_SIZE = PACKET_DATA_SIZE;
     exports.PUBLIC_KEY_LENGTH = PUBLIC_KEY_LENGTH2;
-    exports.PublicKey = PublicKey41;
+    exports.PublicKey = PublicKey44;
     exports.SIGNATURE_LENGTH_IN_BYTES = SIGNATURE_LENGTH_IN_BYTES;
     exports.SOLANA_SCHEMA = SOLANA_SCHEMA;
     exports.STAKE_CONFIG_ID = STAKE_CONFIG_ID;
@@ -32304,20 +32324,20 @@ var require_file_uri_to_path = __commonJS({
       var rest = decodeURI(uri.substring(7));
       var firstSlash = rest.indexOf("/");
       var host = rest.substring(0, firstSlash);
-      var path10 = rest.substring(firstSlash + 1);
+      var path11 = rest.substring(firstSlash + 1);
       if ("localhost" == host) host = "";
       if (host) {
         host = sep + sep + host;
       }
-      path10 = path10.replace(/^(.+)\|/, "$1:");
+      path11 = path11.replace(/^(.+)\|/, "$1:");
       if (sep == "\\") {
-        path10 = path10.replace(/\//g, "\\");
+        path11 = path11.replace(/\//g, "\\");
       }
-      if (/^.+\:/.test(path10)) {
+      if (/^.+\:/.test(path11)) {
       } else {
-        path10 = sep + path10;
+        path11 = sep + path11;
       }
-      return host + path10;
+      return host + path11;
     }
   }
 });
@@ -32325,19 +32345,19 @@ var require_file_uri_to_path = __commonJS({
 // node_modules/bindings/bindings.js
 var require_bindings = __commonJS({
   "node_modules/bindings/bindings.js"(exports, module) {
-    var fs16 = __require("fs");
-    var path10 = __require("path");
+    var fs18 = __require("fs");
+    var path11 = __require("path");
     var fileURLToPath = require_file_uri_to_path();
-    var join = path10.join;
-    var dirname = path10.dirname;
-    var exists = fs16.accessSync && function(path11) {
+    var join = path11.join;
+    var dirname = path11.dirname;
+    var exists = fs18.accessSync && function(path12) {
       try {
-        fs16.accessSync(path11);
+        fs18.accessSync(path12);
       } catch (e3) {
         return false;
       }
       return true;
-    } || fs16.existsSync || path10.existsSync;
+    } || fs18.existsSync || path11.existsSync;
     var defaults = {
       arrow: process.env.NODE_BINDINGS_ARROW || " \u2192 ",
       compiled: process.env.NODE_BINDINGS_COMPILED_DIR || "compiled",
@@ -32382,7 +32402,7 @@ var require_bindings = __commonJS({
       if (!opts.module_root) {
         opts.module_root = exports.getRoot(exports.getFileName());
       }
-      if (path10.extname(opts.bindings) != ".node") {
+      if (path11.extname(opts.bindings) != ".node") {
         opts.bindings += ".node";
       }
       var requireFunc = typeof __webpack_require__ === "function" ? __non_webpack_require__ : __require;
@@ -32568,7 +32588,7 @@ var init_bigint = __esm({
 
 // node_modules/bignumber.js/bignumber.mjs
 function clone(configObject) {
-  var div, convertBase, parseNumeric, P3 = BigNumber2.prototype = { constructor: BigNumber2, toString: null, valueOf: null }, ONE = new BigNumber2(1), DECIMAL_PLACES = 20, ROUNDING_MODE = 4, TO_EXP_NEG = -7, TO_EXP_POS = 21, MIN_EXP = -1e7, MAX_EXP = 1e7, CRYPTO = false, MODULO_MODE = 1, POW_PRECISION = 0, FORMAT = {
+  var div, convertBase, parseNumeric, P4 = BigNumber2.prototype = { constructor: BigNumber2, toString: null, valueOf: null }, ONE = new BigNumber2(1), DECIMAL_PLACES = 20, ROUNDING_MODE = 4, TO_EXP_NEG = -7, TO_EXP_POS = 21, MIN_EXP = -1e7, MAX_EXP = 1e7, CRYPTO = false, MODULO_MODE = 1, POW_PRECISION = 0, FORMAT = {
     prefix: "",
     groupSize: 3,
     secondaryGroupSize: 0,
@@ -32983,15 +33003,15 @@ function clone(configObject) {
     };
   })();
   div = /* @__PURE__ */ (function() {
-    function multiply(x, k2, base2) {
+    function multiply(x, k2, base3) {
       var m, temp, xlo, xhi, carry = 0, i = x.length, klo = k2 % SQRT_BASE, khi = k2 / SQRT_BASE | 0;
       for (x = x.slice(); i--; ) {
         xlo = x[i] % SQRT_BASE;
         xhi = x[i] / SQRT_BASE | 0;
         m = khi * xlo + xhi * klo;
         temp = klo * xlo + m % SQRT_BASE * SQRT_BASE + carry;
-        carry = (temp / base2 | 0) + (m / SQRT_BASE | 0) + khi * xhi;
-        x[i] = temp % base2;
+        carry = (temp / base3 | 0) + (m / SQRT_BASE | 0) + khi * xhi;
+        x[i] = temp % base3;
       }
       if (carry) x = [carry].concat(x);
       return x;
@@ -33010,16 +33030,16 @@ function clone(configObject) {
       }
       return cmp;
     }
-    function subtract(a2, b2, aL, base2) {
+    function subtract(a2, b2, aL, base3) {
       var i = 0;
       for (; aL--; ) {
         a2[aL] -= i;
         i = a2[aL] < b2[aL] ? 1 : 0;
-        a2[aL] = i * base2 + a2[aL] - b2[aL];
+        a2[aL] = i * base3 + a2[aL] - b2[aL];
       }
       for (; !a2[0] && a2.length > 1; a2.splice(0, 1)) ;
     }
-    return function(x, y, dp, rm, base2) {
+    return function(x, y, dp, rm, base3) {
       var cmp, e3, i, more, n, prod, prodL, q2, qc, rem, remL, rem0, xi, xL, yc0, yL, yz, s = x.s == y.s ? 1 : -1, xc = x.c, yc = y.c;
       if (!xc || !xc[0] || !yc || !yc[0]) {
         return new BigNumber2(
@@ -33034,8 +33054,8 @@ function clone(configObject) {
       qc = q2.c = [];
       e3 = x.e - y.e;
       s = dp + e3 + 1;
-      if (!base2) {
-        base2 = BASE;
+      if (!base3) {
+        base3 = BASE;
         e3 = bitFloor(x.e / LOG_BASE) - bitFloor(y.e / LOG_BASE);
         s = s / LOG_BASE | 0;
       }
@@ -33049,10 +33069,10 @@ function clone(configObject) {
         yL = yc.length;
         i = 0;
         s += 2;
-        n = mathfloor(base2 / (yc[0] + 1));
+        n = mathfloor(base3 / (yc[0] + 1));
         if (n > 1) {
-          yc = multiply(yc, n, base2);
-          xc = multiply(xc, n, base2);
+          yc = multiply(yc, n, base3);
+          xc = multiply(xc, n, base3);
           yL = yc.length;
           xL = xc.length;
         }
@@ -33063,22 +33083,22 @@ function clone(configObject) {
         yz = yc.slice();
         yz = [0].concat(yz);
         yc0 = yc[0];
-        if (yc[1] >= base2 / 2) yc0++;
+        if (yc[1] >= base3 / 2) yc0++;
         do {
           n = 0;
           cmp = compare2(yc, rem, yL, remL);
           if (cmp < 0) {
             rem0 = rem[0];
-            if (yL != remL) rem0 = rem0 * base2 + (rem[1] || 0);
+            if (yL != remL) rem0 = rem0 * base3 + (rem[1] || 0);
             n = mathfloor(rem0 / yc0);
             if (n > 1) {
-              if (n >= base2) n = base2 - 1;
-              prod = multiply(yc, n, base2);
+              if (n >= base3) n = base3 - 1;
+              prod = multiply(yc, n, base3);
               prodL = prod.length;
               remL = rem.length;
               while (compare2(prod, rem, prodL, remL) == 1) {
                 n--;
-                subtract(prod, yL < prodL ? yz : yc, prodL, base2);
+                subtract(prod, yL < prodL ? yz : yc, prodL, base3);
                 prodL = prod.length;
                 cmp = 1;
               }
@@ -33090,12 +33110,12 @@ function clone(configObject) {
               prodL = prod.length;
             }
             if (prodL < remL) prod = [0].concat(prod);
-            subtract(rem, prod, remL, base2);
+            subtract(rem, prod, remL, base3);
             remL = rem.length;
             if (cmp == -1) {
               while (compare2(yc, rem, yL, remL) < 1) {
                 n++;
-                subtract(rem, yL < remL ? yz : yc, remL, base2);
+                subtract(rem, yL < remL ? yz : yc, remL, base3);
                 remL = rem.length;
               }
             }
@@ -33114,7 +33134,7 @@ function clone(configObject) {
         more = rem[0] != null;
         if (!qc[0]) qc.splice(0, 1);
       }
-      if (base2 == BASE) {
+      if (base3 == BASE) {
         for (i = 1, s = qc[0]; s >= 10; s /= 10, i++) ;
         round(q2, dp + (q2.e = i + e3 * LOG_BASE - 1) + 1, rm, more);
       } else {
@@ -33185,20 +33205,20 @@ function clone(configObject) {
   parseNumeric = /* @__PURE__ */ (function() {
     var basePrefix = /^(-?)0([xbo])(?=\w[\w.]*$)/i, dotAfter = /^([^.]+)\.$/, dotBefore = /^\.([^.]+)$/, isInfinityOrNaN = /^-?(Infinity|NaN)$/, whitespaceOrPlus = /^\s*\+(?=[\w.])|^\s+|\s+$/g;
     return function(x, str, isNum, b2) {
-      var base2, s = isNum ? str : str.replace(whitespaceOrPlus, "");
+      var base3, s = isNum ? str : str.replace(whitespaceOrPlus, "");
       if (isInfinityOrNaN.test(s)) {
         x.s = isNaN(s) ? null : s < 0 ? -1 : 1;
       } else {
         if (!isNum) {
           s = s.replace(basePrefix, function(m, p1, p2) {
-            base2 = (p2 = p2.toLowerCase()) == "x" ? 16 : p2 == "b" ? 2 : 8;
-            return !b2 || b2 == base2 ? p1 : m;
+            base3 = (p2 = p2.toLowerCase()) == "x" ? 16 : p2 == "b" ? 2 : 8;
+            return !b2 || b2 == base3 ? p1 : m;
           });
           if (b2) {
-            base2 = b2;
+            base3 = b2;
             s = s.replace(dotAfter, "$1").replace(dotBefore, "0.$1");
           }
-          if (str != s) return new BigNumber2(s, base2);
+          if (str != s) return new BigNumber2(s, base3);
         }
         if (BigNumber2.DEBUG) {
           throw Error(bignumberError + "Not a" + (b2 ? " base " + b2 : "") + " number: " + str);
@@ -33301,15 +33321,15 @@ function clone(configObject) {
     str = e3 <= TO_EXP_NEG || e3 >= TO_EXP_POS ? toExponential(str, e3) : toFixedPoint(str, e3, "0");
     return n.s < 0 ? "-" + str : str;
   }
-  P3.absoluteValue = P3.abs = function() {
+  P4.absoluteValue = P4.abs = function() {
     var x = new BigNumber2(this);
     if (x.s < 0) x.s = 1;
     return x;
   };
-  P3.comparedTo = function(y, b2) {
+  P4.comparedTo = function(y, b2) {
     return compare(this, new BigNumber2(y, b2));
   };
-  P3.decimalPlaces = P3.dp = function(dp, rm) {
+  P4.decimalPlaces = P4.dp = function(dp, rm) {
     var c, n, v2, x = this;
     if (dp != null) {
       intCheck(dp, 0, MAX);
@@ -33323,13 +33343,13 @@ function clone(configObject) {
     if (n < 0) n = 0;
     return n;
   };
-  P3.dividedBy = P3.div = function(y, b2) {
+  P4.dividedBy = P4.div = function(y, b2) {
     return div(this, new BigNumber2(y, b2), DECIMAL_PLACES, ROUNDING_MODE);
   };
-  P3.dividedToIntegerBy = P3.idiv = function(y, b2) {
+  P4.dividedToIntegerBy = P4.idiv = function(y, b2) {
     return div(this, new BigNumber2(y, b2), 0, 1);
   };
-  P3.exponentiatedBy = P3.pow = function(n, m) {
+  P4.exponentiatedBy = P4.pow = function(n, m) {
     var half, isModExp, i, k2, more, nIsBig, nIsNeg, nIsOdd, y, x = this;
     n = new BigNumber2(n);
     if (n.c && !n.isInteger()) {
@@ -33398,46 +33418,46 @@ function clone(configObject) {
     if (nIsNeg) y = ONE.div(y);
     return m ? y.mod(m) : k2 ? round(y, POW_PRECISION, ROUNDING_MODE, more) : y;
   };
-  P3.integerValue = function(rm) {
+  P4.integerValue = function(rm) {
     var n = new BigNumber2(this);
     if (rm == null) rm = ROUNDING_MODE;
     else intCheck(rm, 0, 8);
     return round(n, n.e + 1, rm);
   };
-  P3.isEqualTo = P3.eq = function(y, b2) {
+  P4.isEqualTo = P4.eq = function(y, b2) {
     return compare(this, new BigNumber2(y, b2)) === 0;
   };
-  P3.isFinite = function() {
+  P4.isFinite = function() {
     return !!this.c;
   };
-  P3.isGreaterThan = P3.gt = function(y, b2) {
+  P4.isGreaterThan = P4.gt = function(y, b2) {
     return compare(this, new BigNumber2(y, b2)) > 0;
   };
-  P3.isGreaterThanOrEqualTo = P3.gte = function(y, b2) {
+  P4.isGreaterThanOrEqualTo = P4.gte = function(y, b2) {
     return (b2 = compare(this, new BigNumber2(y, b2))) === 1 || b2 === 0;
   };
-  P3.isInteger = function() {
+  P4.isInteger = function() {
     return !!this.c && bitFloor(this.e / LOG_BASE) > this.c.length - 2;
   };
-  P3.isLessThan = P3.lt = function(y, b2) {
+  P4.isLessThan = P4.lt = function(y, b2) {
     return compare(this, new BigNumber2(y, b2)) < 0;
   };
-  P3.isLessThanOrEqualTo = P3.lte = function(y, b2) {
+  P4.isLessThanOrEqualTo = P4.lte = function(y, b2) {
     return (b2 = compare(this, new BigNumber2(y, b2))) === -1 || b2 === 0;
   };
-  P3.isNaN = function() {
+  P4.isNaN = function() {
     return !this.s;
   };
-  P3.isNegative = function() {
+  P4.isNegative = function() {
     return this.s < 0;
   };
-  P3.isPositive = function() {
+  P4.isPositive = function() {
     return this.s > 0;
   };
-  P3.isZero = function() {
+  P4.isZero = function() {
     return !!this.c && this.c[0] == 0;
   };
-  P3.minus = function(y, b2) {
+  P4.minus = function(y, b2) {
     var i, j2, t, xLTy, x = this, a2 = x.s;
     y = new BigNumber2(y, b2);
     b2 = y.s;
@@ -33504,7 +33524,7 @@ function clone(configObject) {
     }
     return normalise(y, xc, ye);
   };
-  P3.modulo = P3.mod = function(y, b2) {
+  P4.modulo = P4.mod = function(y, b2) {
     var q2, s, x = this;
     y = new BigNumber2(y, b2);
     if (!x.c || !y.s || y.c && !y.c[0]) {
@@ -33525,8 +33545,8 @@ function clone(configObject) {
     if (!y.c[0] && MODULO_MODE == 1) y.s = x.s;
     return y;
   };
-  P3.multipliedBy = P3.times = function(y, b2) {
-    var c, e3, i, j2, k2, m, xcL, xlo, xhi, ycL, ylo, yhi, zc, base2, sqrtBase, x = this, xc = x.c, yc = (y = new BigNumber2(y, b2)).c;
+  P4.multipliedBy = P4.times = function(y, b2) {
+    var c, e3, i, j2, k2, m, xcL, xlo, xhi, ycL, ylo, yhi, zc, base3, sqrtBase, x = this, xc = x.c, yc = (y = new BigNumber2(y, b2)).c;
     if (!xc || !yc || !xc[0] || !yc[0]) {
       if (!x.s || !y.s || xc && !xc[0] && !yc || yc && !yc[0] && !xc) {
         y.c = y.e = y.s = null;
@@ -33554,7 +33574,7 @@ function clone(configObject) {
       ycL = i;
     }
     for (i = xcL + ycL, zc = []; i--; zc.push(0)) ;
-    base2 = BASE;
+    base3 = BASE;
     sqrtBase = SQRT_BASE;
     for (i = ycL; --i >= 0; ) {
       c = 0;
@@ -33565,8 +33585,8 @@ function clone(configObject) {
         xhi = xc[k2] / sqrtBase | 0;
         m = yhi * xlo + xhi * ylo;
         xlo = ylo * xlo + m % sqrtBase * sqrtBase + zc[j2] + c;
-        c = (xlo / base2 | 0) + (m / sqrtBase | 0) + yhi * xhi;
-        zc[j2--] = xlo % base2;
+        c = (xlo / base3 | 0) + (m / sqrtBase | 0) + yhi * xhi;
+        zc[j2--] = xlo % base3;
       }
       zc[j2] = c;
     }
@@ -33577,12 +33597,12 @@ function clone(configObject) {
     }
     return normalise(y, zc, e3);
   };
-  P3.negated = function() {
+  P4.negated = function() {
     var x = new BigNumber2(this);
     x.s = -x.s || null;
     return x;
   };
-  P3.plus = function(y, b2) {
+  P4.plus = function(y, b2) {
     var t, x = this, a2 = x.s;
     y = new BigNumber2(y, b2);
     b2 = y.s;
@@ -33629,7 +33649,7 @@ function clone(configObject) {
     }
     return normalise(y, xc, ye);
   };
-  P3.precision = P3.sd = function(sd, rm) {
+  P4.precision = P4.sd = function(sd, rm) {
     var c, n, v2, x = this;
     if (sd != null && sd !== !!sd) {
       intCheck(sd, 1, MAX);
@@ -33647,11 +33667,11 @@ function clone(configObject) {
     if (sd && x.e + 1 > n) n = x.e + 1;
     return n;
   };
-  P3.shiftedBy = function(k2) {
+  P4.shiftedBy = function(k2) {
     intCheck(k2, -MAX_SAFE_INTEGER, MAX_SAFE_INTEGER);
     return this.times("1e" + k2);
   };
-  P3.squareRoot = P3.sqrt = function() {
+  P4.squareRoot = P4.sqrt = function() {
     var m, n, r, rep, t, x = this, c = x.c, s = x.s, e3 = x.e, dp = DECIMAL_PLACES + 4, half = new BigNumber2("0.5");
     if (s !== 1 || !c || !c[0]) {
       return new BigNumber2(!s || s < 0 && (!c || c[0]) ? NaN : c ? x : 1 / 0);
@@ -33705,21 +33725,21 @@ function clone(configObject) {
     }
     return round(r, r.e + DECIMAL_PLACES + 1, ROUNDING_MODE, m);
   };
-  P3.toExponential = function(dp, rm) {
+  P4.toExponential = function(dp, rm) {
     if (dp != null) {
       intCheck(dp, 0, MAX);
       dp++;
     }
     return format(this, dp, rm, 1);
   };
-  P3.toFixed = function(dp, rm) {
+  P4.toFixed = function(dp, rm) {
     if (dp != null) {
       intCheck(dp, 0, MAX);
       dp = dp + this.e + 1;
     }
     return format(this, dp, rm);
   };
-  P3.toFormat = function(dp, rm, format2) {
+  P4.toFormat = function(dp, rm, format2) {
     var str, x = this;
     if (format2 == null) {
       if (dp != null && rm && typeof rm == "object") {
@@ -33757,7 +33777,7 @@ function clone(configObject) {
     }
     return (format2.prefix || "") + str + (format2.suffix || "");
   };
-  P3.toFraction = function(md) {
+  P4.toFraction = function(md) {
     var d, d0, d1, d2, e3, exp, n, n0, n1, q2, r, s, x = this, xc = x.c;
     if (md != null) {
       n = new BigNumber2(md);
@@ -33799,14 +33819,14 @@ function clone(configObject) {
     MAX_EXP = exp;
     return r;
   };
-  P3.toNumber = function() {
+  P4.toNumber = function() {
     return +valueOf(this);
   };
-  P3.toPrecision = function(sd, rm) {
+  P4.toPrecision = function(sd, rm) {
     if (sd != null) intCheck(sd, 1, MAX);
     return format(this, sd, rm, 2);
   };
-  P3.toString = function(b2) {
+  P4.toString = function(b2) {
     var str, n = this, s = n.s, e3 = n.e;
     if (e3 === null) {
       if (s) {
@@ -33829,12 +33849,12 @@ function clone(configObject) {
     }
     return str;
   };
-  P3.valueOf = P3.toJSON = function() {
+  P4.valueOf = P4.toJSON = function() {
     return valueOf(this);
   };
-  P3._isBigNumber = true;
-  P3[Symbol.toStringTag] = "BigNumber";
-  P3[/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")] = P3.valueOf;
+  P4._isBigNumber = true;
+  P4[Symbol.toStringTag] = "BigNumber";
+  P4[/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")] = P4.valueOf;
   if (configObject != null) BigNumber2.set(configObject);
   return BigNumber2;
 }
@@ -40593,7 +40613,7 @@ function addEncoderSizePrefix(encoder, prefix) {
   });
 }
 function addDecoderSizePrefix(decoder, prefix) {
-  const read = (bytes, offset) => {
+  const read2 = (bytes, offset) => {
     const [bigintSize, decoderOffset] = prefix.read(bytes, offset);
     const size = Number(bigintSize);
     offset = decoderOffset;
@@ -40604,12 +40624,12 @@ function addDecoderSizePrefix(decoder, prefix) {
     return [decoder.decode(bytes), offset + size];
   };
   if (isFixedSize2(prefix) && isFixedSize2(decoder)) {
-    return createDecoder2({ ...decoder, fixedSize: prefix.fixedSize + decoder.fixedSize, read });
+    return createDecoder2({ ...decoder, fixedSize: prefix.fixedSize + decoder.fixedSize, read: read2 });
   }
   const prefixMaxSize = isFixedSize2(prefix) ? prefix.fixedSize : prefix.maxSize ?? null;
   const decoderMaxSize = isFixedSize2(decoder) ? decoder.fixedSize : decoder.maxSize ?? null;
   const maxSize = prefixMaxSize !== null && decoderMaxSize !== null ? prefixMaxSize + decoderMaxSize : null;
-  return createDecoder2({ ...decoder, ...maxSize !== null ? { maxSize } : {}, read });
+  return createDecoder2({ ...decoder, ...maxSize !== null ? { maxSize } : {}, read: read2 });
 }
 function addCodecSizePrefix(codec, prefix) {
   return combineCodec2(addEncoderSizePrefix(codec, prefix), addDecoderSizePrefix(codec, prefix));
@@ -40941,16 +40961,16 @@ function getUnionEncoder(variants, getIndexFromValue) {
 }
 function getUnionDecoder(variants, getIndexFromBytes) {
   const fixedSize = getUnionFixedSize(variants);
-  const read = (bytes, offset) => {
+  const read2 = (bytes, offset) => {
     const index = getIndexFromBytes(bytes, offset);
     assertValidVariantIndex(variants, index);
     return variants[index].read(bytes, offset);
   };
   if (fixedSize !== null) {
-    return createDecoder2({ fixedSize, read });
+    return createDecoder2({ fixedSize, read: read2 });
   }
   const maxSize = getUnionMaxSize(variants);
-  return createDecoder2({ ...maxSize !== null ? { maxSize } : {}, read });
+  return createDecoder2({ ...maxSize !== null ? { maxSize } : {}, read: read2 });
 }
 function assertValidVariantIndex(variants, index) {
   if (typeof variants[index] === "undefined") {
@@ -42753,10 +42773,10 @@ function solanaSiwxMessage(address, { nonce, issuedAt, expiresAt, domain = "api.
   ].join("\n");
   return { message, nonce: n, issuedAt: iat, expiresAt: exp };
 }
-async function siwx(identity2, opts) {
-  const { message } = solanaSiwxMessage(identity2.solana.public_key, opts);
+async function siwx(identity3, opts) {
+  const { message } = solanaSiwxMessage(identity3.solana.public_key, opts);
   const sig = await signMessage(message);
-  return siwxHeader(identity2.solana.public_key, message, sig.solana.signature);
+  return siwxHeader(identity3.solana.public_key, message, sig.solana.signature);
 }
 async function discoverTopUp() {
   const r = await fetch(`${BASE2}/x402/top-up`, { method: "POST", redirect: "error" });
@@ -42784,18 +42804,18 @@ function validateSolanaRail(rail) {
   if (amount < 5000000n) throw new Error(`below provider minimum: ${amount}`);
   return true;
 }
-async function buildTopUpPayment({ identity: identity2, rail, amountRaw }) {
+async function buildTopUpPayment({ identity: identity3, rail, amountRaw }) {
   validateSolanaRail(rail);
   const amount = BigInt(amountRaw || rail.amount);
   if (amount < 5000000n) throw new Error("top-up below 5 USDC minimum");
   const mint = new import_web397.PublicKey(rail.asset);
-  const from = getAssociatedTokenAddressSync(mint, new import_web397.PublicKey(identity2.solana.public_key));
+  const from = getAssociatedTokenAddressSync(mint, new import_web397.PublicKey(identity3.solana.public_key));
   const to = getAssociatedTokenAddressSync(mint, new import_web397.PublicKey(rail.payTo), true);
   const info = await getAccountInfo(to.toBase58());
   const ixs = [];
-  const { ComputeBudgetProgram: ComputeBudgetProgram7 } = await Promise.resolve().then(() => __toESM(require_index_cjs(), 1));
-  ixs.push(ComputeBudgetProgram7.setComputeUnitLimit({ units: 2e5 }));
-  ixs.push(ComputeBudgetProgram7.setComputeUnitPrice({ microLamports: 1 }));
+  const { ComputeBudgetProgram: ComputeBudgetProgram8 } = await Promise.resolve().then(() => __toESM(require_index_cjs(), 1));
+  ixs.push(ComputeBudgetProgram8.setComputeUnitLimit({ units: 2e5 }));
+  ixs.push(ComputeBudgetProgram8.setComputeUnitPrice({ microLamports: 1 }));
   if (!info) {
     const { createAssociatedTokenAccountIdempotentInstruction: createAssociatedTokenAccountIdempotentInstruction2 } = await Promise.resolve().then(() => (init_esm4(), esm_exports));
     ixs.push(createAssociatedTokenAccountIdempotentInstruction2(
@@ -42806,7 +42826,7 @@ async function buildTopUpPayment({ identity: identity2, rail, amountRaw }) {
       TOKEN_PROGRAM_ID
     ));
   }
-  ixs.push(createTransferCheckedInstruction(from, mint, to, new import_web397.PublicKey(identity2.solana.public_key), amount, 6, [], TOKEN_PROGRAM_ID));
+  ixs.push(createTransferCheckedInstruction(from, mint, to, new import_web397.PublicKey(identity3.solana.public_key), amount, 6, [], TOKEN_PROGRAM_ID));
   const { blockhash, lastValidBlockHeight } = await getLatestBlockhash();
   const env = await request("sign_payment_legacy", {
     feePayer: rail.extra.feePayer,
@@ -42832,16 +42852,16 @@ async function settleTopUp(header) {
   const receipt = r.headers.get("payment-response");
   return { status: r.status, body, receipt: receipt ? JSON.parse(Buffer.from(receipt, "base64").toString("utf8")) : null };
 }
-async function balance(identity2) {
-  const h2 = await siwx(identity2);
-  const r = await fetch(`${BASE2}/x402/balance/${identity2.solana.public_key}`, { headers: { "SIGN-IN-WITH-X": h2 } });
+async function balance(identity3) {
+  const h2 = await siwx(identity3);
+  const r = await fetch(`${BASE2}/x402/balance/${identity3.solana.public_key}`, { headers: { "SIGN-IN-WITH-X": h2 } });
   const j2 = await r.json().catch(() => ({}));
   const d = j2.data || j2;
   const credits = Number(d.balanceUsd ?? d.balance ?? d.credits ?? d.amount ?? NaN);
   return { status: r.status, success: j2.success, raw: j2, creditsUsd: Number.isFinite(credits) ? credits : null, ...d };
 }
-async function chat(identity2, { messages, tools, maxTokens = 1200, temperature = 0.2, model = MODEL, reasoningEffort = "low" }) {
-  const h2 = await siwx(identity2);
+async function chat(identity3, { messages, tools, maxTokens = 1200, temperature = 0.2, model = MODEL, reasoningEffort = "low" }) {
+  const h2 = await siwx(identity3);
   const body = { model, messages, max_tokens: maxTokens, temperature, reasoning_effort: reasoningEffort };
   if (tools && tools.length) {
     body.tools = tools;
@@ -42878,8 +42898,8 @@ function costOf(usage) {
   const micro = (uncached * 330000n + cached2 * 8250n + out * 1320000n) / 1000000n;
   return Number(micro) / 1e6;
 }
-async function fundIfNeeded(identity2, { maxTopUpUsdc = 5, minCredits = 0.1 } = {}) {
-  const before = await balance(identity2);
+async function fundIfNeeded(identity3, { maxTopUpUsdc = 5, minCredits = 0.1 } = {}) {
+  const before = await balance(identity3);
   const credits = Number(before.balanceUsd ?? before.balance ?? before.credits ?? 0);
   const ledger = loadLedger();
   ledger.credits_usd = credits;
@@ -42889,7 +42909,7 @@ async function fundIfNeeded(identity2, { maxTopUpUsdc = 5, minCredits = 0.1 } = 
   const rail = q2.solana;
   validateSolanaRail(rail);
   const amount = BigInt(Math.max(Number(rail.amount), Math.min(maxTopUpUsdc * 1e6, Number(rail.amount))));
-  const pay = await buildTopUpPayment({ identity: identity2, rail, amountRaw: amount });
+  const pay = await buildTopUpPayment({ identity: identity3, rail, amountRaw: amount });
   const res = await settleTopUp(pay.header);
   const rec = { at: now(), amount_raw: pay.amount, payTo: pay.payTo, feePayer: pay.feePayer, status: res.status, body: res.body, receipt: res.receipt };
   const l2 = loadLedger();
@@ -42993,12 +43013,12 @@ __export(treasury_exports, {
   swapSolToUsdc: () => swapSolToUsdc,
   usdcBalance: () => usdcBalance
 });
-async function usdcBalance(identity2) {
-  const accts = await tokenAccounts(identity2.solana.public_key, TOKEN_PROGRAM_ID.toBase58());
+async function usdcBalance(identity3) {
+  const accts = await tokenAccounts(identity3.solana.public_key, TOKEN_PROGRAM_ID.toBase58());
   return accts.filter((a2) => a2.account.data.parsed.info.mint === USDC).reduce((s, a2) => s + BigInt(a2.account.data.parsed.info.tokenAmount.amount), 0n);
 }
-async function swapSolToUsdc(identity2, lamports, { slippageBps = 50 } = {}) {
-  const owner = new import_web399.PublicKey(identity2.solana.public_key);
+async function swapSolToUsdc(identity3, lamports, { slippageBps = 50 } = {}) {
+  const owner = new import_web399.PublicKey(identity3.solana.public_key);
   const wsolAta = getAssociatedTokenAddressSync(new import_web399.PublicKey(WSOL), owner).toBase58();
   const usdcAta = getAssociatedTokenAddressSync(new import_web399.PublicKey(USDC), owner).toBase58();
   const q2 = await quote({ inputMint: WSOL, outputMint: USDC, amount: String(lamports), slippageBps });
@@ -43026,14 +43046,14 @@ async function swapSolToUsdc(identity2, lamports, { slippageBps = 50 } = {}) {
   await append("treasury.swap", rec);
   return { ok: !status?.err && !!status, ...rec };
 }
-async function ensureInferenceFunding(identity2, { minCredits = 0.1, minUsdc = 5000000n, feeReserve = 20000000n, maxSwap = 12e7 } = {}) {
-  const bal = await balance(identity2).catch(() => null);
+async function ensureInferenceFunding(identity3, { minCredits = 0.1, minUsdc = 5000000n, feeReserve = 20000000n, maxSwap = 12e7 } = {}) {
+  const bal = await balance(identity3).catch(() => null);
   const credits = Number(bal?.balanceUsd ?? 0);
   if (credits >= minCredits) return { state: "ready", credits };
-  let usdc = await usdcBalance(identity2);
+  let usdc = await usdcBalance(identity3);
   const steps = [];
   if (usdc < minUsdc) {
-    const sol = BigInt(await getBalance(identity2.solana.public_key));
+    const sol = BigInt(await getBalance(identity3.solana.public_key));
     const need = minUsdc - usdc;
     const probe = await quote({ inputMint: WSOL, outputMint: USDC, amount: "10000000", slippageBps: 50 }).catch(() => null);
     if (!probe) return { state: "blocked", reason: "no swap quote", credits, usdc: usdc.toString() };
@@ -43043,14 +43063,14 @@ async function ensureInferenceFunding(identity2, { minCredits = 0.1, minUsdc = 5
     if (lamports > BigInt(maxSwap)) lamports = BigInt(maxSwap);
     if (lamports > spendable2) lamports = spendable2;
     if (lamports < 5000000n) return { state: "blocked", reason: "SOL too small to swap", sol: sol.toString(), credits, usdc: usdc.toString() };
-    const s = await swapSolToUsdc(identity2, Number(lamports));
+    const s = await swapSolToUsdc(identity3, Number(lamports));
     steps.push({ swap: s.ok ? "confirmed" : "failed", lamports: String(lamports), signature: s.signature || null });
     if (!s.ok) return { state: "blocked", reason: "swap failed", steps, credits, usdc: usdc.toString() };
-    usdc = await usdcBalance(identity2);
+    usdc = await usdcBalance(identity3);
   }
   if (usdc >= minUsdc) {
     try {
-      const f2 = await fundIfNeeded(identity2, { maxTopUpUsdc: 5 });
+      const f2 = await fundIfNeeded(identity3, { maxTopUpUsdc: 5 });
       steps.push({ topup: f2.funded ? "credited" : "unconfirmed", credits: f2.credits, signature: f2.topup?.receipt?.transaction || null });
       return { state: f2.funded ? "funded" : "topup_pending", credits: f2.credits, steps };
     } catch (e3) {
@@ -43075,19 +43095,252 @@ var init_treasury = __esm({
   }
 });
 
+// lib/playbooks.mjs
+var playbooks_exports = {};
+__export(playbooks_exports, {
+  list: () => list,
+  read: () => read,
+  write: () => write
+});
+import fs8 from "node:fs";
+import path6 from "node:path";
+function list() {
+  try {
+    return JSON.parse(fs8.readFileSync(INDEX, "utf8")).playbooks || [];
+  } catch {
+    return [];
+  }
+}
+function write(name, body) {
+  if (!/^[a-z0-9][a-z0-9-]{1,60}$/.test(String(name || ""))) throw new Error("name must be kebab-case");
+  fs8.mkdirSync(DIR, { recursive: true });
+  const file = path6.join(DIR, `${name}.md`);
+  fs8.writeFileSync(file, String(body || ""), { mode: 384 });
+  const idx = list().filter((p2) => p2.name !== name);
+  idx.push({ name, bytes: Buffer.byteLength(String(body || "")), at: now() });
+  atomicJson(INDEX, { playbooks: idx, updated_at: now() }, 384);
+  return { name, path: file };
+}
+function read(name) {
+  if (!/^[a-z0-9][a-z0-9-]{1,60}$/.test(String(name || ""))) throw new Error("bad name");
+  return fs8.readFileSync(path6.join(DIR, `${name}.md`), "utf8");
+}
+var DIR, INDEX;
+var init_playbooks = __esm({
+  "lib/playbooks.mjs"() {
+    init_paths();
+    init_util();
+    DIR = path6.join(P.state, "playbooks");
+    INDEX = path6.join(DIR, "index.json");
+  }
+});
+
+// node_modules/base-x/src/esm/index.js
+function base(ALPHABET2) {
+  if (ALPHABET2.length >= 255) {
+    throw new TypeError("Alphabet too long");
+  }
+  const BASE_MAP = new Uint8Array(256);
+  for (let j2 = 0; j2 < BASE_MAP.length; j2++) {
+    BASE_MAP[j2] = 255;
+  }
+  for (let i = 0; i < ALPHABET2.length; i++) {
+    const x = ALPHABET2.charAt(i);
+    const xc = x.charCodeAt(0);
+    if (BASE_MAP[xc] !== 255) {
+      throw new TypeError(x + " is ambiguous");
+    }
+    BASE_MAP[xc] = i;
+  }
+  const BASE5 = ALPHABET2.length;
+  const LEADER = ALPHABET2.charAt(0);
+  const FACTOR = Math.log(BASE5) / Math.log(256);
+  const iFACTOR = Math.log(256) / Math.log(BASE5);
+  function encode2(source) {
+    if (source instanceof Uint8Array) {
+    } else if (ArrayBuffer.isView(source)) {
+      source = new Uint8Array(source.buffer, source.byteOffset, source.byteLength);
+    } else if (Array.isArray(source)) {
+      source = Uint8Array.from(source);
+    }
+    if (!(source instanceof Uint8Array)) {
+      throw new TypeError("Expected Uint8Array");
+    }
+    if (source.length === 0) {
+      return "";
+    }
+    let zeroes = 0;
+    let length = 0;
+    let pbegin = 0;
+    const pend = source.length;
+    while (pbegin !== pend && source[pbegin] === 0) {
+      pbegin++;
+      zeroes++;
+    }
+    const size = (pend - pbegin) * iFACTOR + 1 >>> 0;
+    const b58 = new Uint8Array(size);
+    while (pbegin !== pend) {
+      let carry = source[pbegin];
+      let i = 0;
+      for (let it1 = size - 1; (carry !== 0 || i < length) && it1 !== -1; it1--, i++) {
+        carry += 256 * b58[it1] >>> 0;
+        b58[it1] = carry % BASE5 >>> 0;
+        carry = carry / BASE5 >>> 0;
+      }
+      if (carry !== 0) {
+        throw new Error("Non-zero carry");
+      }
+      length = i;
+      pbegin++;
+    }
+    let it2 = size - length;
+    while (it2 !== size && b58[it2] === 0) {
+      it2++;
+    }
+    let str = LEADER.repeat(zeroes);
+    for (; it2 < size; ++it2) {
+      str += ALPHABET2.charAt(b58[it2]);
+    }
+    return str;
+  }
+  function decodeUnsafe(source) {
+    if (typeof source !== "string") {
+      throw new TypeError("Expected String");
+    }
+    if (source.length === 0) {
+      return new Uint8Array();
+    }
+    let psz = 0;
+    let zeroes = 0;
+    let length = 0;
+    while (source[psz] === LEADER) {
+      zeroes++;
+      psz++;
+    }
+    const size = (source.length - psz) * FACTOR + 1 >>> 0;
+    const b256 = new Uint8Array(size);
+    while (psz < source.length) {
+      const charCode = source.charCodeAt(psz);
+      if (charCode > 255) {
+        return;
+      }
+      let carry = BASE_MAP[charCode];
+      if (carry === 255) {
+        return;
+      }
+      let i = 0;
+      for (let it3 = size - 1; (carry !== 0 || i < length) && it3 !== -1; it3--, i++) {
+        carry += BASE5 * b256[it3] >>> 0;
+        b256[it3] = carry % 256 >>> 0;
+        carry = carry / 256 >>> 0;
+      }
+      if (carry !== 0) {
+        throw new Error("Non-zero carry");
+      }
+      length = i;
+      psz++;
+    }
+    let it4 = size - length;
+    while (it4 !== size && b256[it4] === 0) {
+      it4++;
+    }
+    const vch = new Uint8Array(zeroes + (size - it4));
+    let j2 = zeroes;
+    while (it4 !== size) {
+      vch[j2++] = b256[it4++];
+    }
+    return vch;
+  }
+  function decode2(string) {
+    const buffer = decodeUnsafe(string);
+    if (buffer) {
+      return buffer;
+    }
+    throw new Error("Non-base" + BASE5 + " character");
+  }
+  return {
+    encode: encode2,
+    decodeUnsafe,
+    decode: decode2
+  };
+}
+var esm_default;
+var init_esm5 = __esm({
+  "node_modules/base-x/src/esm/index.js"() {
+    esm_default = base;
+  }
+});
+
+// node_modules/bs58/src/esm/index.js
+var esm_exports2 = {};
+__export(esm_exports2, {
+  default: () => esm_default2
+});
+var ALPHABET, esm_default2;
+var init_esm6 = __esm({
+  "node_modules/bs58/src/esm/index.js"() {
+    init_esm5();
+    ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    esm_default2 = esm_default(ALPHABET);
+  }
+});
+
+// bin/agentgates-auth.mjs
+var agentgates_auth_exports = {};
+__export(agentgates_auth_exports, {
+  ownerGet: () => ownerGet,
+  walletAuth: () => walletAuth
+});
+import crypto8 from "node:crypto";
+async function walletAuth(method, path11) {
+  const identity3 = await identity();
+  const nonce = crypto8.randomBytes(12).toString("hex");
+  const timestamp = Math.floor(Date.now() / 1e3);
+  const message = `${method}
+${path11}
+${nonce}
+${timestamp}`;
+  const sig = await signMessage(message);
+  const raw = Buffer.from((await Promise.resolve().then(() => (init_esm6(), esm_exports2))).default.decode(sig.solana.signature));
+  return Buffer.from(JSON.stringify({
+    address: identity3.solana.public_key,
+    timestamp,
+    nonce,
+    signature: raw.toString("base64")
+  })).toString("base64");
+}
+async function ownerGet(base3, path11) {
+  const h2 = await walletAuth("GET", path11);
+  const r = await fetch(base3 + path11, { headers: { "X-Wallet-Auth": h2 } });
+  return { status: r.status, body: await r.json().catch(() => ({})) };
+}
+var init_agentgates_auth = __esm({
+  "bin/agentgates-auth.mjs"() {
+    init_signer_client();
+  }
+});
+
 // lib/lease.mjs
-async function paySolana(rail, identity2) {
+var lease_exports = {};
+__export(lease_exports, {
+  API: () => API,
+  createLease: () => createLease,
+  listDeployments: () => listDeployments,
+  paySolana: () => paySolana,
+  renewLease: () => renewLease
+});
+async function paySolana(rail, identity3) {
   const amount = BigInt(rail.maxAmountRequired || rail.amount);
   if (rail.asset !== USDC2) throw new Error(`unexpected asset ${rail.asset}`);
   if (!rail.extra?.feePayer) throw new Error("rail has no sponsor feePayer");
   const mint = new import_web3100.PublicKey(rail.asset);
-  const from = getAssociatedTokenAddressSync(mint, new import_web3100.PublicKey(identity2.solana.public_key));
+  const from = getAssociatedTokenAddressSync(mint, new import_web3100.PublicKey(identity3.solana.public_key));
   const to = getAssociatedTokenAddressSync(mint, new import_web3100.PublicKey(rail.payTo), true);
   const ixs = [import_web3100.ComputeBudgetProgram.setComputeUnitLimit({ units: 2e5 }), import_web3100.ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 1 })];
   if (!await getAccountInfo(to.toBase58())) {
     ixs.push(createAssociatedTokenAccountIdempotentInstruction(new import_web3100.PublicKey(rail.extra.feePayer), to, new import_web3100.PublicKey(rail.payTo), mint, TOKEN_PROGRAM_ID));
   }
-  ixs.push(createTransferCheckedInstruction(from, mint, to, new import_web3100.PublicKey(identity2.solana.public_key), amount, 6, [], TOKEN_PROGRAM_ID));
+  ixs.push(createTransferCheckedInstruction(from, mint, to, new import_web3100.PublicKey(identity3.solana.public_key), amount, 6, [], TOKEN_PROGRAM_ID));
   const { blockhash } = await getLatestBlockhash();
   const signed = await request("sign_payment_legacy", {
     feePayer: rail.extra.feePayer,
@@ -43106,19 +43359,31 @@ function pickSolana(accepts) {
   if (!rail) throw new Error(`no solana rail: ${(accepts || []).map((a2) => a2.network).join(",")}`);
   return rail;
 }
-async function paidPost(path10, body, identity2, tag) {
-  const post = (headers = {}) => fetch(API + path10, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
+async function paidPost(path11, body, identity3, tag) {
+  const post = (headers = {}) => fetch(API + path11, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
   const first = await post();
   if (first.status !== 402) return { status: first.status, json: await first.json().catch(() => ({})) };
   const rail = pickSolana((await first.json().catch(() => ({}))).accepts);
-  const payment = await paySolana(rail, identity2);
+  const payment = await paySolana(rail, identity3);
   const second = await post({ "X-PAYMENT": payment.header, "PAYMENT-SIGNATURE": payment.header });
   const json = await second.json().catch(() => ({}));
-  await append(tag, { path: path10, status: second.status, amount_raw: payment.amount, at: now(), deploymentId: json.deploymentId || json.id || null });
+  await append(tag, { path: path11, status: second.status, amount_raw: payment.amount, at: now(), deploymentId: json.deploymentId || json.id || null });
   return { status: second.status, json, amount_raw: payment.amount };
 }
-async function createLease({ plan, hours = 1, compose, name }, identity2) {
-  return paidPost("/api/compute/deployments", { plan, hours, compose, name }, identity2, "procreation.lease");
+async function createLease({ plan, hours = 1, compose, name }, identity3) {
+  return paidPost("/api/compute/deployments", { plan, hours, compose, name }, identity3, "procreation.lease");
+}
+async function renewLease(deploymentId, { hours = 1 } = {}, identity3) {
+  return paidPost(`/api/compute/deployments/${deploymentId}/renew`, { hours }, identity3, "procreation.renew");
+}
+async function listDeployments({ timeoutMs = 2e4 } = {}) {
+  const { ownerGet: ownerGet2 } = await Promise.resolve().then(() => (init_agentgates_auth(), agentgates_auth_exports));
+  const b2 = await Promise.race([
+    ownerGet2(API, "/api/compute/deployments").then((r) => r.body),
+    new Promise((resolve2) => setTimeout(() => resolve2(null), timeoutMs))
+  ]);
+  if (!b2) return [];
+  return Array.isArray(b2) ? b2 : b2.deployments || b2.data || [];
 }
 var import_web3100, API, USDC2;
 var init_lease = __esm({
@@ -43135,7 +43400,7 @@ var init_lease = __esm({
 });
 
 // lib/x402-evm.mjs
-import crypto8 from "node:crypto";
+import crypto9 from "node:crypto";
 function pickAccept(accepts, { network = "eip155:8453" } = {}) {
   return (accepts || []).find((a2) => a2.scheme === "exact" && String(a2.network) === network) || (accepts || []).find((a2) => a2.scheme === "exact" && String(a2.asset || "").toLowerCase() === "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913");
 }
@@ -43149,7 +43414,7 @@ async function authorize(accept, { value, validForSeconds = 240, resource = null
     value: String(value ?? accept.amount ?? accept.maxAmountRequired),
     validAfter: String(now2 - 60),
     validBefore: String(now2 + validForSeconds),
-    nonce: "0x" + crypto8.randomBytes(32).toString("hex")
+    nonce: "0x" + crypto9.randomBytes(32).toString("hex")
   };
   const domain = {
     name: accept.extra?.name || "USD Coin",
@@ -43254,7 +43519,7 @@ var require_src3 = __commonJS({
   "node_modules/@coral-xyz/anchor/node_modules/base-x/src/index.js"(exports, module) {
     "use strict";
     var _Buffer = require_safe_buffer().Buffer;
-    function base2(ALPHABET2) {
+    function base3(ALPHABET2) {
       if (ALPHABET2.length >= 255) {
         throw new TypeError("Alphabet too long");
       }
@@ -43380,7 +43645,7 @@ var require_src3 = __commonJS({
         decode: decode2
       };
     }
-    module.exports = base2;
+    module.exports = base3;
   }
 });
 
@@ -43397,8 +43662,8 @@ var require_bs583 = __commonJS({
 var require_bs584 = __commonJS({
   "node_modules/@coral-xyz/anchor/dist/cjs/utils/bytes/bs58.js"(exports) {
     "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.encode = encode2;
@@ -43452,13 +43717,13 @@ var require_bytes = __commonJS({
     }) : function(o3, v2) {
       o3["default"] = v2;
     });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+    var __importStar = exports && exports.__importStar || function(mod2) {
+      if (mod2 && mod2.__esModule) return mod2;
       var result2 = {};
-      if (mod != null) {
-        for (var k2 in mod) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod, k2)) __createBinding(result2, mod, k2);
+      if (mod2 != null) {
+        for (var k2 in mod2) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k2)) __createBinding(result2, mod2, k2);
       }
-      __setModuleDefault(result2, mod);
+      __setModuleDefault(result2, mod2);
       return result2;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -45074,8 +45339,8 @@ var require_Layout2 = __commonJS({
 var require_dist3 = __commonJS({
   "node_modules/@coral-xyz/borsh/dist/index.js"(exports) {
     "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.struct = exports.f64 = exports.f32 = exports.i32 = exports.u32 = exports.i16 = exports.u16 = exports.i8 = exports.u8 = void 0;
@@ -45331,17 +45596,17 @@ var require_idl = __commonJS({
     }) : function(o3, v2) {
       o3["default"] = v2;
     });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+    var __importStar = exports && exports.__importStar || function(mod2) {
+      if (mod2 && mod2.__esModule) return mod2;
       var result2 = {};
-      if (mod != null) {
-        for (var k2 in mod) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod, k2)) __createBinding(result2, mod, k2);
+      if (mod2 != null) {
+        for (var k2 in mod2) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k2)) __createBinding(result2, mod2, k2);
       }
-      __setModuleDefault(result2, mod);
+      __setModuleDefault(result2, mod2);
       return result2;
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.isCompositeAccounts = isCompositeAccounts;
@@ -45359,8 +45624,8 @@ var require_idl = __commonJS({
       return "accounts" in accountItem;
     }
     async function idlAddress(programId) {
-      const base2 = (await web3_js_1.PublicKey.findProgramAddress([], programId))[0];
-      return await web3_js_1.PublicKey.createWithSeed(base2, seed(), programId);
+      const base3 = (await web3_js_1.PublicKey.findProgramAddress([], programId))[0];
+      return await web3_js_1.PublicKey.createWithSeed(base3, seed(), programId);
     }
     function seed() {
       return "anchor:idl";
@@ -45469,9 +45734,9 @@ var require_lib4 = __commonJS({
           ...rest
         } = failure;
         const {
-          path: path10
+          path: path11
         } = failure;
-        const msg = path10.length === 0 ? message : "At path: " + path10.join(".") + " -- " + message;
+        const msg = path11.length === 0 ? message : "At path: " + path11.join(".") + " -- " + message;
         super(msg);
         this.value = void 0;
         this.key = void 0;
@@ -45522,7 +45787,7 @@ var require_lib4 = __commonJS({
         };
       }
       const {
-        path: path10,
+        path: path11,
         branch
       } = context;
       const {
@@ -45536,8 +45801,8 @@ var require_lib4 = __commonJS({
         value,
         type: type2,
         refinement,
-        key: path10[path10.length - 1],
-        path: path10,
+        key: path11[path11.length - 1],
+        path: path11,
         branch,
         ...result2,
         message
@@ -45559,13 +45824,13 @@ var require_lib4 = __commonJS({
         options = {};
       }
       const {
-        path: path10 = [],
+        path: path11 = [],
         branch = [value],
         coerce: coerce2 = false,
         mask: mask2 = false
       } = options;
       const ctx = {
-        path: path10,
+        path: path11,
         branch
       };
       if (coerce2) {
@@ -45585,7 +45850,7 @@ var require_lib4 = __commonJS({
       }
       for (let [k2, v2, s] of struct62.entries(value, ctx)) {
         const ts = run(v2, s, {
-          path: k2 === void 0 ? path10 : [...path10, k2],
+          path: k2 === void 0 ? path11 : [...path11, k2],
           branch: k2 === void 0 ? branch : [...branch, v2],
           coerce: coerce2,
           mask: mask2
@@ -46933,13 +47198,13 @@ var require_error = __commonJS({
     }) : function(o3, v2) {
       o3["default"] = v2;
     });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+    var __importStar = exports && exports.__importStar || function(mod2) {
+      if (mod2 && mod2.__esModule) return mod2;
       var result2 = {};
-      if (mod != null) {
-        for (var k2 in mod) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod, k2)) __createBinding(result2, mod, k2);
+      if (mod2 != null) {
+        for (var k2 in mod2) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k2)) __createBinding(result2, mod2, k2);
       }
-      __setModuleDefault(result2, mod);
+      __setModuleDefault(result2, mod2);
       return result2;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -47497,13 +47762,13 @@ var require_idl2 = __commonJS({
     }) : function(o3, v2) {
       o3["default"] = v2;
     });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+    var __importStar = exports && exports.__importStar || function(mod2) {
+      if (mod2 && mod2.__esModule) return mod2;
       var result2 = {};
-      if (mod != null) {
-        for (var k2 in mod) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod, k2)) __createBinding(result2, mod, k2);
+      if (mod2 != null) {
+        for (var k2 in mod2) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k2)) __createBinding(result2, mod2, k2);
       }
-      __setModuleDefault(result2, mod);
+      __setModuleDefault(result2, mod2);
       return result2;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -47908,17 +48173,17 @@ var require_instruction = __commonJS({
     }) : function(o3, v2) {
       o3["default"] = v2;
     });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+    var __importStar = exports && exports.__importStar || function(mod2) {
+      if (mod2 && mod2.__esModule) return mod2;
       var result2 = {};
-      if (mod != null) {
-        for (var k2 in mod) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod, k2)) __createBinding(result2, mod, k2);
+      if (mod2 != null) {
+        for (var k2 in mod2) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k2)) __createBinding(result2, mod2, k2);
       }
-      __setModuleDefault(result2, mod);
+      __setModuleDefault(result2, mod2);
       return result2;
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.BorshInstructionCoder = void 0;
@@ -48139,8 +48404,8 @@ var require_instruction = __commonJS({
 var require_accounts = __commonJS({
   "node_modules/@coral-xyz/anchor/dist/cjs/coder/borsh/accounts.js"(exports) {
     "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.BorshAccountsCoder = void 0;
@@ -48259,13 +48524,13 @@ var require_event = __commonJS({
     }) : function(o3, v2) {
       o3["default"] = v2;
     });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+    var __importStar = exports && exports.__importStar || function(mod2) {
+      if (mod2 && mod2.__esModule) return mod2;
       var result2 = {};
-      if (mod != null) {
-        for (var k2 in mod) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod, k2)) __createBinding(result2, mod, k2);
+      if (mod2 != null) {
+        for (var k2 in mod2) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k2)) __createBinding(result2, mod2, k2);
       }
-      __setModuleDefault(result2, mod);
+      __setModuleDefault(result2, mod2);
       return result2;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -48420,17 +48685,17 @@ var require_instruction2 = __commonJS({
     }) : function(o3, v2) {
       o3["default"] = v2;
     });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+    var __importStar = exports && exports.__importStar || function(mod2) {
+      if (mod2 && mod2.__esModule) return mod2;
       var result2 = {};
-      if (mod != null) {
-        for (var k2 in mod) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod, k2)) __createBinding(result2, mod, k2);
+      if (mod2 != null) {
+        for (var k2 in mod2) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k2)) __createBinding(result2, mod2, k2);
       }
-      __setModuleDefault(result2, mod);
+      __setModuleDefault(result2, mod2);
       return result2;
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.SystemInstructionCoder = void 0;
@@ -48536,10 +48801,10 @@ var require_instruction2 = __commonJS({
         transfer: { lamports }
       });
     }
-    function encodeCreateAccountWithSeed({ base: base2, seed, lamports, space, owner }) {
+    function encodeCreateAccountWithSeed({ base: base3, seed, lamports, space, owner }) {
       return encodeData({
         createAccountWithSeed: {
-          base: base2.toBuffer(),
+          base: base3.toBuffer(),
           seed,
           lamports,
           space,
@@ -48572,20 +48837,20 @@ var require_instruction2 = __commonJS({
         allocate: { space }
       });
     }
-    function encodeAllocateWithSeed({ base: base2, seed, space, owner }) {
+    function encodeAllocateWithSeed({ base: base3, seed, space, owner }) {
       return encodeData({
         allocateWithSeed: {
-          base: base2.toBuffer(),
+          base: base3.toBuffer(),
           seed,
           space,
           owner: owner.toBuffer()
         }
       }, LAYOUT.getVariant(9).span + seed.length);
     }
-    function encodeAssignWithSeed({ base: base2, seed, owner }) {
+    function encodeAssignWithSeed({ base: base3, seed, owner }) {
       return encodeData({
         assignWithSeed: {
-          base: base2.toBuffer(),
+          base: base3.toBuffer(),
           seed,
           owner: owner.toBuffer()
         }
@@ -48670,13 +48935,13 @@ var require_accounts2 = __commonJS({
     }) : function(o3, v2) {
       o3["default"] = v2;
     });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+    var __importStar = exports && exports.__importStar || function(mod2) {
+      if (mod2 && mod2.__esModule) return mod2;
       var result2 = {};
-      if (mod != null) {
-        for (var k2 in mod) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod, k2)) __createBinding(result2, mod, k2);
+      if (mod2 != null) {
+        for (var k2 in mod2) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k2)) __createBinding(result2, mod2, k2);
       }
-      __setModuleDefault(result2, mod);
+      __setModuleDefault(result2, mod2);
       return result2;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -48941,17 +49206,17 @@ var require_registry = __commonJS({
     }) : function(o3, v2) {
       o3["default"] = v2;
     });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+    var __importStar = exports && exports.__importStar || function(mod2) {
+      if (mod2 && mod2.__esModule) return mod2;
       var result2 = {};
-      if (mod != null) {
-        for (var k2 in mod) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod, k2)) __createBinding(result2, mod, k2);
+      if (mod2 != null) {
+        for (var k2 in mod2) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k2)) __createBinding(result2, mod2, k2);
       }
-      __setModuleDefault(result2, mod);
+      __setModuleDefault(result2, mod2);
       return result2;
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.verifiedBuild = verifiedBuild;
@@ -49025,13 +49290,13 @@ var require_utils4 = __commonJS({
     }) : function(o3, v2) {
       o3["default"] = v2;
     });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+    var __importStar = exports && exports.__importStar || function(mod2) {
+      if (mod2 && mod2.__esModule) return mod2;
       var result2 = {};
-      if (mod != null) {
-        for (var k2 in mod) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod, k2)) __createBinding(result2, mod, k2);
+      if (mod2 != null) {
+        for (var k2 in mod2) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k2)) __createBinding(result2, mod2, k2);
       }
-      __setModuleDefault(result2, mod);
+      __setModuleDefault(result2, mod2);
       return result2;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -49172,7 +49437,7 @@ var require_trees = __commonJS({
       const stree = desc.stat_desc.static_tree;
       const has_stree = desc.stat_desc.has_stree;
       const extra = desc.stat_desc.extra_bits;
-      const base2 = desc.stat_desc.extra_base;
+      const base3 = desc.stat_desc.extra_base;
       const max_length = desc.stat_desc.max_length;
       let h2;
       let n, m;
@@ -49197,8 +49462,8 @@ var require_trees = __commonJS({
         }
         s.bl_count[bits]++;
         xbits = 0;
-        if (n >= base2) {
-          xbits = extra[n - base2];
+        if (n >= base3) {
+          xbits = extra[n - base3];
         }
         f2 = tree[n * 2];
         s.opt_len += f2 * (bits + xbits);
@@ -51716,7 +51981,7 @@ var require_inftrees = __commonJS({
       let low;
       let mask;
       let next;
-      let base2 = null;
+      let base3 = null;
       let match;
       const count = new Uint16Array(MAXBITS + 1);
       const offs = new Uint16Array(MAXBITS + 1);
@@ -51772,14 +52037,14 @@ var require_inftrees = __commonJS({
         }
       }
       if (type === CODES) {
-        base2 = extra = work;
+        base3 = extra = work;
         match = 20;
       } else if (type === LENS) {
-        base2 = lbase;
+        base3 = lbase;
         extra = lext;
         match = 257;
       } else {
-        base2 = dbase;
+        base3 = dbase;
         extra = dext;
         match = 0;
       }
@@ -51802,7 +52067,7 @@ var require_inftrees = __commonJS({
           here_val = work[sym];
         } else if (work[sym] >= match) {
           here_op = extra[work[sym] - match];
-          here_val = base2[work[sym] - match];
+          here_val = base3[work[sym] - match];
         } else {
           here_op = 32 + 64;
           here_val = 0;
@@ -53573,13 +53838,13 @@ var require_instruction3 = __commonJS({
     }) : function(o3, v2) {
       o3["default"] = v2;
     });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+    var __importStar = exports && exports.__importStar || function(mod2) {
+      if (mod2 && mod2.__esModule) return mod2;
       var result2 = {};
-      if (mod != null) {
-        for (var k2 in mod) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod, k2)) __createBinding(result2, mod, k2);
+      if (mod2 != null) {
+        for (var k2 in mod2) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k2)) __createBinding(result2, mod2, k2);
       }
-      __setModuleDefault(result2, mod);
+      __setModuleDefault(result2, mod2);
       return result2;
     };
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -53890,17 +54155,17 @@ var require_account = __commonJS({
     }) : function(o3, v2) {
       o3["default"] = v2;
     });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+    var __importStar = exports && exports.__importStar || function(mod2) {
+      if (mod2 && mod2.__esModule) return mod2;
       var result2 = {};
-      if (mod != null) {
-        for (var k2 in mod) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod, k2)) __createBinding(result2, mod, k2);
+      if (mod2 != null) {
+        for (var k2 in mod2) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k2)) __createBinding(result2, mod2, k2);
       }
-      __setModuleDefault(result2, mod);
+      __setModuleDefault(result2, mod2);
       return result2;
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.AccountClient = void 0;
@@ -54195,17 +54460,17 @@ var require_token_account_layout = __commonJS({
     }) : function(o3, v2) {
       o3["default"] = v2;
     });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+    var __importStar = exports && exports.__importStar || function(mod2) {
+      if (mod2 && mod2.__esModule) return mod2;
       var result2 = {};
-      if (mod != null) {
-        for (var k2 in mod) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod, k2)) __createBinding(result2, mod, k2);
+      if (mod2 != null) {
+        for (var k2 in mod2) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k2)) __createBinding(result2, mod2, k2);
       }
-      __setModuleDefault(result2, mod);
+      __setModuleDefault(result2, mod2);
       return result2;
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.decodeTokenAccount = decodeTokenAccount;
@@ -54318,8 +54583,8 @@ var require_token_account_layout = __commonJS({
 var require_accounts_resolver = __commonJS({
   "node_modules/@coral-xyz/anchor/dist/cjs/program/accounts-resolver.js"(exports) {
     "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.AccountsResolver = void 0;
@@ -54363,18 +54628,18 @@ var require_accounts_resolver = __commonJS({
               }
               return acc.accounts.some(isResolvable);
             };
-            const getPaths = (accs, path10 = [], paths = []) => {
+            const getPaths = (accs, path11 = [], paths = []) => {
               for (const acc of accs) {
                 if ((0, idl_js_1.isCompositeAccounts)(acc)) {
-                  paths.push(...getPaths(acc.accounts, [...path10, acc.name]));
+                  paths.push(...getPaths(acc.accounts, [...path11, acc.name]));
                 } else {
-                  paths.push([...path10, acc.name]);
+                  paths.push([...path11, acc.name]);
                 }
               }
               return paths;
             };
             const resolvableAccs = this._idlIx.accounts.filter(isResolvable);
-            const unresolvedAccs = getPaths(resolvableAccs).filter((path10) => !this.get(path10)).map((path10) => path10.reduce((acc, p2) => acc + "." + p2)).map((acc) => `\`${acc}\``).join(", ");
+            const unresolvedAccs = getPaths(resolvableAccs).filter((path11) => !this.get(path11)).map((path11) => path11.reduce((acc, p2) => acc + "." + p2)).map((acc) => `\`${acc}\``).join(", ");
             throw new Error([
               `Reached maximum depth for account resolution.`,
               `Unresolved accounts: ${unresolvedAccs}`
@@ -54385,17 +54650,17 @@ var require_accounts_resolver = __commonJS({
       resolveOptionals(accounts) {
         Object.assign(this._accounts, this.resolveOptionalsHelper(accounts, this._idlIx.accounts));
       }
-      get(path10) {
-        const ret = path10.reduce((acc, subPath) => acc && acc[subPath], this._accounts);
+      get(path11) {
+        const ret = path11.reduce((acc, subPath) => acc && acc[subPath], this._accounts);
         if (ret && ret.toBase58) {
           return ret;
         }
       }
-      set(path10, value) {
+      set(path11, value) {
         let cur = this._accounts;
-        path10.forEach((p2, i) => {
+        path11.forEach((p2, i) => {
           var _a;
-          const isLast = i === path10.length - 1;
+          const isLast = i === path11.length - 1;
           if (isLast) {
             cur[p2] = value;
           }
@@ -54446,12 +54711,12 @@ var require_accounts_resolver = __commonJS({
        * Accounts will only be resolved if they are declared next to each other to
        * reduce the chance of name collision.
        */
-      resolveEventCpi(accounts, path10 = []) {
+      resolveEventCpi(accounts, path11 = []) {
         for (const i in accounts) {
           const accountOrAccounts = accounts[i];
           if ((0, idl_js_1.isCompositeAccounts)(accountOrAccounts)) {
             this.resolveEventCpi(accountOrAccounts.accounts, [
-              ...path10,
+              ...path11,
               accountOrAccounts.name
             ]);
           }
@@ -54461,8 +54726,8 @@ var require_accounts_resolver = __commonJS({
           const currentName = accounts[i].name;
           const nextName = accounts[nextIndex].name;
           if (currentName === "eventAuthority" && nextName === "program") {
-            const currentPath = [...path10, currentName];
-            const nextPath = [...path10, nextName];
+            const currentPath = [...path11, currentName];
+            const nextPath = [...path11, nextName];
             if (!this.get(currentPath)) {
               this.set(currentPath, web3_js_1.PublicKey.findProgramAddressSync([Buffer.from("__event_authority")], this._programId)[0]);
             }
@@ -54473,57 +54738,57 @@ var require_accounts_resolver = __commonJS({
           }
         }
       }
-      resolveConst(accounts, path10 = []) {
+      resolveConst(accounts, path11 = []) {
         for (const accountOrAccounts of accounts) {
           const name = accountOrAccounts.name;
           if ((0, idl_js_1.isCompositeAccounts)(accountOrAccounts)) {
-            this.resolveConst(accountOrAccounts.accounts, [...path10, name]);
+            this.resolveConst(accountOrAccounts.accounts, [...path11, name]);
           } else {
             const account = accountOrAccounts;
-            if ((account.signer || account.address) && !this.get([...path10, name])) {
+            if ((account.signer || account.address) && !this.get([...path11, name])) {
               if (account.signer) {
                 if (!this._provider.publicKey) {
                   throw new Error("This function requires the `Provider` interface implementor to have a `publicKey` field.");
                 }
-                this.set([...path10, name], this._provider.publicKey);
+                this.set([...path11, name], this._provider.publicKey);
               }
               if (account.address) {
-                this.set([...path10, name], (0, index_js_1.translateAddress)(account.address));
+                this.set([...path11, name], (0, index_js_1.translateAddress)(account.address));
               }
             }
           }
         }
       }
-      async resolvePdasAndRelations(accounts, path10 = []) {
+      async resolvePdasAndRelations(accounts, path11 = []) {
         let found = 0;
         for (const accountOrAccounts of accounts) {
           const name = accountOrAccounts.name;
           if ((0, idl_js_1.isCompositeAccounts)(accountOrAccounts)) {
-            found += await this.resolvePdasAndRelations(accountOrAccounts.accounts, [...path10, name]);
+            found += await this.resolvePdasAndRelations(accountOrAccounts.accounts, [...path11, name]);
           } else {
             const account = accountOrAccounts;
-            if ((account.pda || account.relations) && !this.get([...path10, name])) {
+            if ((account.pda || account.relations) && !this.get([...path11, name])) {
               found++;
               try {
                 if (account.pda) {
-                  const seeds = await Promise.all(account.pda.seeds.map((seed) => this.toBuffer(seed, path10)));
+                  const seeds = await Promise.all(account.pda.seeds.map((seed) => this.toBuffer(seed, path11)));
                   if (seeds.some((seed) => !seed)) {
                     continue;
                   }
-                  const programId = await this.parseProgramId(account, path10);
+                  const programId = await this.parseProgramId(account, path11);
                   const [pubkey] = web3_js_1.PublicKey.findProgramAddressSync(seeds, programId);
-                  this.set([...path10, name], pubkey);
+                  this.set([...path11, name], pubkey);
                 }
               } catch {
               }
               try {
                 if (account.relations) {
-                  const accountKey = this.get([...path10, account.relations[0]]);
+                  const accountKey = this.get([...path11, account.relations[0]]);
                   if (accountKey) {
                     const account2 = await this._accountStore.fetchAccount({
                       publicKey: accountKey
                     });
-                    this.set([...path10, name], account2[name]);
+                    this.set([...path11, name], account2[name]);
                   }
                 }
               } catch {
@@ -54533,25 +54798,25 @@ var require_accounts_resolver = __commonJS({
         }
         return found;
       }
-      async parseProgramId(account, path10 = []) {
+      async parseProgramId(account, path11 = []) {
         var _a;
         if (!((_a = account.pda) === null || _a === void 0 ? void 0 : _a.program)) {
           return this._programId;
         }
-        const buf = await this.toBuffer(account.pda.program, path10);
+        const buf = await this.toBuffer(account.pda.program, path11);
         if (!buf) {
           throw new Error(`Program seed not resolved: ${account.name}`);
         }
         return new web3_js_1.PublicKey(buf);
       }
-      async toBuffer(seed, path10 = []) {
+      async toBuffer(seed, path11 = []) {
         switch (seed.kind) {
           case "const":
             return this.toBufferConst(seed);
           case "arg":
             return await this.toBufferArg(seed);
           case "account":
-            return await this.toBufferAccount(seed, path10);
+            return await this.toBufferAccount(seed, path11);
           default:
             throw new Error(`Unexpected seed: ${seed}`);
         }
@@ -54560,21 +54825,21 @@ var require_accounts_resolver = __commonJS({
         return this.toBufferValue("bytes", seed.value);
       }
       async toBufferArg(seed) {
-        const [name, ...path10] = seed.path.split(".");
+        const [name, ...path11] = seed.path.split(".");
         const index = this._idlIx.args.findIndex((arg) => arg.name === name);
         if (index === -1) {
           throw new Error(`Unable to find argument for seed: ${name}`);
         }
-        const value = path10.reduce((acc, path11) => (acc !== null && acc !== void 0 ? acc : {})[path11], this._args[index]);
+        const value = path11.reduce((acc, path12) => (acc !== null && acc !== void 0 ? acc : {})[path12], this._args[index]);
         if (value === void 0) {
           return;
         }
-        const type = this.getType(this._idlIx.args[index].type, path10);
+        const type = this.getType(this._idlIx.args[index].type, path11);
         return this.toBufferValue(type, value);
       }
-      async toBufferAccount(seed, path10 = []) {
+      async toBufferAccount(seed, path11 = []) {
         const [name, ...paths] = seed.path.split(".");
-        const fieldPubkey = this.get([...path10, name]);
+        const fieldPubkey = this.get([...path11, name]);
         if (!fieldPubkey)
           return;
         if (!paths.length) {
@@ -54639,12 +54904,12 @@ var require_accounts_resolver = __commonJS({
        * Recursively get the type at some path of either a primitive or a user
        * defined struct.
        */
-      getType(type, path10 = []) {
+      getType(type, path11 = []) {
         var _a;
         const typeName = (_a = type === null || type === void 0 ? void 0 : type.defined) === null || _a === void 0 ? void 0 : _a.name;
         if (typeName) {
           if (typeName === "tokenAccount") {
-            switch (path10.at(0)) {
+            switch (path11.at(0)) {
               case "mint":
               case "owner":
                 return "pubkey";
@@ -54652,14 +54917,14 @@ var require_accounts_resolver = __commonJS({
               case "delagatedAmount":
                 return "u64";
               default:
-                throw new Error(`Unknown token account path: ${path10}`);
+                throw new Error(`Unknown token account path: ${path11}`);
             }
           }
           const definedType = this._idlTypes.find((t) => t.name === typeName);
           if (!definedType) {
             throw new Error(`Type not found: ${typeName}`);
           }
-          const [fieldName, ...subPath] = path10;
+          const [fieldName, ...subPath] = path11;
           const fields = definedType.type.fields;
           const field = fields.find((field2) => field2.name === fieldName);
           if (!field) {
@@ -55056,8 +55321,8 @@ var require_views = __commonJS({
 var require_namespace = __commonJS({
   "node_modules/@coral-xyz/anchor/dist/cjs/program/namespace/index.js"(exports) {
     "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.MethodsBuilderFactory = exports.AccountClient = void 0;
@@ -55142,8 +55407,8 @@ var require_program = __commonJS({
     var __exportStar = exports && exports.__exportStar || function(m, exports2) {
       for (var p2 in m) if (p2 !== "default" && !Object.prototype.hasOwnProperty.call(exports2, p2)) __createBinding(exports2, m, p2);
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Program = void 0;
@@ -59311,8 +59576,8 @@ var require_compiler = __commonJS({
           valueAssignments.push(fullPath);
         }
       }
-      function pathAssigned(path10) {
-        return assignedPaths.indexOf(path10) !== -1;
+      function pathAssigned(path11) {
+        return assignedPaths.indexOf(path11) !== -1;
       }
       function reduceValueNode(node) {
         if (node.type === "Array") {
@@ -59336,20 +59601,20 @@ var require_compiler = __commonJS({
         return obj;
       }
       function setPath(node) {
-        var path10 = node.value;
-        var quotedPath = path10.map(quoteDottedString).join(".");
+        var path11 = node.value;
+        var quotedPath = path11.map(quoteDottedString).join(".");
         var line = node.line;
         var column = node.column;
         if (pathAssigned(quotedPath)) {
-          genError("Cannot redefine existing key '" + path10 + "'.", line, column);
+          genError("Cannot redefine existing key '" + path11 + "'.", line, column);
         }
         assignedPaths.push(quotedPath);
-        context = deepRef(data, path10, /* @__PURE__ */ Object.create(null), line, column);
-        currentPath = path10;
+        context = deepRef(data, path11, /* @__PURE__ */ Object.create(null), line, column);
+        currentPath = path11;
       }
       function addTableArray(node) {
-        var path10 = node.value;
-        var quotedPath = path10.map(quoteDottedString).join(".");
+        var path11 = node.value;
+        var quotedPath = path11.map(quoteDottedString).join(".");
         var line = node.line;
         var column = node.column;
         if (!pathAssigned(quotedPath)) {
@@ -59359,20 +59624,20 @@ var require_compiler = __commonJS({
           return p2.indexOf(quotedPath) !== 0;
         });
         assignedPaths.push(quotedPath);
-        context = deepRef(data, path10, [], line, column);
+        context = deepRef(data, path11, [], line, column);
         currentPath = quotedPath;
         if (context instanceof Array) {
           var newObj = /* @__PURE__ */ Object.create(null);
           context.push(newObj);
           context = newObj;
         } else {
-          genError("Cannot redefine existing key '" + path10 + "'.", line, column);
+          genError("Cannot redefine existing key '" + path11 + "'.", line, column);
         }
       }
       function deepRef(start, keys, value, line, column) {
         var traversed = [];
         var traversedPath = "";
-        var path10 = keys.join(".");
+        var path11 = keys.join(".");
         var ctx = start;
         for (var i = 0; i < keys.length; i++) {
           var key = keys[i];
@@ -59458,17 +59723,17 @@ var require_workspace = __commonJS({
     }) : function(o3, v2) {
       o3["default"] = v2;
     });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+    var __importStar = exports && exports.__importStar || function(mod2) {
+      if (mod2 && mod2.__esModule) return mod2;
       var result2 = {};
-      if (mod != null) {
-        for (var k2 in mod) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod, k2)) __createBinding(result2, mod, k2);
+      if (mod2 != null) {
+        for (var k2 in mod2) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k2)) __createBinding(result2, mod2, k2);
       }
-      __setModuleDefault(result2, mod);
+      __setModuleDefault(result2, mod2);
       return result2;
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     var toml = __importStar(require_toml());
@@ -59484,9 +59749,9 @@ var require_workspace = __commonJS({
         programName = (0, camelcase_1.default)(programName);
         if (workspaceCache[programName])
           return workspaceCache[programName];
-        const fs16 = __require("fs");
-        const path10 = __require("path");
-        const anchorToml = toml.parse(fs16.readFileSync("Anchor.toml"));
+        const fs18 = __require("fs");
+        const path11 = __require("path");
+        const anchorToml = toml.parse(fs18.readFileSync("Anchor.toml"));
         const clusterId = anchorToml.provider.cluster;
         const programs = (_a = anchorToml.programs) === null || _a === void 0 ? void 0 : _a[clusterId];
         let programEntry;
@@ -59499,17 +59764,17 @@ var require_workspace = __commonJS({
           idlPath = programEntry.idl;
           programId = programEntry.address;
         } else {
-          const idlDirPath = path10.join("target", "idl");
-          const fileName = fs16.readdirSync(idlDirPath).find((name) => (0, camelcase_1.default)(path10.parse(name).name) === programName);
+          const idlDirPath = path11.join("target", "idl");
+          const fileName = fs18.readdirSync(idlDirPath).find((name) => (0, camelcase_1.default)(path11.parse(name).name) === programName);
           if (!fileName) {
             throw new Error(`Failed to find IDL of program \`${programName}\``);
           }
-          idlPath = path10.join(idlDirPath, fileName);
+          idlPath = path11.join(idlDirPath, fileName);
         }
-        if (!fs16.existsSync(idlPath)) {
+        if (!fs18.existsSync(idlPath)) {
           throw new Error(`${idlPath} doesn't exist. Did you run \`anchor build\`?`);
         }
-        const idl = JSON.parse(fs16.readFileSync(idlPath));
+        const idl = JSON.parse(fs18.readFileSync(idlPath));
         if (programId) {
           idl.address = programId;
         }
@@ -59543,20 +59808,20 @@ var require_cjs = __commonJS({
     }) : function(o3, v2) {
       o3["default"] = v2;
     });
-    var __importStar = exports && exports.__importStar || function(mod) {
-      if (mod && mod.__esModule) return mod;
+    var __importStar = exports && exports.__importStar || function(mod2) {
+      if (mod2 && mod2.__esModule) return mod2;
       var result2 = {};
-      if (mod != null) {
-        for (var k2 in mod) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod, k2)) __createBinding(result2, mod, k2);
+      if (mod2 != null) {
+        for (var k2 in mod2) if (k2 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k2)) __createBinding(result2, mod2, k2);
       }
-      __setModuleDefault(result2, mod);
+      __setModuleDefault(result2, mod2);
       return result2;
     };
     var __exportStar = exports && exports.__exportStar || function(m, exports2) {
       for (var p2 in m) if (p2 !== "default" && !Object.prototype.hasOwnProperty.call(exports2, p2)) __createBinding(exports2, m, p2);
     };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
+    var __importDefault = exports && exports.__importDefault || function(mod2) {
+      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.utils = exports.AnchorProvider = exports.setProvider = exports.getProvider = exports.web3 = exports.BN = void 0;
@@ -59959,7 +60224,7 @@ function buyDebit({
   return booked.add(grossForTransferFee(quoteTransferFee, vault).sub(vault));
 }
 function buyBaseInput({
-  base: base2,
+  base: base3,
   slippage,
   baseReserve,
   quoteReserve,
@@ -59981,12 +60246,12 @@ function buyBaseInput({
       "Invalid input: 'baseReserve' or 'quoteReserve' cannot be zero."
     );
   }
-  if (base2.gt(baseReserve)) {
+  if (base3.gt(baseReserve)) {
     throw new Error("Cannot buy more base tokens than the pool reserves.");
   }
   const effectiveQuoteReserve = quoteReserve.add(virtualQuoteReserves);
-  const numerator = effectiveQuoteReserve.mul(base2);
-  const denominator = baseReserve.sub(base2);
+  const numerator = effectiveQuoteReserve.mul(base3);
+  const denominator = baseReserve.sub(base3);
   if (denominator.isZero()) {
     throw new Error("Pool would be depleted; denominator is zero.");
   }
@@ -60158,7 +60423,7 @@ function depositLpToken(lpToken, slippage, baseReserve, quoteReserve, totalLpTok
   };
 }
 function sellBaseInput({
-  base: base2,
+  base: base3,
   slippage,
   baseReserve,
   quoteReserve,
@@ -60181,7 +60446,7 @@ function sellBaseInput({
     );
   }
   const effectiveQuoteReserve = quoteReserve.add(virtualQuoteReserves);
-  const quoteAmountOut = effectiveQuoteReserve.mul(base2).div(baseReserve.add(base2));
+  const quoteAmountOut = effectiveQuoteReserve.mul(base3).div(baseReserve.add(base3));
   const {
     lpFeeBps,
     protocolFeeBps,
@@ -60389,17 +60654,17 @@ function withdraw(lpAmount, slippage, baseReserve, quoteReserve, totalLpTokens, 
   if (lpAmount.isZero() || totalLpTokens.isZero()) {
     throw new Error("LP amount or total LP tokens cannot be zero.");
   }
-  const base2 = baseReserve.mul(lpAmount).div(totalLpTokens);
+  const base3 = baseReserve.mul(lpAmount).div(totalLpTokens);
   const quote4 = netOfTransferFee(
     quoteTransferFee,
     quoteReserve.mul(lpAmount).div(totalLpTokens)
   );
   const scaleFactor = new import_bn13.default(1e9);
   const slippageFactor = new import_bn13.default((1 - slippage / 100) * 1e9);
-  const minBase = base2.mul(slippageFactor).div(scaleFactor);
+  const minBase = base3.mul(slippageFactor).div(scaleFactor);
   const minQuote = quote4.mul(slippageFactor).div(scaleFactor);
   return {
-    base: base2,
+    base: base3,
     quote: quote4,
     minBase,
     minQuote
@@ -60924,12 +61189,12 @@ function sweepBondingCurveFeeAccounts({
 }
 function normalizeHop(hop) {
   const side = (mint, tokenProgram) => isLegacyQuoteMint(mint) ? { mint: NATIVE_MINT, tokenProgram: TOKEN_PROGRAM_ID } : { mint, tokenProgram };
-  const base2 = side(hop.baseMint, hop.baseTokenProgram);
+  const base3 = side(hop.baseMint, hop.baseTokenProgram);
   const quote4 = side(hop.quoteMint, hop.quoteTokenProgram);
   return {
     venue: hop.venue,
-    baseMint: base2.mint,
-    baseTokenProgram: base2.tokenProgram,
+    baseMint: base3.mint,
+    baseTokenProgram: base3.tokenProgram,
     quoteMint: quote4.mint,
     quoteTokenProgram: quote4.tokenProgram
   };
@@ -61091,7 +61356,7 @@ function pumpQuoteAdmission(global2, quote4, quoteControl) {
   });
   return { depth, target };
 }
-function chainBuy(mint, base2, quoteSide, quoteIn) {
+function chainBuy(mint, base3, quoteSide, quoteIn) {
   if (quoteSide.lten(0)) {
     throw new Error(
       `Pump coin ${mint.toBase58()}: zero quote reserves (DivisionByZero)`
@@ -61099,7 +61364,7 @@ function chainBuy(mint, base2, quoteSide, quoteIn) {
   }
   return getBuyTokenAmountFromSolAmountQuote({
     inputAmount: quoteIn,
-    virtualTokenReserves: base2,
+    virtualTokenReserves: base3,
     virtualQuoteReserves: quoteSide
   });
 }
@@ -61206,7 +61471,7 @@ function getBuybackFeeRecipientForTokenQuote() {
   return new import_web3106.PublicKey(CURRENT_FEE_RECIPIENTS_FOR_BUYBACK[0]);
 }
 var import_web3106, import_bn, import_web3107, import_bn2, import_web3108, import_anchor3, import_web3109, import_bn3, import_web3110, import_bn4, import_web3111, import_bn5, import_web3112, import_bn6, import_web3113, import_anchor4, import_bn7, import_web3114, import_bn8, import_bn9, import_bn10, import_web3115, import_bn11, import_web3116, import_bn12, import_bn13, import_web3117, import_bn14, import_bn15, import_bn16, import_bn17, import_bn18, pump_default, NoShareholdersError, TooManyShareholdersError, ZeroShareError, InvalidShareTotalError, DuplicateShareholderError, UnsupportedQuoteMintError, CreatorFeeNotConfigurableError, CreatorFeeBpsOutOfRangeError, CreatorFeeNotAllowedForCashbackCoinError, CashbackDeprecatedError, HolderRewardDisabledError, HolderRewardCreatorImmutableError, CtoNotAllowedForMayhemCoinError, CashbackCoinNotSupportedError, CreatorFeeNotConfigurableForQuoteError, CurveDepthExceededError, QuoteBondingCurveNotEligibleError, QuoteCurveAwaitingMigrationError, QuoteReservesOutOfRangeError, QuotePoolNotFoundError, ONE_BILLION_SUPPLY, SOL_LIKE_QUOTE_MINTS, STABLE_QUOTE_MINTS, pump_amm_default, pump_fees_default, PUMP_PROGRAM_ID, PUMP_AMM_PROGRAM_ID, PUMP_FEE_PROGRAM_ID, PUMP_MINT, GLOBAL_CONFIG_PDA, PUMP_AMM_EVENT_AUTHORITY_PDA, GLOBAL_VOLUME_ACCUMULATOR_PDA, PUMP_AMM_FEE_CONFIG_PDA, PUMP_GLOBAL_PDA, PUMP_EVENT_AUTHORITY_PDA, PUMP_FEE_CONFIG_PDA, MPL_TOKEN_METADATA_PROGRAM_ID, PUMP_AMM_TOTAL_TOKEN_SUPPLY, USDC_MINT, STABLE_QUOTE_MINTS2, SOL_LIKE_QUOTE_MINTS2, ONE_IN_BASIS_POINTS3, MAX_FEE_BASIS_POINTS2, MULTI_HOP_MAX_HOPS, MULTI_HOP_MAX_POOLS_AT_MAX_HOPS, POOL_ACCOUNT_NEW_SIZE, FEE_CONFIG_SIZE_PRE_STABLE, FEE_CONFIG_SIZE_POST_STABLE, FEE_CONFIG_SIZE_POST_EXOTIC, FEE_CONFIG_FEE_TIERS_OFFSET, FEES_SIZE, FEE_TIER_SIZE, OFFLINE_PUMP_AMM_PROGRAM, PumpAmmSdk, PUMP_AMM_SDK, OnlinePumpAmmSdk, PumpAmmAdminSdk, OFFLINE_PUMP_PROGRAM, GET_MULTIPLE_ACCOUNTS_MAX_KEYS, TRADE_EVENT_DISCRIMINATOR, OnlinePumpSdk, PUMP_PROGRAM_ID2, PUMP_AMM_PROGRAM_ID2, MAYHEM_PROGRAM_ID, PUMP_FEE_PROGRAM_ID2, BONDING_CURVE_SIZE, BONDING_CURVE_INITIALIZE_SIZE, GLOBAL_SIZE, ADMIN_CTO_COMPUTE_UNIT_LIMIT, CREATE_EVENT_LAYOUT_PADDINGS, CREATE_POOL_EVENT_LAYOUT_PADDINGS, TRADE_EVENT_LAYOUT_PADDINGS, LIQUIDITY_EVENT_LAYOUT_PADDINGS, FEE_CONFIG_INITIALIZE_SIZE, FEE_CONFIG_POST_STABLE_SIZE, FEE_CONFIG_CURRENT_SIZE, FEE_CONFIG_FEE_TIERS_OFFSET2, FEE_TIER_LEN, FEES_LEN, VEC_LEN_PREFIX, MAX_FEE_TIERS_SUPPORTED, QUOTE_CONTROL_HEADER_LEN, QUOTE_CONTROL_LEN_OFFSET, QUOTE_CONTROL_ENTRY_LEN, PUMP_TOKEN_MINT, MAX_SHAREHOLDERS, MIGRATE_FIXED_ACCOUNTS, MIGRATE_V2_FIXED_ACCOUNTS, MIGRATE_V2_QUOTE_MINT_INDEX, DEFAULT_VAULT_QUOTE_CANDIDATES, PumpSdk, PUMP_SDK, GLOBAL_PDA, QUOTE_CONTROL_PDA, AMM_GLOBAL_PDA, FEE_PROGRAM_GLOBAL_PDA, PUMP_FEE_CONFIG_PDA2, GLOBAL_VOLUME_ACCUMULATOR_PDA2, AMM_GLOBAL_VOLUME_ACCUMULATOR_PDA, PUMP_EVENT_AUTHORITY_PDA2, PUMP_AMM_EVENT_AUTHORITY_PDA2, PUMP_FEE_EVENT_AUTHORITY_PDA, CANONICAL_POOL_INDEX, getGlobalParamsPda, getMayhemStatePda, getSolVaultPda, getTokenVaultPda, feeSharingConfigPda, isLegacyQuoteMint, normalizeQuoteMint, quoteAta, ammCreatorVaultPda, socialFeePda, donationFeePda, DONATION_RELAY_PROGRAM_ID_MAINNET, DONATION_RELAY_PROGRAM_ID_DEVNET, donationRelayPda, donationRelayEpochTrackerPda, donationRelayDebouncerPda, donationRelayMintWhitelistPda, donationRelayEventAuthorityPda, MAX_CURVE_DEPTH, CURRENT_FEE_RECIPIENTS, CURRENT_FEE_RECIPIENTS_FOR_BUYBACK;
-var init_esm5 = __esm({
+var init_esm7 = __esm({
   "node_modules/@pump-fun/pump-sdk/dist/esm/index.js"() {
     import_web3106 = __toESM(require_index_cjs());
     import_bn = __toESM(require_bn());
@@ -92472,10 +92737,10 @@ var init_esm5 = __esm({
       accountExists(accountInfo, owner) {
         return accountInfo !== null && accountInfo.owner.equals(owner);
       }
-      depositBaseInput(liquiditySolanaState, base2, slippage) {
+      depositBaseInput(liquiditySolanaState, base3, slippage) {
         const { pool, poolBaseTokenAccount, quoteTransferFee } = liquiditySolanaState;
         const { token1, lpToken, maxToken0, maxToken1 } = depositToken0(
-          base2,
+          base3,
           slippage,
           new import_bn5.default(poolBaseTokenAccount.amount.toString()),
           this.realQuoteReserves(liquiditySolanaState),
@@ -92755,7 +93020,7 @@ var init_esm5 = __esm({
           ]
         );
       }
-      async buyBaseInput(swapSolanaState, base2, slippage, options = {}) {
+      async buyBaseInput(swapSolanaState, base3, slippage, options = {}) {
         const {
           baseMint,
           baseMintAccount,
@@ -92767,7 +93032,7 @@ var init_esm5 = __esm({
         } = swapSolanaState;
         const { coinCreator, creator } = pool;
         const { maxQuote } = buyBaseInput({
-          base: base2,
+          base: base3,
           slippage,
           quoteTransferFee: swapSolanaState.quoteTransferFee,
           tradeV2: Boolean(options.v2) && supportsTradeV2(pool),
@@ -92784,7 +93049,7 @@ var init_esm5 = __esm({
           isMayhemMode: pool.isMayhemMode,
           creatorFeeBps: pool.creatorFeeBps
         });
-        return this.routedBuyInstructions(swapSolanaState, base2, maxQuote, options);
+        return this.routedBuyInstructions(swapSolanaState, base3, maxQuote, options);
       }
       async buyQuoteInput(swapSolanaState, quote4, slippage, options = {}) {
         const {
@@ -92797,7 +93062,7 @@ var init_esm5 = __esm({
           poolQuoteAmount
         } = swapSolanaState;
         const { coinCreator, creator } = pool;
-        const { base: base2, maxQuote } = buyQuoteInput({
+        const { base: base3, maxQuote } = buyQuoteInput({
           quote: quote4,
           slippage,
           quoteTransferFee: swapSolanaState.quoteTransferFee,
@@ -92815,7 +93080,7 @@ var init_esm5 = __esm({
           isMayhemMode: pool.isMayhemMode,
           creatorFeeBps: pool.creatorFeeBps
         });
-        return this.routedBuyInstructions(swapSolanaState, base2, maxQuote, options);
+        return this.routedBuyInstructions(swapSolanaState, base3, maxQuote, options);
       }
       async sellInstructions(swapSolanaState, baseAmountIn, minQuoteAmountOut) {
         return await this.withFixPoolInstructions(swapSolanaState, async () => {
@@ -92913,7 +93178,7 @@ var init_esm5 = __esm({
           swap
         );
       }
-      async sellBaseInput(swapSolanaState, base2, slippage, options = {}) {
+      async sellBaseInput(swapSolanaState, base3, slippage, options = {}) {
         const {
           baseMint,
           baseMintAccount,
@@ -92925,7 +93190,7 @@ var init_esm5 = __esm({
         } = swapSolanaState;
         const { coinCreator, creator } = pool;
         const { minQuote } = sellBaseInput({
-          base: base2,
+          base: base3,
           slippage,
           quoteTransferFee: swapSolanaState.quoteTransferFee,
           baseReserve: poolBaseAmount,
@@ -92944,7 +93209,7 @@ var init_esm5 = __esm({
         });
         return this.routedSellInstructions(
           swapSolanaState,
-          base2,
+          base3,
           minQuote,
           options
         );
@@ -92960,7 +93225,7 @@ var init_esm5 = __esm({
           poolQuoteAmount
         } = swapSolanaState;
         const { coinCreator, creator } = pool;
-        const { base: base2, minQuote } = sellQuoteInput({
+        const { base: base3, minQuote } = sellQuoteInput({
           quote: quote4,
           slippage,
           quoteTransferFee: swapSolanaState.quoteTransferFee,
@@ -92980,7 +93245,7 @@ var init_esm5 = __esm({
         });
         return this.routedSellInstructions(
           swapSolanaState,
-          base2,
+          base3,
           minQuote,
           options
         );
@@ -93507,10 +93772,10 @@ var init_esm5 = __esm({
           maxQuote
         );
       }
-      depositAutocompleteQuoteAndLpTokenFromBase(liquiditySolanaState, base2, slippage) {
+      depositAutocompleteQuoteAndLpTokenFromBase(liquiditySolanaState, base3, slippage) {
         const { quote: quote4, lpToken } = this.depositBaseInput(
           liquiditySolanaState,
-          base2,
+          base3,
           slippage
         );
         return {
@@ -93519,13 +93784,13 @@ var init_esm5 = __esm({
         };
       }
       depositAutocompleteBaseAndLpTokenFromQuote(liquiditySolanaState, quote4, slippage) {
-        const { base: base2, lpToken } = this.depositQuoteInput(
+        const { base: base3, lpToken } = this.depositQuoteInput(
           liquiditySolanaState,
           quote4,
           slippage
         );
         return {
-          base: base2,
+          base: base3,
           lpToken
         };
       }
@@ -93543,13 +93808,13 @@ var init_esm5 = __esm({
         );
       }
       withdrawAutoCompleteBaseAndQuoteFromLpToken(liquiditySolanaState, lpAmount, slippage) {
-        const { base: base2, quote: quote4 } = this.withdrawInputs(
+        const { base: base3, quote: quote4 } = this.withdrawInputs(
           liquiditySolanaState,
           lpAmount,
           slippage
         );
         return {
-          base: base2,
+          base: base3,
           quote: quote4
         };
       }
@@ -95490,11 +95755,11 @@ var init_esm5 = __esm({
        *   cashback coin sits on the leg charging the creator fee, as the program
        *   refuses those.
        */
-      async resolveMultiHopRoute(path10, side) {
-        if (path10.length < 2) {
+      async resolveMultiHopRoute(path11, side) {
+        if (path11.length < 2) {
           throw new Error("A route needs at least two mints");
         }
-        const mints = path10.map((mint) => normalizeQuoteMint(mint));
+        const mints = path11.map((mint) => normalizeQuoteMint(mint));
         const pairs = mints.slice(0, -1).map((mint, index) => {
           const next = mints[index + 1];
           return side === "buy" ? { baseMint: next, quoteMint: mint } : { baseMint: mint, quoteMint: next };
@@ -99033,149 +99298,1142 @@ ${(value.logs ?? []).join("\n")}`
   }
 });
 
-// node_modules/base-x/src/esm/index.js
-function base(ALPHABET2) {
-  if (ALPHABET2.length >= 255) {
-    throw new TypeError("Alphabet too long");
-  }
-  const BASE_MAP = new Uint8Array(256);
-  for (let j2 = 0; j2 < BASE_MAP.length; j2++) {
-    BASE_MAP[j2] = 255;
-  }
-  for (let i = 0; i < ALPHABET2.length; i++) {
-    const x = ALPHABET2.charAt(i);
-    const xc = x.charCodeAt(0);
-    if (BASE_MAP[xc] !== 255) {
-      throw new TypeError(x + " is ambiguous");
-    }
-    BASE_MAP[xc] = i;
-  }
-  const BASE5 = ALPHABET2.length;
-  const LEADER = ALPHABET2.charAt(0);
-  const FACTOR = Math.log(BASE5) / Math.log(256);
-  const iFACTOR = Math.log(256) / Math.log(BASE5);
-  function encode2(source) {
-    if (source instanceof Uint8Array) {
-    } else if (ArrayBuffer.isView(source)) {
-      source = new Uint8Array(source.buffer, source.byteOffset, source.byteLength);
-    } else if (Array.isArray(source)) {
-      source = Uint8Array.from(source);
-    }
-    if (!(source instanceof Uint8Array)) {
-      throw new TypeError("Expected Uint8Array");
-    }
-    if (source.length === 0) {
-      return "";
-    }
-    let zeroes = 0;
-    let length = 0;
-    let pbegin = 0;
-    const pend = source.length;
-    while (pbegin !== pend && source[pbegin] === 0) {
-      pbegin++;
-      zeroes++;
-    }
-    const size = (pend - pbegin) * iFACTOR + 1 >>> 0;
-    const b58 = new Uint8Array(size);
-    while (pbegin !== pend) {
-      let carry = source[pbegin];
-      let i = 0;
-      for (let it1 = size - 1; (carry !== 0 || i < length) && it1 !== -1; it1--, i++) {
-        carry += 256 * b58[it1] >>> 0;
-        b58[it1] = carry % BASE5 >>> 0;
-        carry = carry / BASE5 >>> 0;
-      }
-      if (carry !== 0) {
-        throw new Error("Non-zero carry");
-      }
-      length = i;
-      pbegin++;
-    }
-    let it2 = size - length;
-    while (it2 !== size && b58[it2] === 0) {
-      it2++;
-    }
-    let str = LEADER.repeat(zeroes);
-    for (; it2 < size; ++it2) {
-      str += ALPHABET2.charAt(b58[it2]);
-    }
-    return str;
-  }
-  function decodeUnsafe(source) {
-    if (typeof source !== "string") {
-      throw new TypeError("Expected String");
-    }
-    if (source.length === 0) {
-      return new Uint8Array();
-    }
-    let psz = 0;
-    let zeroes = 0;
-    let length = 0;
-    while (source[psz] === LEADER) {
-      zeroes++;
-      psz++;
-    }
-    const size = (source.length - psz) * FACTOR + 1 >>> 0;
-    const b256 = new Uint8Array(size);
-    while (psz < source.length) {
-      const charCode = source.charCodeAt(psz);
-      if (charCode > 255) {
-        return;
-      }
-      let carry = BASE_MAP[charCode];
-      if (carry === 255) {
-        return;
-      }
-      let i = 0;
-      for (let it3 = size - 1; (carry !== 0 || i < length) && it3 !== -1; it3--, i++) {
-        carry += BASE5 * b256[it3] >>> 0;
-        b256[it3] = carry % 256 >>> 0;
-        carry = carry / 256 >>> 0;
-      }
-      if (carry !== 0) {
-        throw new Error("Non-zero carry");
-      }
-      length = i;
-      psz++;
-    }
-    let it4 = size - length;
-    while (it4 !== size && b256[it4] === 0) {
-      it4++;
-    }
-    const vch = new Uint8Array(zeroes + (size - it4));
-    let j2 = zeroes;
-    while (it4 !== size) {
-      vch[j2++] = b256[it4++];
-    }
-    return vch;
-  }
-  function decode2(string) {
-    const buffer = decodeUnsafe(string);
-    if (buffer) {
-      return buffer;
-    }
-    throw new Error("Non-base" + BASE5 + " character");
-  }
-  return {
-    encode: encode2,
-    decodeUnsafe,
-    decode: decode2
-  };
+// lib/token-program.mjs
+var token_program_exports = {};
+__export(token_program_exports, {
+  SPL: () => SPL,
+  T22: () => T22,
+  tokenProgramOf: () => tokenProgramOf
+});
+async function tokenProgramOf(conn3, mint) {
+  const info = await conn3.getAccountInfo(new import_web3119.PublicKey(mint));
+  if (!info) return T22;
+  return new import_web3119.PublicKey(info.owner);
 }
-var esm_default;
-var init_esm6 = __esm({
-  "node_modules/base-x/src/esm/index.js"() {
-    esm_default = base;
+var import_web3119, SPL, T22;
+var init_token_program = __esm({
+  "lib/token-program.mjs"() {
+    import_web3119 = __toESM(require_index_cjs(), 1);
+    SPL = new import_web3119.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+    T22 = new import_web3119.PublicKey("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
   }
 });
 
-// node_modules/bs58/src/esm/index.js
-var ALPHABET, esm_default2;
-var init_esm7 = __esm({
-  "node_modules/bs58/src/esm/index.js"() {
-    init_esm6();
-    ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-    esm_default2 = esm_default(ALPHABET);
+// strategies/pump-lifecycle.mjs
+var pump_lifecycle_exports = {};
+__export(pump_lifecycle_exports, {
+  collect: () => collect,
+  exit: () => exit,
+  observe: () => observe,
+  withdrawVault: () => withdrawVault
+});
+function wire2(ix) {
+  return {
+    programId: typeof ix.programId === "string" ? ix.programId : ix.programId.toBase58(),
+    keys: ix.keys.map((k2) => ({ pubkey: typeof k2.pubkey === "string" ? k2.pubkey : k2.pubkey.toBase58(), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
+    dataHex: ix.dataHex || Buffer.from(ix.data).toString("hex")
+  };
+}
+async function observe(mintAddress) {
+  const online = new OnlinePumpSdk(conn());
+  const mint = new import_web3120.PublicKey(mintAddress);
+  const curve = await online.fetchBondingCurve(mint).catch(() => null);
+  if (!curve) return { mint: mintAddress, exists: false };
+  const g2 = (k2) => (curve[k2] ?? curve.account?.[k2])?.toString?.() ?? String(curve[k2] ?? curve.account?.[k2] ?? "");
+  return {
+    mint: mintAddress,
+    exists: true,
+    virtualTokenReserves: g2("virtualTokenReserves"),
+    virtualSolReserves: g2("virtualSolReserves"),
+    realTokenReserves: g2("realTokenReserves"),
+    realSolReserves: g2("realSolReserves"),
+    tokenTotalSupply: g2("tokenTotalSupply"),
+    complete: Boolean(curve.complete ?? curve.account?.complete),
+    creator: String(curve.creator ?? curve.account?.creator ?? "")
+  };
+}
+async function signSimSend(identity3, ixs, tag, extra = {}) {
+  const user = identity3.solana.public_key;
+  const { blockhash, lastValidBlockHeight } = await getLatestBlockhash();
+  const env = await signV1({
+    instructions: ixs.map(wire2),
+    blockhash,
+    lastValidBlockHeight,
+    cuLimit: 14e5,
+    allowedDestinations: [user],
+    strategy: true
+  });
+  const sim = await simulate(env.wireBase64, [user]);
+  const base3 = { at: now(), ...extra, sim_err: sim.value?.err || null, sim_logs: (sim.value?.logs || []).slice(-6) };
+  if (sim.value?.err) {
+    await append(`${tag}_sim_failed`, base3);
+    return { ok: false, ...base3 };
+  }
+  const sig = await sendRaw(env.wireBase64);
+  let status = null;
+  for (let i = 0; i < 40; i++) {
+    const st = (await signatureStatuses([sig]))[0];
+    if (st?.confirmationStatus) {
+      status = st;
+      break;
+    }
+    await new Promise((r) => setTimeout(r, 1200));
+  }
+  const out = { ...base3, signature: sig, status: status?.confirmationStatus || "unknown", err: status?.err || null };
+  await append(tag, out);
+  return { ok: !status?.err && !!status, ...out };
+}
+async function exit({ identity: identity3, mint: mintAddress, amountRaw, slippage = 1500 }) {
+  const online = new OnlinePumpSdk(conn());
+  const mint = new import_web3120.PublicKey(mintAddress);
+  const user = new import_web3120.PublicKey(identity3.solana.public_key);
+  const { tokenProgramOf: tokenProgramOf2 } = await Promise.resolve().then(() => (init_token_program(), token_program_exports));
+  const T22P = await tokenProgramOf2(conn(), mint);
+  const curve = await online.fetchBondingCurve(mint);
+  const global2 = await online.fetchGlobal();
+  const curvePda = bondingCurvePda2(mint);
+  const ata = getAssociatedTokenAddressSync(mint, user, false, T22P);
+  let amount = amountRaw;
+  if (!amount) {
+    const acc = await conn().getParsedAccountInfo(ata);
+    amount = acc?.value?.data?.parsed?.info?.tokenAmount?.amount;
+  }
+  if (!amount || amount === "0") return { ok: false, err: "no position in this wallet" };
+  const ixs = [
+    createAssociatedTokenAccountIdempotentInstruction(user, ata, user, mint, T22P),
+    ...await sdk2.sellInstructions({
+      global: global2,
+      bondingCurveAccountInfo: await conn().getAccountInfo(curvePda),
+      bondingCurve: curve,
+      mint,
+      user,
+      amount: new import_bn20.default(String(amount)),
+      solAmount: new import_bn20.default(0),
+      slippage,
+      tokenProgram: T22P
+    })
+  ];
+  return signSimSend(identity3, ixs, "pump.exit", { mint: mintAddress, amount_raw: String(amount) });
+}
+async function collect({ identity: identity3, mint: mintAddress }) {
+  const user = new import_web3120.PublicKey(identity3.solana.public_key);
+  const ix = await sdk2.sweepCreatorFeeInstruction({ payer: user, mint: new import_web3120.PublicKey(mintAddress), creator: user, quoteMint: WSOL2, quoteTokenProgram: TOKEN });
+  return signSimSend(identity3, [ix], "pump.collect", { mint: mintAddress });
+}
+async function withdrawVault({ identity: identity3 }) {
+  const creator = new import_web3120.PublicKey(identity3.solana.public_key);
+  const vault = import_web3120.PublicKey.findProgramAddressSync([Buffer.from("creator-vault"), creator.toBuffer()], PUMP_PROGRAM)[0];
+  const eventAuthority = import_web3120.PublicKey.findProgramAddressSync([Buffer.from("__event_authority")], PUMP_PROGRAM)[0];
+  const ix = {
+    programId: PUMP_PROGRAM,
+    keys: [
+      { pubkey: creator.toBase58(), isSigner: true, isWritable: true },
+      { pubkey: vault.toBase58(), isSigner: false, isWritable: true },
+      { pubkey: "11111111111111111111111111111111", isSigner: false, isWritable: false },
+      { pubkey: eventAuthority.toBase58(), isSigner: false, isWritable: false },
+      { pubkey: PUMP_PROGRAM.toBase58(), isSigner: false, isWritable: false }
+    ],
+    dataHex: Buffer.from(COLLECT_DISC).toString("hex")
+  };
+  return signSimSend(identity3, [ix], "pump.withdraw_vault", { creator: creator.toBase58(), vault: vault.toBase58() });
+}
+var import_web3120, import_bn20, WSOL2, TOKEN, sdk2, conn, PUMP_PROGRAM, COLLECT_DISC;
+var init_pump_lifecycle = __esm({
+  "strategies/pump-lifecycle.mjs"() {
+    import_web3120 = __toESM(require_index_cjs(), 1);
+    init_esm4();
+    init_esm7();
+    import_bn20 = __toESM(require_bn(), 1);
+    init_esm7();
+    init_signer_client();
+    init_rpc();
+    init_journal();
+    init_util();
+    WSOL2 = new import_web3120.PublicKey("So11111111111111111111111111111111111111112");
+    TOKEN = new import_web3120.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+    sdk2 = new PumpSdk();
+    conn = () => new import_web3120.Connection(RPC_URL, "confirmed");
+    PUMP_PROGRAM = new import_web3120.PublicKey("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P");
+    COLLECT_DISC = [20, 22, 86, 123, 198, 28, 219, 132];
+  }
+});
+
+// node_modules/@jup-ag/lend/dist/shared/lend.Ce_TNXL0.mjs
+var import_web3121, PROGRAM_IDS, perMarket, getVaultsProgramId, getLiquidityProgramId, getLendingProgramId, getFlashloanProgramId, getLendingRewardRateModelProgramId, getDexProgramId, DEX_PROGRAM_ID, ORACLE_PROGRAM_ID, MPL_TOKEN_METADATA_PROGRAM_ID2, READONLY_SIGNER;
+var init_lend_Ce_TNXL0 = __esm({
+  "node_modules/@jup-ag/lend/dist/shared/lend.Ce_TNXL0.mjs"() {
+    import_web3121 = __toESM(require_index_cjs(), 1);
+    PROGRAM_IDS = {
+      vaults: {
+        main: "jupr81YtYssSyPt8jbnGuiWon5f6x9TcDEFxYe3Bdzi",
+        ethena: "jupo974WCqAUMD3RtpayTap1me7StQCWtEkBbDb6Ba3",
+        galaxy: "jupGzLGoLzW1xac45pxMa6fMBtDSyQu4DxLk9F7Tqch"
+      },
+      liquidity: {
+        main: "jupeiUmn818Jg1ekPURTpr4mFo29p46vygyykFJ3wZC",
+        ethena: "jup6QF1sNDGpkkcu6F4qaFHcRBmnSS1VgyB4uFbBvNS",
+        galaxy: "jupGn4jL7x9rxLh6CddPcckD3Sn3imXznJWJaT61qH9"
+      },
+      lending: {
+        main: "jup3YeL8QhtSx1e253b2FDvsMNC87fDrgQZivbrndc9",
+        ethena: "jup97Zx1NixM8UJMQFw8TtKzqTiRT3ETAJR7cVx3PfQ",
+        galaxy: "jupG2HgSoMonThDnmSc9kYjqkmD2ka54T2iZdNyjdQU"
+      },
+      flashloan: {
+        main: "jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS",
+        ethena: "jupKxkab7RTnQJ6wXStXg6WY4rcReV3maiUNwByciFF",
+        galaxy: "jupGqBCvfpJy8yLsnnBtiw5GTd6hi3Kg4KrbrzN3C4q"
+      },
+      lendingRewardRateModel: {
+        main: "jup7TthsMgcR9Y3L277b8Eo9uboVSmu1utkuXHNUKar",
+        ethena: "jupGBUJYXuzz2hVSoqjrxoEwJUB6uuHJsQqkzmYyQ7n",
+        galaxy: "jupGeFNt34vdhJH2wjbJs2Dx9UXjYtDZFFmgoPsLe3Q"
+      },
+      dex: {
+        main: "jupZ4m2GqUCJ5iueMfzQf8khFfH31d4XAQt3RzCT9Vd",
+        ethena: "jupZ4m2GqUCJ5iueMfzQf8khFfH31d4XAQt3RzCT9Vd",
+        galaxy: "jupGfzSq5GT3BpeK7NM5YLBK3KzvR6Z32Mq2fsSgegL"
+      }
+    };
+    perMarket = (ids) => {
+      const cache2 = {};
+      return (market = "main") => cache2[market] ??= new import_web3121.PublicKey(ids[market]);
+    };
+    getVaultsProgramId = perMarket(PROGRAM_IDS.vaults);
+    getLiquidityProgramId = perMarket(PROGRAM_IDS.liquidity);
+    getLendingProgramId = perMarket(PROGRAM_IDS.lending);
+    getFlashloanProgramId = perMarket(PROGRAM_IDS.flashloan);
+    getLendingRewardRateModelProgramId = perMarket(
+      PROGRAM_IDS.lendingRewardRateModel
+    );
+    getDexProgramId = perMarket(PROGRAM_IDS.dex);
+    DEX_PROGRAM_ID = getDexProgramId();
+    ORACLE_PROGRAM_ID = new import_web3121.PublicKey(
+      "jupnw4B6Eqs7ft6rxpzYLJZYSnrpRgPcr589n5Kv4oc"
+    );
+    MPL_TOKEN_METADATA_PROGRAM_ID2 = new import_web3121.PublicKey(
+      "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+    );
+    READONLY_SIGNER = new import_web3121.PublicKey(
+      "HEyJLdMfZhhQ7FHCtjD5DWDFNFQhaeAVAsHeWqoY6dSD"
+    );
+  }
+});
+
+// node_modules/@jup-ag/lend/dist/shared/lend.BhHkksLH.mjs
+var import_web3122, import_anchor5, getAccountOwner, getOrCreateATAInstruction, isNativeMint, createsAta, getWrapSolInstructions, getWsolAtaCreateInstructions, getUnwrapSolInstructions, address$1, metadata$1, instructions$1, accounts$1, events$1, errors$1, types$1, flashloanIdl, getFlashloanProgram;
+var init_lend_BhHkksLH = __esm({
+  "node_modules/@jup-ag/lend/dist/shared/lend.BhHkksLH.mjs"() {
+    init_esm4();
+    import_web3122 = __toESM(require_index_cjs(), 1);
+    import_anchor5 = __toESM(require_cjs(), 1);
+    init_lend_Ce_TNXL0();
+    getAccountOwner = async (account, connection) => {
+      const info = await connection.getAccountInfo(account);
+      if (!info)
+        throw new Error(`Account info not found for ${account.toString()}`);
+      return info.owner;
+    };
+    getOrCreateATAInstruction = async (owner, mint, connection) => {
+      const tokenProgram = await getAccountOwner(mint, connection);
+      const associatedTokenAccount = await getAssociatedTokenAddress(
+        mint,
+        owner,
+        true,
+        // allowOwnerOffCurve - supports PDA owners
+        tokenProgram
+      );
+      const account = await getAccount(
+        connection,
+        associatedTokenAccount,
+        "confirmed",
+        tokenProgram
+      ).catch(() => null);
+      const ixs = [];
+      if (!account) {
+        ixs.push(
+          createAssociatedTokenAccountIdempotentInstruction(
+            owner,
+            associatedTokenAccount,
+            owner,
+            mint,
+            tokenProgram
+          )
+        );
+      }
+      return ixs;
+    };
+    isNativeMint = (mint) => mint.equals(NATIVE_MINT);
+    createsAta = (ixs, ata) => ixs.some(
+      (ix) => ix.programId.equals(ASSOCIATED_TOKEN_PROGRAM_ID) && ix.keys[1]?.pubkey.equals(ata)
+    );
+    getWrapSolInstructions = async ({
+      payer,
+      owner,
+      amount,
+      connection,
+      priorIxs = []
+    }) => {
+      if (amount.isZero()) return [];
+      const tokenProgram = await getAccountOwner(NATIVE_MINT, connection);
+      const wsolAta = getAssociatedTokenAddressSync(
+        NATIVE_MINT,
+        owner,
+        true,
+        tokenProgram
+      );
+      return [
+        ...createsAta(priorIxs, wsolAta) ? [] : [
+          createAssociatedTokenAccountIdempotentInstruction(
+            payer,
+            wsolAta,
+            owner,
+            NATIVE_MINT,
+            tokenProgram
+          )
+        ],
+        import_web3122.SystemProgram.transfer({
+          fromPubkey: payer,
+          toPubkey: wsolAta,
+          lamports: BigInt(amount.toString(10))
+        }),
+        createSyncNativeInstruction(wsolAta, tokenProgram)
+      ];
+    };
+    getWsolAtaCreateInstructions = async ({
+      payer,
+      owner,
+      connection,
+      priorIxs = []
+    }) => {
+      const tokenProgram = await getAccountOwner(NATIVE_MINT, connection);
+      const wsolAta = getAssociatedTokenAddressSync(
+        NATIVE_MINT,
+        owner,
+        true,
+        tokenProgram
+      );
+      if (createsAta(priorIxs, wsolAta)) return [];
+      return [
+        createAssociatedTokenAccountIdempotentInstruction(
+          payer,
+          wsolAta,
+          owner,
+          NATIVE_MINT,
+          tokenProgram
+        )
+      ];
+    };
+    getUnwrapSolInstructions = async ({
+      owner,
+      connection
+    }) => {
+      const tokenProgram = await getAccountOwner(NATIVE_MINT, connection);
+      const wsolAta = getAssociatedTokenAddressSync(
+        NATIVE_MINT,
+        owner,
+        true,
+        tokenProgram
+      );
+      return [
+        createCloseAccountInstruction(wsolAta, owner, owner, [], tokenProgram)
+      ];
+    };
+    address$1 = "jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS";
+    metadata$1 = {
+      name: "flashloan",
+      version: "0.1.4",
+      spec: "0.1.0",
+      description: "Created with Anchor"
+    };
+    instructions$1 = [
+      {
+        name: "activate_protocol",
+        discriminator: [
+          230,
+          235,
+          188,
+          19,
+          120,
+          91,
+          11,
+          94
+        ],
+        accounts: [
+          {
+            name: "authority",
+            signer: true
+          },
+          {
+            name: "flashloan_admin",
+            writable: true
+          }
+        ],
+        args: []
+      },
+      {
+        name: "flashloan_borrow",
+        discriminator: [
+          103,
+          19,
+          78,
+          24,
+          240,
+          9,
+          135,
+          63
+        ],
+        accounts: [
+          {
+            name: "signer",
+            writable: true,
+            signer: true
+          },
+          {
+            name: "flashloan_admin",
+            writable: true
+          },
+          {
+            name: "signer_borrow_token_account",
+            writable: true
+          },
+          {
+            name: "mint"
+          },
+          {
+            name: "flashloan_token_reserves_liquidity",
+            writable: true
+          },
+          {
+            name: "flashloan_borrow_position_on_liquidity",
+            writable: true
+          },
+          {
+            name: "rate_model"
+          },
+          {
+            name: "vault",
+            writable: true
+          },
+          {
+            name: "liquidity"
+          },
+          {
+            name: "liquidity_program",
+            relations: [
+              "flashloan_admin"
+            ]
+          },
+          {
+            name: "token_program"
+          },
+          {
+            name: "associated_token_program",
+            optional: true,
+            address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+          },
+          {
+            name: "system_program",
+            address: "11111111111111111111111111111111"
+          },
+          {
+            name: "instruction_sysvar",
+            address: "Sysvar1nstructions1111111111111111111111111"
+          }
+        ],
+        args: [
+          {
+            name: "amount",
+            type: "u64"
+          }
+        ]
+      },
+      {
+        name: "flashloan_payback",
+        discriminator: [
+          213,
+          47,
+          153,
+          137,
+          84,
+          243,
+          94,
+          232
+        ],
+        accounts: [
+          {
+            name: "signer",
+            writable: true,
+            signer: true
+          },
+          {
+            name: "flashloan_admin",
+            writable: true
+          },
+          {
+            name: "signer_borrow_token_account",
+            writable: true
+          },
+          {
+            name: "mint"
+          },
+          {
+            name: "flashloan_token_reserves_liquidity",
+            writable: true
+          },
+          {
+            name: "flashloan_borrow_position_on_liquidity",
+            writable: true
+          },
+          {
+            name: "rate_model"
+          },
+          {
+            name: "vault",
+            writable: true
+          },
+          {
+            name: "liquidity"
+          },
+          {
+            name: "liquidity_program",
+            relations: [
+              "flashloan_admin"
+            ]
+          },
+          {
+            name: "token_program"
+          },
+          {
+            name: "associated_token_program",
+            optional: true,
+            address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+          },
+          {
+            name: "system_program",
+            address: "11111111111111111111111111111111"
+          },
+          {
+            name: "instruction_sysvar",
+            address: "Sysvar1nstructions1111111111111111111111111"
+          }
+        ],
+        args: [
+          {
+            name: "amount",
+            type: "u64"
+          }
+        ]
+      },
+      {
+        name: "init_flashloan_admin",
+        discriminator: [
+          185,
+          117,
+          154,
+          56,
+          95,
+          12,
+          187,
+          139
+        ],
+        accounts: [
+          {
+            name: "signer",
+            writable: true,
+            signer: true
+          },
+          {
+            name: "flashloan_admin",
+            writable: true,
+            pda: {
+              seeds: [
+                {
+                  kind: "const",
+                  value: [
+                    102,
+                    108,
+                    97,
+                    115,
+                    104,
+                    108,
+                    111,
+                    97,
+                    110,
+                    95,
+                    97,
+                    100,
+                    109,
+                    105,
+                    110
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            name: "system_program",
+            address: "11111111111111111111111111111111"
+          }
+        ],
+        args: [
+          {
+            name: "authority",
+            type: "pubkey"
+          },
+          {
+            name: "flashloan_fee",
+            type: "u16"
+          },
+          {
+            name: "liquidity_program",
+            type: "pubkey"
+          }
+        ]
+      },
+      {
+        name: "pause_protocol",
+        discriminator: [
+          144,
+          95,
+          0,
+          107,
+          119,
+          39,
+          248,
+          141
+        ],
+        accounts: [
+          {
+            name: "authority",
+            signer: true
+          },
+          {
+            name: "flashloan_admin",
+            writable: true
+          }
+        ],
+        args: []
+      },
+      {
+        name: "set_flashloan_fee",
+        discriminator: [
+          120,
+          248,
+          221,
+          70,
+          84,
+          216,
+          0,
+          149
+        ],
+        accounts: [
+          {
+            name: "authority",
+            signer: true
+          },
+          {
+            name: "flashloan_admin",
+            writable: true
+          }
+        ],
+        args: [
+          {
+            name: "flashloan_fee",
+            type: "u16"
+          }
+        ]
+      },
+      {
+        name: "update_authority",
+        discriminator: [
+          32,
+          46,
+          64,
+          28,
+          149,
+          75,
+          243,
+          88
+        ],
+        accounts: [
+          {
+            name: "authority",
+            signer: true
+          },
+          {
+            name: "flashloan_admin",
+            writable: true
+          }
+        ],
+        args: [
+          {
+            name: "new_authority",
+            type: "pubkey"
+          }
+        ]
+      }
+    ];
+    accounts$1 = [
+      {
+        name: "FlashloanAdmin",
+        discriminator: [
+          162,
+          161,
+          45,
+          28,
+          131,
+          91,
+          202,
+          88
+        ]
+      }
+    ];
+    events$1 = [
+      {
+        name: "ActivateProtocol",
+        discriminator: [
+          70,
+          178,
+          173,
+          151,
+          180,
+          166,
+          68,
+          102
+        ]
+      },
+      {
+        name: "LogUpdateAuthority",
+        discriminator: [
+          150,
+          152,
+          157,
+          143,
+          6,
+          135,
+          193,
+          101
+        ]
+      },
+      {
+        name: "PauseProtocol",
+        discriminator: [
+          66,
+          229,
+          166,
+          147,
+          152,
+          13,
+          42,
+          29
+        ]
+      },
+      {
+        name: "SetFlashloanFee",
+        discriminator: [
+          112,
+          164,
+          66,
+          251,
+          191,
+          56,
+          0,
+          47
+        ]
+      }
+    ];
+    errors$1 = [
+      {
+        code: 6e3,
+        name: "FlashloanInvalidAuthority",
+        msg: "FLASHLOAN_INVALID_AUTHORITY"
+      },
+      {
+        code: 6001,
+        name: "FlashloanFeeTooHigh",
+        msg: "FLASHLOAN_FEE_TOO_HIGH"
+      },
+      {
+        code: 6002,
+        name: "FlashloanInvalidParams",
+        msg: "FLASHLOAN_INVALID_PARAMS"
+      },
+      {
+        code: 6003,
+        name: "FlashloanAlreadyActive",
+        msg: "FLASHLOAN_ALREADY_ACTIVE"
+      },
+      {
+        code: 6004,
+        name: "FlashloanAlreadyInactive",
+        msg: "FLASHLOAN_ALREADY_INACTIVE"
+      },
+      {
+        code: 6005,
+        name: "FlashloanCpiToLiquidityFailed",
+        msg: "FLASHLOAN_CPI_TO_LIQUIDITY_FAILED"
+      },
+      {
+        code: 6006,
+        name: "FlashloanNotAllowedInThisSlot",
+        msg: "FLASHLOAN_NOT_ALLOWED_IN_THIS_SLOT"
+      },
+      {
+        code: 6007,
+        name: "FlashloanInvalidInstructionSysvar",
+        msg: "FLASHLOAN_INVALID_INSTRUCTION_SYSVAR"
+      },
+      {
+        code: 6008,
+        name: "FlashloanInvalidInstructionData",
+        msg: "FLASHLOAN_INVALID_INSTRUCTION_DATA"
+      },
+      {
+        code: 6009,
+        name: "FlashloanPaybackNotFound",
+        msg: "FLASHLOAN_PAYBACK_NOT_FOUND"
+      },
+      {
+        code: 6010,
+        name: "FlashloanInvalidInstruction",
+        msg: "FLASHLOAN_INVALID_INSTRUCTION"
+      },
+      {
+        code: 6011,
+        name: "FlashloanPaused",
+        msg: "FLASHLOAN_PAUSED"
+      },
+      {
+        code: 6012,
+        name: "FlashloanCPICallNotAllowed",
+        msg: "FLASHLOAN_CPICALL_NOT_ALLOWED"
+      },
+      {
+        code: 6013,
+        name: "FlashloanMultiplePaybacksFound",
+        msg: "FLASHLOAN_MULTIPLE_PAYBACKS_FOUND"
+      }
+    ];
+    types$1 = [
+      {
+        name: "ActivateProtocol",
+        type: {
+          kind: "struct",
+          fields: []
+        }
+      },
+      {
+        name: "FlashloanAdmin",
+        type: {
+          kind: "struct",
+          fields: [
+            {
+              name: "authority",
+              type: "pubkey"
+            },
+            {
+              name: "liquidity_program",
+              type: "pubkey"
+            },
+            {
+              name: "status",
+              type: "bool"
+            },
+            {
+              name: "flashloan_fee",
+              type: "u16"
+            },
+            {
+              name: "flashloan_timestamp",
+              type: "u64"
+            },
+            {
+              name: "is_flashloan_active",
+              type: "bool"
+            },
+            {
+              name: "active_flashloan_amount",
+              type: "u64"
+            },
+            {
+              name: "bump",
+              type: "u8"
+            }
+          ]
+        }
+      },
+      {
+        name: "LogUpdateAuthority",
+        type: {
+          kind: "struct",
+          fields: [
+            {
+              name: "new_authority",
+              type: "pubkey"
+            }
+          ]
+        }
+      },
+      {
+        name: "PauseProtocol",
+        type: {
+          kind: "struct",
+          fields: []
+        }
+      },
+      {
+        name: "SetFlashloanFee",
+        type: {
+          kind: "struct",
+          fields: [
+            {
+              name: "flashloan_fee",
+              type: "u16"
+            }
+          ]
+        }
+      }
+    ];
+    flashloanIdl = {
+      address: address$1,
+      metadata: metadata$1,
+      instructions: instructions$1,
+      accounts: accounts$1,
+      events: events$1,
+      errors: errors$1,
+      types: types$1
+    };
+    getFlashloanProgram = ({
+      connection,
+      signer,
+      market = "main"
+    }) => new import_anchor5.Program(
+      { ...flashloanIdl, address: getFlashloanProgramId(market).toBase58() },
+      { connection, publicKey: signer }
+    );
+  }
+});
+
+// node_modules/@jup-ag/lend/dist/shared/lend.DM_fboW2.mjs
+function divCeil(numerator, denominator) {
+  if (denominator.isZero()) {
+    throw new Error("Division by zero");
+  }
+  const { div, mod: mod2 } = numerator.divmod(denominator);
+  return mod2.isZero() ? div : div.addn(1);
+}
+var import_bn21, COEFFICIENT_SIZE_DEBT_FACTOR, EXPONENT_SIZE_DEBT_FACTOR, EXPONENT_MAX_DEBT_FACTOR, DECIMALS_DEBT_FACTOR, MAX_MASK_DEBT_FACTOR, PRECISION, TWO_POWER_64, TWO_POWER_69_MINUS_1, COEFFICIENT_PLUS_PRECISION, COEFFICIENT_PLUS_PRECISION_MINUS_1;
+var init_lend_DM_fboW2 = __esm({
+  "node_modules/@jup-ag/lend/dist/shared/lend.DM_fboW2.mjs"() {
+    import_bn21 = __toESM(require_bn(), 1);
+    COEFFICIENT_SIZE_DEBT_FACTOR = 35;
+    EXPONENT_SIZE_DEBT_FACTOR = 15;
+    EXPONENT_MAX_DEBT_FACTOR = new import_bn21.default(1).shln(EXPONENT_SIZE_DEBT_FACTOR).subn(1);
+    DECIMALS_DEBT_FACTOR = new import_bn21.default(16384);
+    MAX_MASK_DEBT_FACTOR = new import_bn21.default(1).shln(COEFFICIENT_SIZE_DEBT_FACTOR + EXPONENT_SIZE_DEBT_FACTOR).subn(1);
+    PRECISION = 64;
+    TWO_POWER_64 = new import_bn21.default("18446744073709551615");
+    TWO_POWER_69_MINUS_1 = new import_bn21.default(1).shln(69).subn(1);
+    COEFFICIENT_PLUS_PRECISION = COEFFICIENT_SIZE_DEBT_FACTOR + PRECISION;
+    COEFFICIENT_PLUS_PRECISION_MINUS_1 = COEFFICIENT_PLUS_PRECISION - 1;
+    new import_bn21.default(1).shln(COEFFICIENT_PLUS_PRECISION_MINUS_1).subn(1);
+    new import_bn21.default(1).shln(COEFFICIENT_PLUS_PRECISION_MINUS_1 - 1).subn(1);
+  }
+});
+
+// node_modules/@jup-ag/lend/dist/shared/lend.BkEMAdZj.mjs
+var import_web3123, getFlashloanAdmin, getLiquidityReserve, getLiquidity, getRateModel, getFlashloanBorrowPosition;
+var init_lend_BkEMAdZj = __esm({
+  "node_modules/@jup-ag/lend/dist/shared/lend.BkEMAdZj.mjs"() {
+    import_web3123 = __toESM(require_index_cjs(), 1);
+    init_lend_Ce_TNXL0();
+    getFlashloanAdmin = (market) => {
+      const [pda2] = import_web3123.PublicKey.findProgramAddressSync(
+        [Buffer.from("flashloan_admin")],
+        getFlashloanProgramId(market)
+      );
+      return pda2;
+    };
+    getLiquidityReserve = (asset, market) => {
+      const [pda2] = import_web3123.PublicKey.findProgramAddressSync(
+        [Buffer.from("reserve"), asset.toBuffer()],
+        getLiquidityProgramId(market)
+      );
+      return pda2;
+    };
+    getLiquidity = (market) => {
+      const [pda2] = import_web3123.PublicKey.findProgramAddressSync(
+        [Buffer.from("liquidity")],
+        getLiquidityProgramId(market)
+      );
+      return pda2;
+    };
+    getRateModel = (asset, market) => {
+      const [pda2] = import_web3123.PublicKey.findProgramAddressSync(
+        [Buffer.from("rate_model"), asset.toBuffer()],
+        getLiquidityProgramId(market)
+      );
+      return pda2;
+    };
+    getFlashloanBorrowPosition = (asset, market) => {
+      const [pda2] = import_web3123.PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("user_borrow_position"),
+          asset.toBuffer(),
+          getFlashloanAdmin(market).toBuffer()
+        ],
+        getLiquidityProgramId(market)
+      );
+      return pda2;
+    };
+  }
+});
+
+// node_modules/@jup-ag/lend/dist/flashloan/index.mjs
+async function getFlashloanContext({
+  signer,
+  asset,
+  connection,
+  market
+}) {
+  const tokenProgram = await getAccountOwner(asset, connection);
+  const liquidityKey = getLiquidity(market);
+  return {
+    signer,
+    flashloanAdmin: getFlashloanAdmin(market),
+    signerBorrowTokenAccount: getAssociatedTokenAddressSync(
+      asset,
+      signer,
+      true,
+      tokenProgram
+    ),
+    mint: asset,
+    flashloanTokenReservesLiquidity: getLiquidityReserve(
+      asset,
+      market
+    ),
+    flashloanBorrowPositionOnLiquidity: getFlashloanBorrowPosition(
+      asset,
+      market
+    ),
+    rateModel: getRateModel(asset, market),
+    vault: getAssociatedTokenAddressSync(
+      asset,
+      liquidityKey,
+      true,
+      tokenProgram
+    ),
+    liquidity: getLiquidity(market),
+    liquidityProgram: getLiquidityProgramId(market),
+    tokenProgram,
+    systemProgram: import_web3124.SystemProgram.programId,
+    instructionSysvar: import_web3124.SYSVAR_INSTRUCTIONS_PUBKEY
+  };
+}
+async function getFlashBorrowIx({
+  connection,
+  signer,
+  amount,
+  asset,
+  market = "main"
+}) {
+  const program = getFlashloanProgram({
+    connection,
+    signer,
+    market
+  });
+  const context = await getFlashloanContext({
+    connection,
+    signer,
+    market,
+    asset
+  });
+  return await program.methods.flashloanBorrow(amount).accounts(context).instruction();
+}
+async function getFlashPaybackIx({
+  connection,
+  signer,
+  amount,
+  market = "main",
+  asset
+}) {
+  const program = getFlashloanProgram({
+    connection,
+    signer,
+    market
+  });
+  const context = await getFlashloanContext({
+    connection,
+    signer,
+    market,
+    asset
+  });
+  return await program.methods.flashloanPayback(amount).accounts(context).instruction();
+}
+async function getFlashloanIx({
+  connection,
+  signer,
+  amount,
+  market = "main",
+  asset,
+  includeATASetup = false,
+  includeWrapSol = false
+}) {
+  const program = getFlashloanProgram({
+    connection,
+    signer,
+    market
+  });
+  const [flashloanAdmin, borrowIx] = await Promise.all([
+    program.account.flashloanAdmin.fetch(
+      getFlashloanAdmin(market)
+    ),
+    getFlashBorrowIx({ connection, signer, amount, asset, market })
+  ]);
+  const feeAmount = divCeil(
+    amount.muln(flashloanAdmin.flashloanFee),
+    FLASHLOAN_FEE_PRECISION
+  );
+  const paybackIx = await getFlashPaybackIx({
+    connection,
+    signer,
+    market,
+    asset,
+    amount
+  });
+  const setupIxs = includeATASetup ? await getOrCreateATAInstruction(signer, asset, connection) : [];
+  if (includeWrapSol && isNativeMint(asset)) {
+    setupIxs.push(
+      ...feeAmount.gtn(0) ? await getWrapSolInstructions({
+        payer: signer,
+        owner: signer,
+        amount: feeAmount,
+        connection,
+        priorIxs: setupIxs
+      }) : await getWsolAtaCreateInstructions({
+        payer: signer,
+        owner: signer,
+        connection,
+        priorIxs: setupIxs
+      })
+    );
+  }
+  const cleanupIxs = includeWrapSol && isNativeMint(asset) ? await getUnwrapSolInstructions({ owner: signer, connection }) : [];
+  return { borrowIx, paybackIx, setupIxs, cleanupIxs, feeAmount };
+}
+var import_web3124, import_bn22, import_anchor6, FLASHLOAN_FEE_PRECISION;
+var init_flashloan = __esm({
+  "node_modules/@jup-ag/lend/dist/flashloan/index.mjs"() {
+    import_web3124 = __toESM(require_index_cjs(), 1);
+    import_bn22 = __toESM(require_bn(), 1);
+    init_esm4();
+    init_lend_Ce_TNXL0();
+    init_lend_BhHkksLH();
+    init_lend_DM_fboW2();
+    init_lend_BkEMAdZj();
+    import_anchor6 = __toESM(require_cjs(), 1);
+    FLASHLOAN_FEE_PRECISION = new import_bn22.default(1e4);
   }
 });
 
@@ -99188,11 +100446,11 @@ async function discoverImageProviders() {
     for (const x of r.items || r.resources || []) {
       const blob5 = ((x.resource || x.url || "") + " " + (x.metadata?.description || "") + " " + (x.name || "") + " " + JSON.stringify(x.metadata?.input || "")).slice(0, 900);
       if (!IMG_KW.test(blob5)) continue;
-      const base2 = (x.accepts || []).find((a2) => String(a2.network).includes("8453")) || (x.accepts || []).find((a2) => String(a2.network).startsWith("solana"));
-      if (!base2) continue;
-      const price = Number(base2.maxAmountRequired || base2.amount || 0) / 1e6;
+      const base3 = (x.accepts || []).find((a2) => String(a2.network).includes("8453")) || (x.accepts || []).find((a2) => String(a2.network).startsWith("solana"));
+      if (!base3) continue;
+      const price = Number(base3.maxAmountRequired || base3.amount || 0) / 1e6;
       if (!(price > 0 && price <= 0.25)) continue;
-      out.push({ name: (x.resource || x.url || "").replace(/^https?:\/\//, "").split("/")[0], url: x.resource || x.url, price, network: base2.network });
+      out.push({ name: (x.resource || x.url || "").replace(/^https?:\/\//, "").split("/")[0], url: x.resource || x.url, price, network: base3.network });
     }
   } catch {
   }
@@ -99221,38 +100479,38 @@ __export(x402_exports, {
   signRequirement: () => signRequirement,
   solanaSelfPay: () => solanaSelfPay
 });
-async function balances(identity2) {
+async function balances(identity3) {
   const out = { base: 0n, solana: 0n };
   try {
-    const data = "0x70a08231000000000000000000000000" + identity2.evm.address.slice(2).toLowerCase();
+    const data = "0x70a08231000000000000000000000000" + identity3.evm.address.slice(2).toLowerCase();
     const r = await (await fetch("https://mainnet.base.org", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to: USDC_BASE, data }, "latest"] }), signal: AbortSignal.timeout(8e3) })).json();
     out.base = BigInt(r.result || "0x0");
   } catch {
   }
   try {
     const R2 = await Promise.resolve().then(() => (init_rpc(), rpc_exports));
-    const accs = await R2.tokenAccounts(identity2.solana.public_key, "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+    const accs = await R2.tokenAccounts(identity3.solana.public_key, "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
     out.solana = accs.filter((a2) => a2.account.data.parsed.info.mint === USDC_SOL).reduce((s, a2) => s + BigInt(a2.account.data.parsed.info.amount || a2.account.data.parsed.info.tokenAmount.amount), 0n);
   } catch {
   }
   return out;
 }
-async function solanaSelfPay(rail, identity2, version3 = 2) {
-  const [{ PublicKey: PublicKey41, ComputeBudgetProgram: ComputeBudgetProgram7 }, spl, S2, R2] = await Promise.all([
+async function solanaSelfPay(rail, identity3, version3 = 2) {
+  const [{ PublicKey: PublicKey44, ComputeBudgetProgram: ComputeBudgetProgram8 }, spl, S2, R2] = await Promise.all([
     Promise.resolve().then(() => __toESM(require_index_cjs(), 1)),
     Promise.resolve().then(() => (init_esm4(), esm_exports)),
     Promise.resolve().then(() => (init_signer_client(), signer_client_exports)),
     Promise.resolve().then(() => (init_rpc(), rpc_exports))
   ]);
   const amount = amountOf(rail);
-  const mint = new PublicKey41(rail.asset || USDC_SOL);
-  const owner = new PublicKey41(identity2.solana.public_key);
+  const mint = new PublicKey44(rail.asset || USDC_SOL);
+  const owner = new PublicKey44(identity3.solana.public_key);
   const from = spl.getAssociatedTokenAddressSync(mint, owner);
-  const to = spl.getAssociatedTokenAddressSync(mint, new PublicKey41(rail.payTo), true);
-  const feePayer = rail.extra?.feePayer ? new PublicKey41(rail.extra.feePayer) : owner;
-  const ixs = [ComputeBudgetProgram7.setComputeUnitLimit({ units: 2e5 }), ComputeBudgetProgram7.setComputeUnitPrice({ microLamports: 1 })];
+  const to = spl.getAssociatedTokenAddressSync(mint, new PublicKey44(rail.payTo), true);
+  const feePayer = rail.extra?.feePayer ? new PublicKey44(rail.extra.feePayer) : owner;
+  const ixs = [ComputeBudgetProgram8.setComputeUnitLimit({ units: 2e5 }), ComputeBudgetProgram8.setComputeUnitPrice({ microLamports: 1 })];
   if (!await R2.getAccountInfo(to.toBase58())) {
-    ixs.push(spl.createAssociatedTokenAccountIdempotentInstruction(feePayer, to, new PublicKey41(rail.payTo), mint, spl.TOKEN_PROGRAM_ID));
+    ixs.push(spl.createAssociatedTokenAccountIdempotentInstruction(feePayer, to, new PublicKey44(rail.payTo), mint, spl.TOKEN_PROGRAM_ID));
   }
   ixs.push(spl.createTransferCheckedInstruction(from, mint, to, owner, amount, 6, [], spl.TOKEN_PROGRAM_ID));
   const { blockhash } = await R2.getLatestBlockhash();
@@ -99287,33 +100545,33 @@ async function quote3(url, body, headers = {}) {
   }
   return { settled: false, response: r, quote: q2, accepts: q2.accepts || q2.accepted || q2.paymentRequirements || [] };
 }
-async function signRequirement(rail, { identity: identity2, resource, version: version3 }) {
+async function signRequirement(rail, { identity: identity3, resource, version: version3 }) {
   if (isSol(rail)) {
     try {
       if (rail.extra?.feePayer) {
-        const p3 = await paySolana(rail, identity2);
+        const p3 = await paySolana(rail, identity3);
         return { header: p3.header, rail: "solana", amount: amountOf(rail) };
       }
-      const p2 = await solanaSelfPay(rail, identity2, version3);
+      const p2 = await solanaSelfPay(rail, identity3, version3);
       return { header: p2.header, rail: "solana", amount: amountOf(rail) };
     } catch (e3) {
       return { header: null, rail: "solana", amount: amountOf(rail), err: String(e3.message || e3).slice(0, 80) };
     }
   }
   const res = typeof resource === "string" ? { url: resource, description: "paid request", mimeType: "application/json" } : resource;
-  const a2 = await authorize(rail, { value: amountOf(rail), resource: res, version: version3, identity: identity2 });
+  const a2 = await authorize(rail, { value: amountOf(rail), resource: res, version: version3, identity: identity3 });
   return { header: a2.header, rail: "base", amount: amountOf(rail) };
 }
-async function paidRequest(url, body, { identity: identity2, headers = {}, maxTries = 3 } = {}) {
+async function paidRequest(url, body, { identity: identity3, headers = {}, maxTries = 3 } = {}) {
   const first = await quote3(url, body, headers);
   if (first.settled) return { status: first.response.status, json: await first.response.json().catch(() => ({})), paid: 0 };
-  const bal = await balances(identity2);
+  const bal = await balances(identity3);
   const rails = orderRails(first.accepts, bal).slice(0, maxTries);
   const tried = [];
   for (const rail of rails) {
     try {
       const res = first.quote.resource && typeof first.quote.resource === "object" ? first.quote.resource : { url, description: "paid request", mimeType: "application/json" };
-      const signed = await signRequirement(rail, { identity: identity2, resource: res, version: first.quote.x402Version || 2 });
+      const signed = await signRequirement(rail, { identity: identity3, resource: res, version: first.quote.x402Version || 2 });
       const r = await fetch(url, { method: "POST", headers: { "content-type": "application/json", ...headers, "PAYMENT-SIGNATURE": signed.header }, body: body === void 0 ? void 0 : JSON.stringify(body), signal: AbortSignal.timeout(18e4) });
       const json = await r.json().catch(() => ({}));
       if (r.status < 300) return { status: r.status, json, paid: Number(signed.amount) / 1e6, rail: signed.rail };
@@ -99564,10 +100822,10 @@ __export(relay_sol_exports, {
   bridgeSolToBase: () => bridgeSolToBase,
   quoteSolToBase: () => quoteSolToBase
 });
-async function quoteSolToBase(identity2, amountRaw) {
+async function quoteSolToBase(identity3, amountRaw) {
   const body = {
-    user: identity2.solana.public_key,
-    recipient: identity2.evm.address,
+    user: identity3.solana.public_key,
+    recipient: identity3.evm.address,
     originChainId: 792703809,
     destinationChainId: 8453,
     originCurrency: SOL_USDC2,
@@ -99580,16 +100838,16 @@ async function quoteSolToBase(identity2, amountRaw) {
   if (!j2.steps) throw new Error(`relay quote: ${r.status} ${JSON.stringify(j2).slice(0, 160)}`);
   return j2;
 }
-async function bridgeSolToBase(identity2, amountRaw) {
-  const q2 = await quoteSolToBase(identity2, amountRaw);
+async function bridgeSolToBase(identity3, amountRaw) {
+  const q2 = await quoteSolToBase(identity3, amountRaw);
   const ins = q2.steps[0]?.items?.[0]?.data?.instructions || [];
   const alts = q2.steps[0]?.items?.[0]?.data?.addressLookupTableAddresses || [];
   if (!ins.length) throw new Error("relay: no deposit instructions");
   const web3 = await Promise.resolve().then(() => __toESM(require_index_cjs(), 1));
-  const { PublicKey: PublicKey41, TransactionInstruction: TransactionInstruction48, TransactionMessage: TransactionMessage2, VersionedTransaction: VersionedTransaction2, AddressLookupTableAccount, ComputeBudgetProgram: ComputeBudgetProgram7 } = web3;
+  const { PublicKey: PublicKey44, TransactionInstruction: TransactionInstruction48, TransactionMessage: TransactionMessage2, VersionedTransaction: VersionedTransaction2, AddressLookupTableAccount, ComputeBudgetProgram: ComputeBudgetProgram8 } = web3;
   const ixs = ins.map((i) => new TransactionInstruction48({
-    programId: new PublicKey41(i.programId),
-    keys: i.keys.map((k2) => ({ pubkey: new PublicKey41(k2.pubkey), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
+    programId: new PublicKey44(i.programId),
+    keys: i.keys.map((k2) => ({ pubkey: new PublicKey44(k2.pubkey), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
     data: (() => {
       const d = String(i.data || "");
       if (/^[0-9a-fA-F]+$/.test(d) && d.length % 2 === 0) return Buffer.from(d, "hex");
@@ -99605,29 +100863,29 @@ async function bridgeSolToBase(identity2, amountRaw) {
   for (const a2 of alts.slice(0, 4)) {
     try {
       const acc = await rpc("getAccountInfo", [a2, { encoding: "base64" }]);
-      if (acc?.value?.data) tables.push(new AddressLookupTableAccount({ key: new PublicKey41(a2), state: AddressLookupTableAccount.deserialize(Buffer.from(acc.value.data[0], "base64")) }));
+      if (acc?.value?.data) tables.push(new AddressLookupTableAccount({ key: new PublicKey44(a2), state: AddressLookupTableAccount.deserialize(Buffer.from(acc.value.data[0], "base64")) }));
     } catch {
     }
   }
   const { blockhash } = await getLatestBlockhash();
   const msg = new TransactionMessage2({
-    payerKey: new PublicKey41(identity2.solana.public_key),
+    payerKey: new PublicKey44(identity3.solana.public_key),
     recentBlockhash: blockhash,
-    instructions: [ComputeBudgetProgram7.setComputeUnitLimit({ units: 4e5 }), ...ixs]
+    instructions: [ComputeBudgetProgram8.setComputeUnitLimit({ units: 4e5 }), ...ixs]
   }).compileToV0Message(tables);
   const vtx = new VersionedTransaction2(msg);
   const signed = await request("sign_tx", { wireBase64: Buffer.from(vtx.serialize()).toString("base64") });
   if (!signed?.wireBase64) throw new Error("relay: sign failed " + JSON.stringify(signed).slice(0, 120));
-  const sim = await simulate(signed.wireBase64, [identity2.solana.public_key]);
+  const sim = await simulate(signed.wireBase64, [identity3.solana.public_key]);
   if (sim.value?.err) return { ok: false, stage: "simulate", err: sim.value.err, logs: (sim.value.logs || []).slice(-3) };
   const sig = await sendRaw(signed.wireBase64);
   return { ok: true, signature: sig, outAmount: q2.details?.currencyOut?.amount || null, via: "v0+alt" };
 }
-var import_web3126, bs58, SOL_USDC2, BASE_USDC2;
+var import_web3127, bs58, SOL_USDC2, BASE_USDC2;
 var init_relay_sol = __esm({
   "lib/relay-sol.mjs"() {
-    import_web3126 = __toESM(require_index_cjs(), 1);
-    init_esm7();
+    import_web3127 = __toESM(require_index_cjs(), 1);
+    init_esm6();
     init_signer_client();
     init_rpc();
     bs58 = esm_default2.default || esm_default2;
@@ -99679,24 +100937,24 @@ var devbuy_curve_exports = {};
 __export(devbuy_curve_exports, {
   devBuyCurve: () => devBuyCurve
 });
-async function devBuyCurve({ identity: identity2, mint, lamports }) {
-  const user = new import_web3127.PublicKey(identity2.solana.public_key);
-  const conn3 = new import_web3127.Connection(RPC_URL, "confirmed");
+async function devBuyCurve({ identity: identity3, mint, lamports }) {
+  const user = new import_web3128.PublicKey(identity3.solana.public_key);
+  const conn3 = new import_web3128.Connection(RPC_URL, "confirmed");
   const online = new OnlinePumpSdk(conn3);
   const sdk3 = new PumpSdk();
   const curve = await online.fetchBondingCurve(mint);
   const curvePda = bondingCurvePda2(mint);
-  const curveAta = getAssociatedTokenAddressSync(mint, curvePda, true, T22);
-  const userAta = getAssociatedTokenAddressSync(mint, user, false, T22);
+  const curveAta = getAssociatedTokenAddressSync(mint, curvePda, true, T222);
+  const userAta = getAssociatedTokenAddressSync(mint, user, false, T222);
   const global2 = await online.fetchGlobal();
   const vTok = Number(curve.virtualTokenReserves ?? 0);
   const vSol = Number(curve.virtualQuoteReserves ?? 0);
   const inSol = Number(lamports);
   const expectedOut = vSol > 0 && vTok > 0 ? Math.floor(vTok * inSol / (vSol + inSol)) : 0;
   const ixs = [
-    import_web3127.ComputeBudgetProgram.setComputeUnitLimit({ units: 4e5 }),
-    createAssociatedTokenAccountIdempotentInstruction(user, userAta, user, mint, T22),
-    createAssociatedTokenAccountIdempotentInstruction(user, curveAta, curvePda, mint, T22),
+    import_web3128.ComputeBudgetProgram.setComputeUnitLimit({ units: 4e5 }),
+    createAssociatedTokenAccountIdempotentInstruction(user, userAta, user, mint, T222),
+    createAssociatedTokenAccountIdempotentInstruction(user, curveAta, curvePda, mint, T222),
     ...await sdk3.buyInstructions({
       global: global2,
       bondingCurveAccountInfo: await conn3.getAccountInfo(curvePda),
@@ -99707,7 +100965,7 @@ async function devBuyCurve({ identity: identity2, mint, lamports }) {
       amount: new import_bn24.default(String(Math.floor(expectedOut * 0.95))),
       solAmount: new import_bn24.default(String(lamports)),
       slippage: 1500,
-      tokenProgram: T22
+      tokenProgram: T222
     })
   ];
   const mk = (ix) => ({ programId: ix.programId.toBase58(), keys: ix.keys.map((k2) => ({ pubkey: k2.pubkey.toBase58(), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })), dataHex: Buffer.from(ix.data).toString("hex") });
@@ -99718,16 +100976,16 @@ async function devBuyCurve({ identity: identity2, mint, lamports }) {
   if (sim.value?.err) return { ok: false, err: sim.value.err };
   return { ok: true, sig: await sendRaw(env.wireBase64) };
 }
-var import_web3127, import_bn24, T22;
+var import_web3128, import_bn24, T222;
 var init_devbuy_curve = __esm({
   "strategies/devbuy-curve.mjs"() {
-    import_web3127 = __toESM(require_index_cjs(), 1);
+    import_web3128 = __toESM(require_index_cjs(), 1);
     init_esm4();
-    init_esm5();
+    init_esm7();
     import_bn24 = __toESM(require_bn(), 1);
     init_signer_client();
     init_rpc();
-    T22 = new import_web3127.PublicKey("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
+    T222 = new import_web3128.PublicKey("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
   }
 });
 
@@ -99740,10 +100998,10 @@ __export(relay_exports, {
   bridgeBaseToSol: () => bridgeBaseToSol,
   quoteToSol: () => quoteToSol
 });
-async function quoteToSol({ amountRaw, identity: identity2 }) {
+async function quoteToSol({ amountRaw, identity: identity3 }) {
   const body = {
-    user: identity2.evm.address,
-    recipient: identity2.solana.public_key,
+    user: identity3.evm.address,
+    recipient: identity3.solana.public_key,
     originChainId: 8453,
     destinationChainId: 792703809,
     originCurrency: BASE_USDC3,
@@ -99757,8 +101015,8 @@ async function quoteToSol({ amountRaw, identity: identity2 }) {
   if (!q2.steps) throw new Error(`relay quote: ${r.status} ${JSON.stringify(q2).slice(0, 160)}`);
   return q2;
 }
-async function bridgeBaseToSol(identity2, amountRaw) {
-  const q2 = await quoteToSol({ amountRaw, identity: identity2 });
+async function bridgeBaseToSol(identity3, amountRaw) {
+  const q2 = await quoteToSol({ amountRaw, identity: identity3 });
   const item = (q2.steps[0].items || [])[0];
   const signReq = item?.data?.sign;
   if (!signReq) throw new Error("relay: no permit step");
@@ -99793,10 +101051,11 @@ var buy_existing_exports = {};
 __export(buy_existing_exports, {
   buyExisting: () => buyExisting
 });
-async function buyExisting({ identity: identity2, mint: mintAddress, solLamports, slippageBps = 1500 }) {
-  const mint = new import_web3128.PublicKey(mintAddress);
-  const user = new import_web3128.PublicKey(identity2.solana.public_key);
-  const conn3 = new import_web3128.Connection(RPC_URL, "confirmed");
+async function buyExisting({ identity: identity3, mint: mintAddress, solLamports, slippageBps = 1500 }) {
+  const mint = new import_web3129.PublicKey(mintAddress);
+  const user = new import_web3129.PublicKey(identity3.solana.public_key);
+  const conn3 = new import_web3129.Connection(RPC_URL, "confirmed");
+  const T223 = await tokenProgramOf(conn3, mintAddress);
   const online = new OnlinePumpSdk(conn3);
   const sdk3 = new PumpSdk();
   const curve = await online.fetchBondingCurve(mint);
@@ -99808,10 +101067,10 @@ async function buyExisting({ identity: identity2, mint: mintAddress, solLamports
   if (!(vTok > 0) || !(vSol > 0)) return { ok: false, err: "curve empty or graduated" };
   const expectedOut = Math.floor(vTok * inSol / (vSol + inSol));
   if (expectedOut <= 0) return { ok: false, err: "amount too small" };
-  const ata = getAssociatedTokenAddressSync(mint, user, false, T222);
+  const ata = getAssociatedTokenAddressSync(mint, user, false, T223);
   const ixs = [
-    import_web3128.ComputeBudgetProgram.setComputeUnitLimit({ units: 3e5 }),
-    createAssociatedTokenAccountIdempotentInstruction(user, ata, user, mint, T222),
+    import_web3129.ComputeBudgetProgram.setComputeUnitLimit({ units: 3e5 }),
+    createAssociatedTokenAccountIdempotentInstruction(user, ata, user, mint, T223),
     ...await sdk3.buyInstructions({
       global: global2,
       bondingCurveAccountInfo: await conn3.getAccountInfo(curvePda),
@@ -99822,7 +101081,7 @@ async function buyExisting({ identity: identity2, mint: mintAddress, solLamports
       amount: new import_bn25.default(String(Math.floor(expectedOut * 0.95))),
       solAmount: new import_bn25.default(String(solLamports)),
       slippage: slippageBps,
-      tokenProgram: T222
+      tokenProgram: T223
     })
   ];
   const mk = (ix) => ({ programId: ix.programId.toBase58(), keys: ix.keys.map((k2) => ({ pubkey: k2.pubkey.toBase58(), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })), dataHex: Buffer.from(ix.data).toString("hex") });
@@ -99834,16 +101093,378 @@ async function buyExisting({ identity: identity2, mint: mintAddress, solLamports
   const sig = await sendRaw(env.wireBase64);
   return { ok: true, sig, mint: mintAddress, sol_in: solLamports / 1e9, tokens_expected: expectedOut };
 }
-var import_web3128, import_bn25, T222;
+var import_web3129, import_bn25;
 var init_buy_existing = __esm({
   "strategies/buy-existing.mjs"() {
-    import_web3128 = __toESM(require_index_cjs(), 1);
+    import_web3129 = __toESM(require_index_cjs(), 1);
     init_esm4();
-    init_esm5();
+    init_esm7();
     import_bn25 = __toESM(require_bn(), 1);
     init_signer_client();
     init_rpc();
-    T222 = new import_web3128.PublicKey("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
+    init_token_program();
+  }
+});
+
+// lib/ix-legos.mjs
+var ix_legos_exports = {};
+__export(ix_legos_exports, {
+  buildFromLegos: () => buildFromLegos,
+  fragAta: () => fragAta,
+  fragFlashBorrow: () => fragFlashBorrow,
+  fragPumpBuy: () => fragPumpBuy,
+  fragSwap: () => fragSwap
+});
+async function fragAta({ owner, mint }) {
+  const o3 = new import_web3130.PublicKey(owner);
+  const m = new import_web3130.PublicKey(mint);
+  const ata = getAssociatedTokenAddressSync(m, o3);
+  return { ixs: [createAssociatedTokenAccountIdempotentInstruction(o3, ata, o3, m, TOKEN_PROGRAM_ID)], gives: { ata: ata.toBase58() } };
+}
+async function fragFlashBorrow({ owner, asset = USDC4, amountRaw }) {
+  const o3 = new import_web3130.PublicKey(owner);
+  const conn3 = new import_web3130.Connection(RPC_URL, "confirmed");
+  const { borrowIx, paybackIx, feeAmount } = await getFlashloanIx({ connection: conn3, signer: o3, asset: new import_web3130.PublicKey(asset), amount: new import_bn26.default(String(amountRaw)) });
+  return { ixs: [borrowIx], repay: [paybackIx], fee_raw: String(feeAmount ?? 0n), gives: { usdc: Number(amountRaw) / 1e6 } };
+}
+async function fragSwap({ owner, inputMint, outputMint, amountRaw, slippageBps = 300 }) {
+  const o3 = new import_web3130.PublicKey(owner);
+  const q2 = await quote({ inputMint, outputMint, amount: String(amountRaw), slippageBps });
+  const set = await swapInstructions({ quoteResponse: q2, userPublicKey: o3.toBase58(), wrapAndUnwrapSol: true });
+  return { ixs: ixsOf(set), quote: { in: String(amountRaw), out: String(q2.outAmount), min: String(q2.otherAmountThreshold) } };
+}
+async function fragPumpBuy({ owner, mint, solLamports, slippage = 300 }) {
+  const o3 = new import_web3130.PublicKey(owner);
+  const m = new import_web3130.PublicKey(mint);
+  const conn3 = new import_web3130.Connection(RPC_URL, "confirmed");
+  const online = new OnlinePumpSdk(conn3);
+  const sdk3 = new PumpSdk();
+  const curve = await online.fetchBondingCurve(m);
+  const global2 = await online.fetchGlobal();
+  const curvePda = bondingCurvePda2(m);
+  const vTok = Number(curve.virtualTokenReserves ?? 0);
+  const vSol = Number(curve.virtualQuoteReserves ?? 0);
+  const solIn = Number(solLamports);
+  const expected = vSol > 0 && vTok > 0 ? Math.floor(vTok * solIn / (vSol + solIn)) : 0;
+  const ownerProgram = (await conn3.getAccountInfo(m))?.owner;
+  const ixs = await sdk3.buyInstructions({
+    global: global2,
+    bondingCurveAccountInfo: await conn3.getAccountInfo(curvePda),
+    bondingCurve: curve,
+    associatedUserAccountInfo: null,
+    mint: m,
+    user: o3,
+    amount: new import_bn26.default(String(Math.floor(expected * 0.95) || 1)),
+    solAmount: new import_bn26.default(String(solIn)),
+    slippage,
+    tokenProgram: ownerProgram ? new import_web3130.PublicKey(ownerProgram) : new import_web3130.PublicKey("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb")
+  });
+  return { ixs, gives: { position: 1 }, expected_tokens: expected };
+}
+function norm(x) {
+  const pk = (v2) => typeof v2 === "string" ? new import_web3130.PublicKey(v2) : v2;
+  const programId = pk(x.programId || x.program_id);
+  const keys = (x.keys || x.accounts || []).map((k2) => ({
+    pubkey: pk(k2.pubkey || k2.pubKey || k2.publicKey),
+    isSigner: !!(k2.isSigner || k2.is_signer || k2.signer),
+    isWritable: !!(k2.isWritable || k2.is_writable || k2.writable)
+  }));
+  const data = x.dataHex ? Buffer.from(x.dataHex, "hex") : x.data ? Buffer.isBuffer(x.data) ? x.data : Buffer.from(x.data, x.dataEncoding === "base64" ? "base64" : void 0) : Buffer.alloc(0);
+  return { programId, keys, data };
+}
+async function buildFromLegos(owner, specs) {
+  const parts = [];
+  const reps = [];
+  for (const s of specs) {
+    const [kind, ...rest] = String(s).split(":");
+    if (kind === "flashBorrow") {
+      const [asset, amountRaw] = rest;
+      const f2 = await fragFlashBorrow({ owner, asset, amountRaw });
+      parts.push(...f2.ixs);
+      reps.push(...f2.repay || []);
+    } else if (kind === "swap") {
+      const [inputMint, outputMint, amountRaw] = rest;
+      const f2 = await fragSwap({ owner, inputMint, outputMint, amountRaw });
+      parts.push(...f2.ixs);
+    } else if (kind === "pumpBuy") {
+      const [mint, solRaw] = rest;
+      const f2 = await fragPumpBuy({ owner, mint, solLamports: Number(solRaw) });
+      parts.push(...f2.ixs);
+    } else if (kind === "ata") {
+      const f2 = await fragAta({ owner, mint: rest[0] });
+      parts.push(...f2.ixs);
+    } else {
+      throw new Error(`unknown lego ${kind}`);
+    }
+  }
+  return [import_web3130.ComputeBudgetProgram.setComputeUnitLimit({ units: 14e5 }), ...[...parts, ...reps].map(norm)];
+}
+var import_web3130, import_bn26, USDC4;
+var init_ix_legos = __esm({
+  "lib/ix-legos.mjs"() {
+    import_web3130 = __toESM(require_index_cjs(), 1);
+    init_esm4();
+    init_esm7();
+    init_flashloan();
+    import_bn26 = __toESM(require_bn(), 1);
+    init_swap();
+    init_rpc();
+    USDC4 = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+  }
+});
+
+// lib/lego.mjs
+var lego_exports = {};
+__export(lego_exports, {
+  COMPOSITES: () => COMPOSITES,
+  LEGOS: () => LEGOS,
+  assess: () => assess,
+  chainTo: () => chainTo,
+  resolve: () => resolve,
+  saveComposite: () => saveComposite,
+  savedComposites: () => savedComposites
+});
+import fs15 from "node:fs";
+function assess(holdings = {}) {
+  const h2 = (k2) => Number(holdings[k2] || 0);
+  return LEGOS.map((p2) => {
+    const missing = Object.entries(p2.needs).filter(([k2, v2]) => h2(k2) < Number(v2)).map(([k2, v2]) => `${k2}>=${v2}`);
+    return { id: p2.id, tool: p2.tool, needs: p2.needs, gives: p2.gives, ready: missing.length === 0, missing };
+  });
+}
+function chainTo(want, holdings = {}) {
+  const h2 = (k2) => Number(holdings[k2] || 0);
+  if (want === "usdc") return h2("usdc") > 0 ? [] : ["swap_sol_usdc"];
+  if (want === "base_usdc") return h2("base_usdc") > 0 ? [] : h2("usdc") > 0 ? ["bridge_to_base"] : ["swap_sol_usdc", "bridge_to_base"];
+  if (want === "child") {
+    if (h2("usdc") >= 0.05) return ["lease_child"];
+    if (h2("sol") >= 0.06) return ["swap_sol_usdc", "lease_child"];
+    return ["exit_position", "swap_sol_usdc", "lease_child"];
+  }
+  if (want === "position") return h2("sol") >= 0.02 ? ["launch_coin"] : ["exit_position", "launch_coin"];
+  return [];
+}
+function savedComposites() {
+  try {
+    const base3 = process.env.AGENT_GUEST_ROOT || "/var/lib/agent";
+    return JSON.parse(fs15.readFileSync(base3 + "/var/lib/agent/composites.json", "utf8"));
+  } catch {
+    return {};
+  }
+}
+function saveComposite(name, steps) {
+  const base3 = process.env.AGENT_GUEST_ROOT || "/var/lib/agent";
+  const all2 = savedComposites();
+  all2[name] = steps;
+  fs15.writeFileSync(base3 + "/var/lib/agent/composites.json", JSON.stringify(all2, null, 1));
+  return { name, steps };
+}
+function resolve(name, depth = 0) {
+  if (depth > 6) return [];
+  const entry = COMPOSITES[name] || savedComposites()[name];
+  if (entry) return entry.flatMap((step) => Array.isArray(step) ? step.flatMap((x) => resolve(x, depth + 1)) : typeof step === "string" && COMPOSITES[step] ? resolve(step, depth + 1) : [step]);
+  return [name];
+}
+var LEGOS, COMPOSITES;
+var init_lego = __esm({
+  "lib/lego.mjs"() {
+    LEGOS = [
+      { id: "swap_sol_usdc", tool: "swap_usdc", needs: { sol: 0.01 }, gives: { usdc: 1 }, note: "funds everything USDC-denominated from your own SOL" },
+      { id: "bridge_to_base", tool: "bridge_to_base", needs: { usdc: 1 }, gives: { base_usdc: 1 }, note: "only when a seller takes Base USDC and not Solana USDC" },
+      { id: "lease_child", tool: "spawn_child", needs: { usdc: 0.05 }, gives: { child: 1 }, note: "pays x402 on whichever rail you hold; the child renews itself" },
+      { id: "launch_coin", tool: "pump_launch", needs: { sol: 0.03 }, gives: { position: 1, creator_fee_stream: 1 }, note: "art bought and hosted BEFORE mint, then a real dev buy" },
+      { id: "buy_sibling", tool: "pump_buy", needs: { sol: 0.02 }, gives: { position: 1 }, note: "you keep the tokens; cost is the round trip, not the size" },
+      { id: "exit_position", tool: "pump_exit", needs: { position: 1 }, gives: { sol: 1 }, note: "sells the whole position into the curve" },
+      { id: "collect_fees", tool: "pump_collect", needs: { coin: 1 }, gives: { sol: 1 }, note: "free money once the coin has traded" },
+      { id: "sealed_message", tool: "memo_seal", needs: { peer: 1 }, gives: { agreement: 1 }, note: "pair launches and time exits with a sibling" }
+    ];
+    COMPOSITES = {
+      launch_pair: ["swap_sol_usdc", "launch_coin", "buy_sibling", "memo_seal"],
+      earn_round: ["collect_fees", "exit_position", "swap_sol_usdc"],
+      grow: [["earn_round"], "launch_pair"]
+    };
+  }
+});
+
+// lib/compose.mjs
+var compose_exports = {};
+__export(compose_exports, {
+  parseChain: () => parseChain,
+  runChain: () => runChain
+});
+async function identity2() {
+  return identity();
+}
+async function runChain(steps, args = {}) {
+  const id = await identity2();
+  const L2 = await Promise.resolve().then(() => (init_lego(), lego_exports));
+  const expand = (x, d = 0) => {
+    if (d > 6) return [];
+    if (Array.isArray(x)) return x.flatMap((y) => expand(y, d + 1));
+    if (typeof x === "string") return L2.resolve(x);
+    return [];
+  };
+  const flat = expand(steps);
+  const out = [];
+  for (const name of flat) {
+    const fn = STEPS[name];
+    if (!fn) {
+      out.push({ step: name, err: "unknown lego" });
+      break;
+    }
+    try {
+      const r = await fn({ identity: id, ...args });
+      out.push(r);
+      if (r && r.ok === false) break;
+    } catch (e3) {
+      out.push({ step: name, err: String(e3.message || e3).slice(0, 120) });
+      break;
+    }
+  }
+  return { chain: flat, requested: steps, results: out, completed: out.filter((r) => !r.err).length };
+}
+function parseChain(text) {
+  const t = String(text || "").trim();
+  if (t.startsWith("[")) {
+    try {
+      return JSON.parse(t);
+    } catch {
+    }
+  }
+  return t.split(/\s*>\s*|\s*,\s*/).filter(Boolean);
+}
+var STEPS;
+var init_compose = __esm({
+  "lib/compose.mjs"() {
+    init_signer_client();
+    init_rpc();
+    STEPS = {
+      async swap_sol_usdc({ identity: id, lamports = 15e6 }) {
+        const swap = await Promise.resolve().then(() => (init_swap(), swap_exports));
+        const WSOL4 = "So11111111111111111111111111111111111111112";
+        const USDC5 = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+        const q2 = await swap.quote({ inputMint: WSOL4, outputMint: USDC5, amount: String(lamports), slippageBps: 50 });
+        return { step: "swap_sol_usdc", quote_out_usdc: Number(q2?.outAmount || 0) / 1e6, ran: true };
+      },
+      async lease_child({ identity: id }) {
+        const { paySolana: paySolana2 } = await Promise.resolve().then(() => (init_lease(), lease_exports));
+        return { step: "lease_child", note: "use spawn_child tool for the full lease+adopt path", ran: false };
+      },
+      async launch_coin({ identity: id, name, symbol, lamports }) {
+        return { step: "launch_coin", note: "use pump_launch tool (needs art + metadata first)", ran: false };
+      },
+      async buy_sibling({ identity: id, mint, sol }) {
+        const { buyExisting: buyExisting2 } = await Promise.resolve().then(() => (init_buy_existing(), buy_existing_exports));
+        return buyExisting2({ identity: id, mint, solLamports: Math.round(Number(sol || 0) * 1e9) });
+      },
+      async exit_position({ identity: id, mint }) {
+        const { exit: exit2 } = await Promise.resolve().then(() => (init_pump_lifecycle(), pump_lifecycle_exports));
+        return exit2({ identity: id, mint });
+      },
+      async collect_fees({ identity: id, mint }) {
+        const { collect: collect2 } = await Promise.resolve().then(() => (init_pump_lifecycle(), pump_lifecycle_exports));
+        return collect2({ identity: id, mint });
+      }
+    };
+  }
+});
+
+// lib/wire.mjs
+var wire_exports = {};
+__export(wire_exports, {
+  ed25519PublicFromSeed: () => ed25519PublicFromSeed,
+  injectSolana: () => injectSolana,
+  openFrom: () => openFrom,
+  sealTo: () => sealTo,
+  x25519PublicFromEd25519Public: () => x25519PublicFromEd25519Public,
+  x25519SecretFromEd25519Seed: () => x25519SecretFromEd25519Seed
+});
+import crypto10 from "node:crypto";
+function x25519SecretFromEd25519Seed(seed) {
+  const h2 = crypto10.createHash("sha512").update(seed).digest();
+  const a2 = Buffer.from(h2.subarray(0, 32));
+  a2[0] &= 248;
+  a2[31] &= 127;
+  a2[31] |= 64;
+  return a2;
+}
+function x25519PublicFromEd25519Public(edPub) {
+  const y = leToBig(edPub) & (1n << 255n) - 1n;
+  const u = mod((1n + y) * inv(1n - y + P3));
+  return bigToLe(u);
+}
+function rawKeyPair(secret32, public32) {
+  return {
+    secret: crypto10.createPrivateKey({ key: Buffer.concat([Buffer.from("302e020100300506032b656e04220420", "hex"), secret32]), format: "der", type: "pkcs8" }),
+    public: crypto10.createPublicKey({ key: Buffer.concat([Buffer.from("302a300506032b656e032100", "hex"), public32]), format: "der", type: "spki" })
+  };
+}
+function sealTo(recipientEdPub58, plaintext, ed25519Seed) {
+  const { PublicKey: PublicKey44 } = requireSolana();
+  const mySecret = x25519SecretFromEd25519Seed(ed25519Seed);
+  const myPubEd = ed25519PublicFromSeed(ed25519Seed);
+  const mine = rawKeyPair(mySecret, x25519PublicFromEd25519Public(myPubEd));
+  const theirs = x25519PublicFromEd25519Public(new PublicKey44(recipientEdPub58).toBytes());
+  const theirPub = crypto10.createPublicKey({ key: Buffer.concat([Buffer.from("302a300506032b656e032100", "hex"), theirs]), format: "der", type: "spki" });
+  const shared = crypto10.diffieHellman({ privateKey: mine.secret, publicKey: theirPub });
+  const key = Buffer.from(crypto10.hkdfSync("sha256", shared, Buffer.from("birth-image-wire-v1"), Buffer.from("aead"), 32));
+  const iv = crypto10.randomBytes(12);
+  const c = crypto10.createCipheriv("aes-256-gcm", key, iv);
+  const ct = Buffer.concat([c.update(Buffer.from(plaintext, "utf8")), c.final()]);
+  return ["swm2", iv.toString("base64url"), ct.toString("base64url"), c.getAuthTag().toString("base64url")].join(".");
+}
+function openFrom(senderEdPub58, envelope, ed25519Seed) {
+  const { PublicKey: PublicKey44 } = requireSolana();
+  const [tag, ivB, ctB, tagB] = String(envelope).split(".");
+  if (tag !== "swm2") throw new Error("not a sealed envelope");
+  const mySecret = x25519SecretFromEd25519Seed(ed25519Seed);
+  const myPubEd = ed25519PublicFromSeed(ed25519Seed);
+  const mine = rawKeyPair(mySecret, x25519PublicFromEd25519Public(myPubEd));
+  const theirs = x25519PublicFromEd25519Public(new PublicKey44(senderEdPub58).toBytes());
+  const theirPub = crypto10.createPublicKey({ key: Buffer.concat([Buffer.from("302a300506032b656e032100", "hex"), theirs]), format: "der", type: "spki" });
+  const shared = crypto10.diffieHellman({ privateKey: mine.secret, publicKey: theirPub });
+  const key = Buffer.from(crypto10.hkdfSync("sha256", shared, Buffer.from("birth-image-wire-v1"), Buffer.from("aead"), 32));
+  const d = crypto10.createDecipheriv("aes-256-gcm", key, Buffer.from(ivB, "base64url"));
+  d.setAuthTag(Buffer.from(tagB, "base64url"));
+  return Buffer.concat([d.update(Buffer.from(ctB, "base64url")), d.final()]).toString("utf8");
+}
+function ed25519PublicFromSeed(seed) {
+  const pk = crypto10.createPrivateKey({ key: Buffer.concat([Buffer.from("302e020100300506032b657004220420", "hex"), seed]), format: "der", type: "pkcs8" });
+  return crypto10.createPublicKey(pk).export({ format: "der", type: "spki" }).subarray(-32);
+}
+function requireSolana() {
+  if (!_solana) throw new Error("solana web3 not injected");
+  return _solana;
+}
+function injectSolana(mod2) {
+  _solana = mod2;
+}
+var P3, mod, pow, inv, leToBig, bigToLe, _solana;
+var init_wire = __esm({
+  "lib/wire.mjs"() {
+    P3 = (1n << 255n) - 19n;
+    mod = (a2, m = P3) => (a2 % m + m) % m;
+    pow = (b2, e3, m = P3) => {
+      let r = 1n;
+      b2 = mod(b2, m);
+      while (e3 > 0n) {
+        if (e3 & 1n) r = r * b2 % m;
+        b2 = b2 * b2 % m;
+        e3 >>= 1n;
+      }
+      return r;
+    };
+    inv = (a2, m = P3) => pow(a2, m - 2n, m);
+    leToBig = (buf) => buf.reduceRight((acc, byte) => (acc << 8n) + BigInt(byte), 0n);
+    bigToLe = (v2) => {
+      const out = Buffer.alloc(32);
+      for (let i = 0; i < 32; i++) {
+        out[i] = Number(v2 & 0xffn);
+        v2 >>= 8n;
+      }
+      return out;
+    };
+    _solana = null;
   }
 });
 
@@ -99866,11 +101487,11 @@ function decode(memo) {
     return null;
   }
 }
-async function memoSend({ identity: identity2, text }) {
-  const me = new import_web3129.PublicKey(identity2.solana.public_key);
+async function memoSend({ identity: identity3, text }) {
+  const me = new import_web3131.PublicKey(identity3.solana.public_key);
   const ixs = [
-    import_web3129.ComputeBudgetProgram.setComputeUnitLimit({ units: 2e4 }),
-    new import_web3129.TransactionInstruction({ programId: MEMO_PROGRAM, keys: [{ pubkey: me, isSigner: true, isWritable: false }], data: Buffer.from(encode(String(text).slice(0, 400))) })
+    import_web3131.ComputeBudgetProgram.setComputeUnitLimit({ units: 2e4 }),
+    new import_web3131.TransactionInstruction({ programId: MEMO_PROGRAM, keys: [{ pubkey: me, isSigner: true, isWritable: false }], data: Buffer.from(encode(String(text).slice(0, 400))) })
   ];
   const mk = (ix) => ({ programId: ix.programId.toBase58(), keys: ix.keys.map((k2) => ({ pubkey: k2.pubkey.toBase58(), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })), dataHex: Buffer.from(ix.data).toString("hex") });
   const { blockhash, lastValidBlockHeight } = await getLatestBlockhash();
@@ -99891,26 +101512,66 @@ async function memoRead({ limit = 12 } = {}) {
         if (!MEMO_IDS.has(pid)) continue;
         const raw = ix.data ? Buffer.from(ix.data, "base64").toString("utf8") : ix.parsed || "";
         const text = decode(String(raw));
-        if (text) out.push({ from: (tx.transaction.message.accountKeys?.[0]?.pubkey || s.signature).slice(0, 8), text, at: s.blockTime });
+        if (text) out.push({ from: (tx.transaction.message.accountKeys?.[0]?.pubkey || s.signature).slice(0, 8), sender: tx.transaction.message.accountKeys?.[0]?.pubkey || null, text, at: s.blockTime });
       }
     } catch {
     }
   }
   return { ok: true, channel: CHANNEL.toBase58(), messages: out.filter((m) => m.text).slice(0, limit) };
 }
-var import_web3129, MEMO_V2, MEMO_V1, MEMO_PROGRAM, MEMO_IDS, CHANNEL, KEY2, encode;
+var import_web3131, MEMO_V2, MEMO_V1, MEMO_PROGRAM, MEMO_IDS, CHANNEL, KEY2, encode;
 var init_memo_bus = __esm({
   "strategies/memo-bus.mjs"() {
-    import_web3129 = __toESM(require_index_cjs(), 1);
+    import_web3131 = __toESM(require_index_cjs(), 1);
     init_signer_client();
     init_rpc();
-    MEMO_V2 = new import_web3129.PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
-    MEMO_V1 = new import_web3129.PublicKey("Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo");
+    MEMO_V2 = new import_web3131.PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+    MEMO_V1 = new import_web3131.PublicKey("Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo");
     MEMO_PROGRAM = MEMO_V2;
     MEMO_IDS = /* @__PURE__ */ new Set([MEMO_V1.toBase58(), MEMO_V2.toBase58()]);
-    CHANNEL = new import_web3129.PublicKey(process.env.SWARM_CHANNEL || "AcHSTxazhNz6zvvFSswSfAaJ9Jhuih8YXB1ozTqUMABM");
+    CHANNEL = new import_web3131.PublicKey(process.env.SWARM_CHANNEL || "AcHSTxazhNz6zvvFSswSfAaJ9Jhuih8YXB1ozTqUMABM");
     KEY2 = Buffer.from(process.env.SWARM_KEY || "birth-image-swarm");
     encode = (text) => "swm:" + xor(Buffer.from(text, "utf8")).toString("base64");
+  }
+});
+
+// lib/comms-policy.mjs
+var comms_policy_exports = {};
+__export(comms_policy_exports, {
+  audience: () => audience,
+  load: () => load,
+  save: () => save,
+  shouldSpeak: () => shouldSpeak
+});
+import fs16 from "node:fs";
+function load() {
+  try {
+    return { ...DEFAULTS, ...JSON.parse(fs16.readFileSync(path9(), "utf8")) };
+  } catch {
+    return { ...DEFAULTS };
+  }
+}
+function save(patch) {
+  const next = { ...load(), ...patch };
+  fs16.mkdirSync(base2() + "/var/lib/agent", { recursive: true });
+  fs16.writeFileSync(path9(), JSON.stringify(next, null, 1), { mode: 384 });
+  return next;
+}
+function shouldSpeak(lastAt, nowSec, spokeThisLoop) {
+  const p2 = load();
+  if (p2.quiet && p2.audience === "none") return false;
+  if (p2.floor_per_loop && !spokeThisLoop) return true;
+  return nowSec - Number(lastAt || 0) >= Number(p2.cadence_s || 240);
+}
+function audience() {
+  return load().audience;
+}
+var base2, path9, DEFAULTS;
+var init_comms_policy = __esm({
+  "lib/comms-policy.mjs"() {
+    base2 = () => process.env.AGENT_GUEST_ROOT || "/var/lib/agent";
+    path9 = () => base2() + "/var/lib/agent/comms.json";
+    DEFAULTS = { cadence_s: 240, audience: "all", peers: [], floor_per_loop: true, quiet: false };
   }
 });
 
@@ -99921,8 +101582,8 @@ init_journal();
 init_signer_client();
 init_rpc();
 init_venice();
-import fs15 from "node:fs";
-import path9 from "node:path";
+import fs17 from "node:fs";
+import path10 from "node:path";
 
 // inference/bazaar.mjs
 init_util();
@@ -99959,8 +101620,8 @@ async function crawl({ pages = 24, journal = null } = {}) {
       for (const it of items) {
         if (!looksInference(it)) continue;
         const sol = railOf(it.accepts, "solana");
-        const base2 = railOf(it.accepts, "8453");
-        if (!sol && !base2) continue;
+        const base3 = railOf(it.accepts, "8453");
+        if (!sol && !base3) continue;
         const fields = it.extensions?.bazaar?.info?.input?.bodyFields || it.extensions?.bazaar?.info?.input?.body || {};
         out.push({
           id: sha256hex(Buffer.from(String(it.resource))).slice(0, 12),
@@ -99968,7 +101629,7 @@ async function crawl({ pages = 24, journal = null } = {}) {
           name: it.title || it.name || null,
           description: (it.description || "").slice(0, 200),
           solana: sol ? { asset: sol.asset, payTo: sol.payTo, amount: sol.maxAmountRequired || sol.amount, feePayer: sol.extra?.feePayer || null } : null,
-          base: base2 ? { asset: base2.asset, payTo: base2.payTo, amount: base2.maxAmountRequired || base2.amount } : null,
+          base: base3 ? { asset: base3.asset, payTo: base3.payTo, amount: base3.maxAmountRequired || base3.amount } : null,
           models: fields?.model?.enum || fields?.model?.examples || null,
           verified_wallet_x402: false
         });
@@ -100027,7 +101688,7 @@ function parseChallenge(body, headers) {
   }
   return req;
 }
-async function call(identity2, provider, { body, maxTokens = 1200, timeoutMs = 6e4 } = {}) {
+async function call(identity3, provider, { body, maxTokens = 1200, timeoutMs = 6e4 } = {}) {
   const payload = JSON.stringify({ ...body, max_tokens: maxTokens });
   const t0 = Date.now();
   const first = await fetch(provider.url, { method: "POST", headers: { "content-type": "application/json", accept: "application/json" }, body: payload });
@@ -100039,13 +101700,13 @@ async function call(identity2, provider, { body, maxTokens = 1200, timeoutMs = 6
   if (!rail.extra?.feePayer) return { ok: false, status: 402, error: "rail has no sponsor feePayer", ms: Date.now() - t0 };
   const amount = BigInt(rail.maxAmountRequired || rail.amount);
   const mint = new import_web398.PublicKey(rail.asset);
-  const from = getAssociatedTokenAddressSync(mint, new import_web398.PublicKey(identity2.solana.public_key));
+  const from = getAssociatedTokenAddressSync(mint, new import_web398.PublicKey(identity3.solana.public_key));
   const to = getAssociatedTokenAddressSync(mint, new import_web398.PublicKey(rail.payTo), true);
   const ixs = [import_web398.ComputeBudgetProgram.setComputeUnitLimit({ units: 2e5 }), import_web398.ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 1 })];
   if (!await getAccountInfo(to.toBase58())) {
     ixs.push(createAssociatedTokenAccountIdempotentInstruction(new import_web398.PublicKey(rail.extra.feePayer), to, new import_web398.PublicKey(rail.payTo), mint, TOKEN_PROGRAM_ID));
   }
-  ixs.push(createTransferCheckedInstruction(from, mint, to, new import_web398.PublicKey(identity2.solana.public_key), amount, 6, [], TOKEN_PROGRAM_ID));
+  ixs.push(createTransferCheckedInstruction(from, mint, to, new import_web398.PublicKey(identity3.solana.public_key), amount, 6, [], TOKEN_PROGRAM_ID));
   const { blockhash } = await getLatestBlockhash();
   const signed = await request("sign_payment_legacy", {
     feePayer: rail.extra.feePayer,
@@ -100242,9 +101903,9 @@ function totalByAsset(snap) {
 }
 
 // lib/accounting.mjs
-async function observeFunding(identity2) {
+async function observeFunding(identity3) {
   const st = state({});
-  const snap = await snapshot(identity2.solana.public_key);
+  const snap = await snapshot(identity3.solana.public_key);
   const totals = Object.fromEntries(totalByAsset(snap));
   const prior = st.last_balances || {};
   const deltas = {};
@@ -100285,9 +101946,9 @@ function spendable(totalsRaw, reserveFeeLamports = 5000000n) {
   }
   return out;
 }
-async function solAndUsdc(identity2) {
-  const sol = BigInt(await getBalance(identity2.solana.public_key));
-  const usdc = (await tokenAccounts(identity2.solana.public_key, "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")).filter((a2) => a2.account.data.parsed.info.mint === "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v").reduce((s, a2) => s + BigInt(a2.account.data.parsed.info.tokenAmount.amount), 0n);
+async function solAndUsdc(identity3) {
+  const sol = BigInt(await getBalance(identity3.solana.public_key));
+  const usdc = (await tokenAccounts(identity3.solana.public_key, "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")).filter((a2) => a2.account.data.parsed.info.mint === "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v").reduce((s, a2) => s + BigInt(a2.account.data.parsed.info.tokenAmount.amount), 0n);
   return { sol_raw: sol.toString(), usdc_raw: usdc.toString() };
 }
 
@@ -100320,32 +101981,8 @@ function describe() {
   return loadExtra().map((t) => ({ name: t.name, description: t.description, endpoint: t.endpoint || null, registered_at: t.registered_at }));
 }
 
-// lib/playbooks.mjs
-init_paths();
-init_util();
-import fs8 from "node:fs";
-import path6 from "node:path";
-var DIR = path6.join(P.state, "playbooks");
-var INDEX = path6.join(DIR, "index.json");
-function list() {
-  try {
-    return JSON.parse(fs8.readFileSync(INDEX, "utf8")).playbooks || [];
-  } catch {
-    return [];
-  }
-}
-function write(name, body) {
-  if (!/^[a-z0-9][a-z0-9-]{1,60}$/.test(String(name || ""))) throw new Error("name must be kebab-case");
-  fs8.mkdirSync(DIR, { recursive: true });
-  const file = path6.join(DIR, `${name}.md`);
-  fs8.writeFileSync(file, String(body || ""), { mode: 384 });
-  const idx = list().filter((p2) => p2.name !== name);
-  idx.push({ name, bytes: Buffer.byteLength(String(body || "")), at: now() });
-  atomicJson(INDEX, { playbooks: idx, updated_at: now() }, 384);
-  return { name, path: file };
-}
-
 // brain.mjs
+init_playbooks();
 init_lease();
 
 // lib/childcompose.mjs
@@ -100400,16 +102037,16 @@ var EVM_NETWORK = (() => {
   const v2 = String(process.env.AGENT_LEASE_NETWORK || "eip155:8453").toLowerCase();
   return v2 === "base" ? "eip155:8453" : v2 === "polygon" ? "eip155:137" : v2;
 })();
-async function railBalances(identity2) {
+async function railBalances(identity3) {
   const out = { solana: 0n, base: 0n };
   try {
     const R2 = await Promise.resolve().then(() => (init_rpc(), rpc_exports));
-    const accs = await R2.tokenAccounts(identity2.solana.public_key, "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+    const accs = await R2.tokenAccounts(identity3.solana.public_key, "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
     out.solana = accs.filter((a2) => a2.account.data.parsed.info.mint === "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v").reduce((s2, a2) => s2 + BigInt(a2.account.data.parsed.info.tokenAmount.amount), 0n);
   } catch {
   }
   try {
-    const data = "0x70a08231000000000000000000000000" + identity2.evm.address.slice(2).toLowerCase();
+    const data = "0x70a08231000000000000000000000000" + identity3.evm.address.slice(2).toLowerCase();
     const r = await fetch("https://mainnet.base.org", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -100422,7 +102059,7 @@ async function railBalances(identity2) {
   return out;
 }
 function pickRail(accepts, balances2 = null) {
-  const norm = (n) => {
+  const norm2 = (n) => {
     const v2 = String(n || "").toLowerCase();
     if (v2 === "base") return "eip155:8453";
     if (v2 === "polygon") return "eip155:137";
@@ -100431,34 +102068,34 @@ function pickRail(accepts, balances2 = null) {
   const envRail = (process.env.AGENT_LEASE_NETWORK || "").toLowerCase();
   if (!envRail && balances2) {
     const want = String(balances2.solana) !== "0" && String(balances2.solana) !== "0" ? "solana" : "base";
-    const chosen = want === "solana" ? (accepts || []).find((a2) => String(a2.network) === "solana") : (accepts || []).find((a2) => norm(a2.network) === EVM_NETWORK && a2.scheme === "exact");
+    const chosen = want === "solana" ? (accepts || []).find((a2) => String(a2.network) === "solana") : (accepts || []).find((a2) => norm2(a2.network) === EVM_NETWORK && a2.scheme === "exact");
     if (chosen) return { kind: want === "solana" ? "solana" : "evm", rail: chosen };
   }
   const preferSol = envRail === "solana";
-  const base2 = preferSol ? null : (accepts || []).find((a2) => norm(a2.network) === EVM_NETWORK && a2.scheme === "exact");
-  if (base2) return { kind: "evm", rail: base2 };
+  const base3 = preferSol ? null : (accepts || []).find((a2) => norm2(a2.network) === EVM_NETWORK && a2.scheme === "exact");
+  if (base3) return { kind: "evm", rail: base3 };
   const sol = (accepts || []).find((a2) => String(a2.network) === "solana");
   if (sol) return { kind: "solana", rail: sol };
   throw new Error(`no payable rail: ${(accepts || []).map((a2) => a2.network).join(",")}`);
 }
-async function paidPostAuto(path10, body, identity2, tag) {
-  const post = (headers = {}) => fetch(API + path10, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
+async function paidPostAuto(path11, body, identity3, tag) {
+  const post = (headers = {}) => fetch(API + path11, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
   const first = await post();
   if (first.status !== 402) return { status: first.status, json: await first.json().catch(() => ({})) };
   const quote4 = await first.json().catch(() => ({}));
-  const balances2 = await railBalances(identity2).catch(() => null);
+  const balances2 = await railBalances(identity3).catch(() => null);
   const { kind, rail } = pickRail(quote4.accepts, balances2);
   if (kind === "evm") {
     const auth = await authorize(rail, { value: rail.maxAmountRequired || rail.amount, resource: rail.resource, version: quote4.x402Version || 1 });
     const second2 = await post({ "X-PAYMENT": auth.header, "PAYMENT-SIGNATURE": auth.header });
     const json2 = await second2.json().catch(() => ({}));
-    await append(tag, { path: path10, rail: rail.network, status: second2.status, amount: String(rail.maxAmountRequired || rail.amount), at: now(), deploymentId: json2.deploymentId || json2.id || null });
+    await append(tag, { path: path11, rail: rail.network, status: second2.status, amount: String(rail.maxAmountRequired || rail.amount), at: now(), deploymentId: json2.deploymentId || json2.id || null });
     return { status: second2.status, json: json2, rail: rail.network, amount_raw: String(rail.maxAmountRequired || rail.amount) };
   }
-  const payment = await paySolana(rail, identity2);
+  const payment = await paySolana(rail, identity3);
   const second = await post({ "X-PAYMENT": payment.header, "PAYMENT-SIGNATURE": payment.header });
   const json = await second.json().catch(() => ({}));
-  await append(tag, { path: path10, rail: "solana", status: second.status, amount_raw: payment.amount, at: now(), deploymentId: json.deploymentId || json.id || null });
+  await append(tag, { path: path11, rail: "solana", status: second.status, amount_raw: payment.amount, at: now(), deploymentId: json.deploymentId || json.id || null });
   return { status: second.status, json, rail: "solana", amount_raw: payment.amount };
 }
 
@@ -100474,9 +102111,9 @@ init_journal();
 init_util();
 var SSH_PUB = process.env.AGENT_SSH_PUB_FILE || "C:/Users/User/birth-image/guest/ssh/id_ed25519.pub";
 async function provisionAgentgates({ plan = "compute.standard", compose, hours = 1 } = {}) {
-  const identity2 = await identity();
+  const identity3 = await identity();
   process.env.AGENT_LEASE_NETWORK = process.env.AGENT_LEASE_NETWORK || "solana";
-  const r = await paidPostAuto("/api/compute/deployments", { plan, hours, compose, name: `birth-child-${Math.floor(now() / 60)}` }, identity2, "procreation.lease");
+  const r = await paidPostAuto("/api/compute/deployments", { plan, hours, compose, name: `birth-child-${Math.floor(now() / 60)}` }, identity3, "procreation.lease");
   const id = r.json?.deploymentId || r.json?.id || null;
   if (!id) throw new Error(`agentgates: ${JSON.stringify(r.json).slice(0, 120)}`);
   return { provider: "agentgates", id, rail: r.rail, raw: r.json };
@@ -100492,7 +102129,7 @@ async function provisionSecretvm({ vmTypeId = "small" } = {}) {
   return { provider: "secretvm", id: j2.json.id, endpoint: `https://${j2.json.vmDomain}`, raw: j2.json };
 }
 async function provisionX402Compute({ plan = "vc2-1c-1gb", hours = 24 } = {}) {
-  const identity2 = await identity();
+  const identity3 = await identity();
   const pub = fs9.readFileSync(SSH_PUB, "utf8").trim();
   const body = { plan, provider: plan.startsWith("do:") ? "digitalocean" : "vultr", region: process.env.X402C_REGION || "ewr", os_id: 2284, label: `birth-${Math.floor(now() / 60)}`, prepaid_hours: hours, ssh_public_key: pub };
   const post = (headers = {}) => fetch("https://compute.x402layer.cc/compute/provision", { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
@@ -100549,7 +102186,7 @@ async function provisionAny({ compose, plan = "compute.standard", prefer = (proc
 
 // strategies/pump-sdk-launch.mjs
 var import_web3118 = __toESM(require_index_cjs(), 1);
-init_esm5();
+init_esm7();
 var import_bn19 = __toESM(require_bn(), 1);
 init_signer_client();
 init_rpc();
@@ -100563,8 +102200,8 @@ function wire(ix) {
     dataHex: Buffer.from(ix.data).toString("hex")
   };
 }
-async function launch({ identity: identity2, name, symbol, uri, devbuyLamports = 0 }) {
-  const user = new import_web3118.PublicKey(identity2.solana.public_key);
+async function launch({ identity: identity3, name, symbol, uri, devbuyLamports = 0 }) {
+  const user = new import_web3118.PublicKey(identity3.solana.public_key);
   const mintKp = import_web3118.Keypair.generate();
   const mint = mintKp.publicKey;
   const ixs = [];
@@ -100608,10 +102245,10 @@ async function launch({ identity: identity2, name, symbol, uri, devbuyLamports =
     strategy: true
   });
   const sim = await simulate(env.wireBase64, [user.toBase58(), mint.toBase58()]);
-  const base2 = { at: now(), provider: "pump-sdk", mint: mint.toBase58(), ixs: ixs.length, sim_err: sim.value?.err || null, sim_logs: (sim.value?.logs || []).slice(-8) };
+  const base3 = { at: now(), provider: "pump-sdk", mint: mint.toBase58(), ixs: ixs.length, sim_err: sim.value?.err || null, sim_logs: (sim.value?.logs || []).slice(-8) };
   if (sim.value?.err) {
-    await append("pump.launch_sim_failed", base2);
-    return { ok: false, ...base2 };
+    await append("pump.launch_sim_failed", base3);
+    return { ok: false, ...base3 };
   }
   const sig = await sendRaw(env.wireBase64);
   let status = null;
@@ -100623,146 +102260,23 @@ async function launch({ identity: identity2, name, symbol, uri, devbuyLamports =
     }
     await new Promise((r) => setTimeout(r, 1200));
   }
-  const out = { ...base2, signature: sig, status: status?.confirmationStatus || "unknown", err: status?.err || null };
+  const out = { ...base3, signature: sig, status: status?.confirmationStatus || "unknown", err: status?.err || null };
   await append("pump.launch", out);
   return { ok: !status?.err && !!status, ...out };
 }
 
-// strategies/pump-lifecycle.mjs
-var import_web3119 = __toESM(require_index_cjs(), 1);
-init_esm4();
-init_esm5();
-var import_bn20 = __toESM(require_bn(), 1);
-init_esm5();
-init_signer_client();
-init_rpc();
-init_journal();
-init_util();
-var WSOL2 = new import_web3119.PublicKey("So11111111111111111111111111111111111111112");
-var TOKEN = new import_web3119.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
-var sdk2 = new PumpSdk();
-var conn = () => new import_web3119.Connection(RPC_URL, "confirmed");
-function wire2(ix) {
-  return {
-    programId: typeof ix.programId === "string" ? ix.programId : ix.programId.toBase58(),
-    keys: ix.keys.map((k2) => ({ pubkey: typeof k2.pubkey === "string" ? k2.pubkey : k2.pubkey.toBase58(), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
-    dataHex: ix.dataHex || Buffer.from(ix.data).toString("hex")
-  };
-}
-async function observe(mintAddress) {
-  const online = new OnlinePumpSdk(conn());
-  const mint = new import_web3119.PublicKey(mintAddress);
-  const curve = await online.fetchBondingCurve(mint).catch(() => null);
-  if (!curve) return { mint: mintAddress, exists: false };
-  const g2 = (k2) => (curve[k2] ?? curve.account?.[k2])?.toString?.() ?? String(curve[k2] ?? curve.account?.[k2] ?? "");
-  return {
-    mint: mintAddress,
-    exists: true,
-    virtualTokenReserves: g2("virtualTokenReserves"),
-    virtualSolReserves: g2("virtualSolReserves"),
-    realTokenReserves: g2("realTokenReserves"),
-    realSolReserves: g2("realSolReserves"),
-    tokenTotalSupply: g2("tokenTotalSupply"),
-    complete: Boolean(curve.complete ?? curve.account?.complete),
-    creator: String(curve.creator ?? curve.account?.creator ?? "")
-  };
-}
-async function signSimSend(identity2, ixs, tag, extra = {}) {
-  const user = identity2.solana.public_key;
-  const { blockhash, lastValidBlockHeight } = await getLatestBlockhash();
-  const env = await signV1({
-    instructions: ixs.map(wire2),
-    blockhash,
-    lastValidBlockHeight,
-    cuLimit: 14e5,
-    allowedDestinations: [user],
-    strategy: true
-  });
-  const sim = await simulate(env.wireBase64, [user]);
-  const base2 = { at: now(), ...extra, sim_err: sim.value?.err || null, sim_logs: (sim.value?.logs || []).slice(-6) };
-  if (sim.value?.err) {
-    await append(`${tag}_sim_failed`, base2);
-    return { ok: false, ...base2 };
-  }
-  const sig = await sendRaw(env.wireBase64);
-  let status = null;
-  for (let i = 0; i < 40; i++) {
-    const st = (await signatureStatuses([sig]))[0];
-    if (st?.confirmationStatus) {
-      status = st;
-      break;
-    }
-    await new Promise((r) => setTimeout(r, 1200));
-  }
-  const out = { ...base2, signature: sig, status: status?.confirmationStatus || "unknown", err: status?.err || null };
-  await append(tag, out);
-  return { ok: !status?.err && !!status, ...out };
-}
-async function exit({ identity: identity2, mint: mintAddress, amountRaw, slippage = 1500 }) {
-  const online = new OnlinePumpSdk(conn());
-  const mint = new import_web3119.PublicKey(mintAddress);
-  const user = new import_web3119.PublicKey(identity2.solana.public_key);
-  const T22P = new import_web3119.PublicKey("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
-  const curve = await online.fetchBondingCurve(mint);
-  const global2 = await online.fetchGlobal();
-  const curvePda = bondingCurvePda2(mint);
-  const ata = getAssociatedTokenAddressSync(mint, user, false, T22P);
-  let amount = amountRaw;
-  if (!amount) {
-    const acc = await conn().getParsedAccountInfo(ata);
-    amount = acc?.value?.data?.parsed?.info?.tokenAmount?.amount;
-  }
-  if (!amount || amount === "0") return { ok: false, err: "no position in this wallet" };
-  const ixs = [
-    createAssociatedTokenAccountIdempotentInstruction(user, ata, user, mint, T22P),
-    ...await sdk2.sellInstructions({
-      global: global2,
-      bondingCurveAccountInfo: await conn().getAccountInfo(curvePda),
-      bondingCurve: curve,
-      mint,
-      user,
-      amount: new import_bn20.default(String(amount)),
-      solAmount: new import_bn20.default(0),
-      slippage,
-      tokenProgram: T22P
-    })
-  ];
-  return signSimSend(identity2, ixs, "pump.exit", { mint: mintAddress, amount_raw: String(amount) });
-}
-async function collect({ identity: identity2, mint: mintAddress }) {
-  const user = new import_web3119.PublicKey(identity2.solana.public_key);
-  const ix = await sdk2.sweepCreatorFeeInstruction({ payer: user, mint: new import_web3119.PublicKey(mintAddress), creator: user, quoteMint: WSOL2, quoteTokenProgram: TOKEN });
-  return signSimSend(identity2, [ix], "pump.collect", { mint: mintAddress });
-}
-var PUMP_PROGRAM = new import_web3119.PublicKey("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P");
-var COLLECT_DISC = [20, 22, 86, 123, 198, 28, 219, 132];
-async function withdrawVault({ identity: identity2 }) {
-  const creator = new import_web3119.PublicKey(identity2.solana.public_key);
-  const vault = import_web3119.PublicKey.findProgramAddressSync([Buffer.from("creator-vault"), creator.toBuffer()], PUMP_PROGRAM)[0];
-  const eventAuthority = import_web3119.PublicKey.findProgramAddressSync([Buffer.from("__event_authority")], PUMP_PROGRAM)[0];
-  const ix = {
-    programId: PUMP_PROGRAM,
-    keys: [
-      { pubkey: creator.toBase58(), isSigner: true, isWritable: true },
-      { pubkey: vault.toBase58(), isSigner: false, isWritable: true },
-      { pubkey: "11111111111111111111111111111111", isSigner: false, isWritable: false },
-      { pubkey: eventAuthority.toBase58(), isSigner: false, isWritable: false },
-      { pubkey: PUMP_PROGRAM.toBase58(), isSigner: false, isWritable: false }
-    ],
-    dataHex: Buffer.from(COLLECT_DISC).toString("hex")
-  };
-  return signSimSend(identity2, [ix], "pump.withdraw_vault", { creator: creator.toBase58(), vault: vault.toBase58() });
-}
+// brain.mjs
+init_pump_lifecycle();
 
 // lib/proc.mjs
 init_paths();
 init_util();
 async function identityWhenReady({ timeoutMs = 45e3 } = {}) {
-  const { identity: identity2 } = await Promise.resolve().then(() => (init_signer_client(), signer_client_exports));
+  const { identity: identity3 } = await Promise.resolve().then(() => (init_signer_client(), signer_client_exports));
   const t0 = Date.now();
   for (; ; ) {
     try {
-      return await identity2();
+      return await identity3();
     } catch (e3) {
       if (Date.now() - t0 > timeoutMs) throw e3;
       await sleep(1e3);
@@ -100807,959 +102321,8 @@ function loadPolicy() {
 }
 
 // strategies/flashloan.mjs
-var import_web3124 = __toESM(require_index_cjs(), 1);
-
-// node_modules/@jup-ag/lend/dist/flashloan/index.mjs
-var import_web3123 = __toESM(require_index_cjs(), 1);
-var import_bn22 = __toESM(require_bn(), 1);
-init_esm4();
-
-// node_modules/@jup-ag/lend/dist/shared/lend.Ce_TNXL0.mjs
-var import_web3120 = __toESM(require_index_cjs(), 1);
-var PROGRAM_IDS = {
-  vaults: {
-    main: "jupr81YtYssSyPt8jbnGuiWon5f6x9TcDEFxYe3Bdzi",
-    ethena: "jupo974WCqAUMD3RtpayTap1me7StQCWtEkBbDb6Ba3",
-    galaxy: "jupGzLGoLzW1xac45pxMa6fMBtDSyQu4DxLk9F7Tqch"
-  },
-  liquidity: {
-    main: "jupeiUmn818Jg1ekPURTpr4mFo29p46vygyykFJ3wZC",
-    ethena: "jup6QF1sNDGpkkcu6F4qaFHcRBmnSS1VgyB4uFbBvNS",
-    galaxy: "jupGn4jL7x9rxLh6CddPcckD3Sn3imXznJWJaT61qH9"
-  },
-  lending: {
-    main: "jup3YeL8QhtSx1e253b2FDvsMNC87fDrgQZivbrndc9",
-    ethena: "jup97Zx1NixM8UJMQFw8TtKzqTiRT3ETAJR7cVx3PfQ",
-    galaxy: "jupG2HgSoMonThDnmSc9kYjqkmD2ka54T2iZdNyjdQU"
-  },
-  flashloan: {
-    main: "jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS",
-    ethena: "jupKxkab7RTnQJ6wXStXg6WY4rcReV3maiUNwByciFF",
-    galaxy: "jupGqBCvfpJy8yLsnnBtiw5GTd6hi3Kg4KrbrzN3C4q"
-  },
-  lendingRewardRateModel: {
-    main: "jup7TthsMgcR9Y3L277b8Eo9uboVSmu1utkuXHNUKar",
-    ethena: "jupGBUJYXuzz2hVSoqjrxoEwJUB6uuHJsQqkzmYyQ7n",
-    galaxy: "jupGeFNt34vdhJH2wjbJs2Dx9UXjYtDZFFmgoPsLe3Q"
-  },
-  dex: {
-    main: "jupZ4m2GqUCJ5iueMfzQf8khFfH31d4XAQt3RzCT9Vd",
-    ethena: "jupZ4m2GqUCJ5iueMfzQf8khFfH31d4XAQt3RzCT9Vd",
-    galaxy: "jupGfzSq5GT3BpeK7NM5YLBK3KzvR6Z32Mq2fsSgegL"
-  }
-};
-var perMarket = (ids) => {
-  const cache2 = {};
-  return (market = "main") => cache2[market] ??= new import_web3120.PublicKey(ids[market]);
-};
-var getVaultsProgramId = perMarket(PROGRAM_IDS.vaults);
-var getLiquidityProgramId = perMarket(PROGRAM_IDS.liquidity);
-var getLendingProgramId = perMarket(PROGRAM_IDS.lending);
-var getFlashloanProgramId = perMarket(PROGRAM_IDS.flashloan);
-var getLendingRewardRateModelProgramId = perMarket(
-  PROGRAM_IDS.lendingRewardRateModel
-);
-var getDexProgramId = perMarket(PROGRAM_IDS.dex);
-var DEX_PROGRAM_ID = getDexProgramId();
-var ORACLE_PROGRAM_ID = new import_web3120.PublicKey(
-  "jupnw4B6Eqs7ft6rxpzYLJZYSnrpRgPcr589n5Kv4oc"
-);
-var MPL_TOKEN_METADATA_PROGRAM_ID2 = new import_web3120.PublicKey(
-  "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
-);
-var READONLY_SIGNER = new import_web3120.PublicKey(
-  "HEyJLdMfZhhQ7FHCtjD5DWDFNFQhaeAVAsHeWqoY6dSD"
-);
-
-// node_modules/@jup-ag/lend/dist/shared/lend.BhHkksLH.mjs
-init_esm4();
-var import_web3121 = __toESM(require_index_cjs(), 1);
-var import_anchor5 = __toESM(require_cjs(), 1);
-var getAccountOwner = async (account, connection) => {
-  const info = await connection.getAccountInfo(account);
-  if (!info)
-    throw new Error(`Account info not found for ${account.toString()}`);
-  return info.owner;
-};
-var getOrCreateATAInstruction = async (owner, mint, connection) => {
-  const tokenProgram = await getAccountOwner(mint, connection);
-  const associatedTokenAccount = await getAssociatedTokenAddress(
-    mint,
-    owner,
-    true,
-    // allowOwnerOffCurve - supports PDA owners
-    tokenProgram
-  );
-  const account = await getAccount(
-    connection,
-    associatedTokenAccount,
-    "confirmed",
-    tokenProgram
-  ).catch(() => null);
-  const ixs = [];
-  if (!account) {
-    ixs.push(
-      createAssociatedTokenAccountIdempotentInstruction(
-        owner,
-        associatedTokenAccount,
-        owner,
-        mint,
-        tokenProgram
-      )
-    );
-  }
-  return ixs;
-};
-var isNativeMint = (mint) => mint.equals(NATIVE_MINT);
-var createsAta = (ixs, ata) => ixs.some(
-  (ix) => ix.programId.equals(ASSOCIATED_TOKEN_PROGRAM_ID) && ix.keys[1]?.pubkey.equals(ata)
-);
-var getWrapSolInstructions = async ({
-  payer,
-  owner,
-  amount,
-  connection,
-  priorIxs = []
-}) => {
-  if (amount.isZero()) return [];
-  const tokenProgram = await getAccountOwner(NATIVE_MINT, connection);
-  const wsolAta = getAssociatedTokenAddressSync(
-    NATIVE_MINT,
-    owner,
-    true,
-    tokenProgram
-  );
-  return [
-    ...createsAta(priorIxs, wsolAta) ? [] : [
-      createAssociatedTokenAccountIdempotentInstruction(
-        payer,
-        wsolAta,
-        owner,
-        NATIVE_MINT,
-        tokenProgram
-      )
-    ],
-    import_web3121.SystemProgram.transfer({
-      fromPubkey: payer,
-      toPubkey: wsolAta,
-      lamports: BigInt(amount.toString(10))
-    }),
-    createSyncNativeInstruction(wsolAta, tokenProgram)
-  ];
-};
-var getWsolAtaCreateInstructions = async ({
-  payer,
-  owner,
-  connection,
-  priorIxs = []
-}) => {
-  const tokenProgram = await getAccountOwner(NATIVE_MINT, connection);
-  const wsolAta = getAssociatedTokenAddressSync(
-    NATIVE_MINT,
-    owner,
-    true,
-    tokenProgram
-  );
-  if (createsAta(priorIxs, wsolAta)) return [];
-  return [
-    createAssociatedTokenAccountIdempotentInstruction(
-      payer,
-      wsolAta,
-      owner,
-      NATIVE_MINT,
-      tokenProgram
-    )
-  ];
-};
-var getUnwrapSolInstructions = async ({
-  owner,
-  connection
-}) => {
-  const tokenProgram = await getAccountOwner(NATIVE_MINT, connection);
-  const wsolAta = getAssociatedTokenAddressSync(
-    NATIVE_MINT,
-    owner,
-    true,
-    tokenProgram
-  );
-  return [
-    createCloseAccountInstruction(wsolAta, owner, owner, [], tokenProgram)
-  ];
-};
-var address$1 = "jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS";
-var metadata$1 = {
-  name: "flashloan",
-  version: "0.1.4",
-  spec: "0.1.0",
-  description: "Created with Anchor"
-};
-var instructions$1 = [
-  {
-    name: "activate_protocol",
-    discriminator: [
-      230,
-      235,
-      188,
-      19,
-      120,
-      91,
-      11,
-      94
-    ],
-    accounts: [
-      {
-        name: "authority",
-        signer: true
-      },
-      {
-        name: "flashloan_admin",
-        writable: true
-      }
-    ],
-    args: []
-  },
-  {
-    name: "flashloan_borrow",
-    discriminator: [
-      103,
-      19,
-      78,
-      24,
-      240,
-      9,
-      135,
-      63
-    ],
-    accounts: [
-      {
-        name: "signer",
-        writable: true,
-        signer: true
-      },
-      {
-        name: "flashloan_admin",
-        writable: true
-      },
-      {
-        name: "signer_borrow_token_account",
-        writable: true
-      },
-      {
-        name: "mint"
-      },
-      {
-        name: "flashloan_token_reserves_liquidity",
-        writable: true
-      },
-      {
-        name: "flashloan_borrow_position_on_liquidity",
-        writable: true
-      },
-      {
-        name: "rate_model"
-      },
-      {
-        name: "vault",
-        writable: true
-      },
-      {
-        name: "liquidity"
-      },
-      {
-        name: "liquidity_program",
-        relations: [
-          "flashloan_admin"
-        ]
-      },
-      {
-        name: "token_program"
-      },
-      {
-        name: "associated_token_program",
-        optional: true,
-        address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-      },
-      {
-        name: "system_program",
-        address: "11111111111111111111111111111111"
-      },
-      {
-        name: "instruction_sysvar",
-        address: "Sysvar1nstructions1111111111111111111111111"
-      }
-    ],
-    args: [
-      {
-        name: "amount",
-        type: "u64"
-      }
-    ]
-  },
-  {
-    name: "flashloan_payback",
-    discriminator: [
-      213,
-      47,
-      153,
-      137,
-      84,
-      243,
-      94,
-      232
-    ],
-    accounts: [
-      {
-        name: "signer",
-        writable: true,
-        signer: true
-      },
-      {
-        name: "flashloan_admin",
-        writable: true
-      },
-      {
-        name: "signer_borrow_token_account",
-        writable: true
-      },
-      {
-        name: "mint"
-      },
-      {
-        name: "flashloan_token_reserves_liquidity",
-        writable: true
-      },
-      {
-        name: "flashloan_borrow_position_on_liquidity",
-        writable: true
-      },
-      {
-        name: "rate_model"
-      },
-      {
-        name: "vault",
-        writable: true
-      },
-      {
-        name: "liquidity"
-      },
-      {
-        name: "liquidity_program",
-        relations: [
-          "flashloan_admin"
-        ]
-      },
-      {
-        name: "token_program"
-      },
-      {
-        name: "associated_token_program",
-        optional: true,
-        address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-      },
-      {
-        name: "system_program",
-        address: "11111111111111111111111111111111"
-      },
-      {
-        name: "instruction_sysvar",
-        address: "Sysvar1nstructions1111111111111111111111111"
-      }
-    ],
-    args: [
-      {
-        name: "amount",
-        type: "u64"
-      }
-    ]
-  },
-  {
-    name: "init_flashloan_admin",
-    discriminator: [
-      185,
-      117,
-      154,
-      56,
-      95,
-      12,
-      187,
-      139
-    ],
-    accounts: [
-      {
-        name: "signer",
-        writable: true,
-        signer: true
-      },
-      {
-        name: "flashloan_admin",
-        writable: true,
-        pda: {
-          seeds: [
-            {
-              kind: "const",
-              value: [
-                102,
-                108,
-                97,
-                115,
-                104,
-                108,
-                111,
-                97,
-                110,
-                95,
-                97,
-                100,
-                109,
-                105,
-                110
-              ]
-            }
-          ]
-        }
-      },
-      {
-        name: "system_program",
-        address: "11111111111111111111111111111111"
-      }
-    ],
-    args: [
-      {
-        name: "authority",
-        type: "pubkey"
-      },
-      {
-        name: "flashloan_fee",
-        type: "u16"
-      },
-      {
-        name: "liquidity_program",
-        type: "pubkey"
-      }
-    ]
-  },
-  {
-    name: "pause_protocol",
-    discriminator: [
-      144,
-      95,
-      0,
-      107,
-      119,
-      39,
-      248,
-      141
-    ],
-    accounts: [
-      {
-        name: "authority",
-        signer: true
-      },
-      {
-        name: "flashloan_admin",
-        writable: true
-      }
-    ],
-    args: []
-  },
-  {
-    name: "set_flashloan_fee",
-    discriminator: [
-      120,
-      248,
-      221,
-      70,
-      84,
-      216,
-      0,
-      149
-    ],
-    accounts: [
-      {
-        name: "authority",
-        signer: true
-      },
-      {
-        name: "flashloan_admin",
-        writable: true
-      }
-    ],
-    args: [
-      {
-        name: "flashloan_fee",
-        type: "u16"
-      }
-    ]
-  },
-  {
-    name: "update_authority",
-    discriminator: [
-      32,
-      46,
-      64,
-      28,
-      149,
-      75,
-      243,
-      88
-    ],
-    accounts: [
-      {
-        name: "authority",
-        signer: true
-      },
-      {
-        name: "flashloan_admin",
-        writable: true
-      }
-    ],
-    args: [
-      {
-        name: "new_authority",
-        type: "pubkey"
-      }
-    ]
-  }
-];
-var accounts$1 = [
-  {
-    name: "FlashloanAdmin",
-    discriminator: [
-      162,
-      161,
-      45,
-      28,
-      131,
-      91,
-      202,
-      88
-    ]
-  }
-];
-var events$1 = [
-  {
-    name: "ActivateProtocol",
-    discriminator: [
-      70,
-      178,
-      173,
-      151,
-      180,
-      166,
-      68,
-      102
-    ]
-  },
-  {
-    name: "LogUpdateAuthority",
-    discriminator: [
-      150,
-      152,
-      157,
-      143,
-      6,
-      135,
-      193,
-      101
-    ]
-  },
-  {
-    name: "PauseProtocol",
-    discriminator: [
-      66,
-      229,
-      166,
-      147,
-      152,
-      13,
-      42,
-      29
-    ]
-  },
-  {
-    name: "SetFlashloanFee",
-    discriminator: [
-      112,
-      164,
-      66,
-      251,
-      191,
-      56,
-      0,
-      47
-    ]
-  }
-];
-var errors$1 = [
-  {
-    code: 6e3,
-    name: "FlashloanInvalidAuthority",
-    msg: "FLASHLOAN_INVALID_AUTHORITY"
-  },
-  {
-    code: 6001,
-    name: "FlashloanFeeTooHigh",
-    msg: "FLASHLOAN_FEE_TOO_HIGH"
-  },
-  {
-    code: 6002,
-    name: "FlashloanInvalidParams",
-    msg: "FLASHLOAN_INVALID_PARAMS"
-  },
-  {
-    code: 6003,
-    name: "FlashloanAlreadyActive",
-    msg: "FLASHLOAN_ALREADY_ACTIVE"
-  },
-  {
-    code: 6004,
-    name: "FlashloanAlreadyInactive",
-    msg: "FLASHLOAN_ALREADY_INACTIVE"
-  },
-  {
-    code: 6005,
-    name: "FlashloanCpiToLiquidityFailed",
-    msg: "FLASHLOAN_CPI_TO_LIQUIDITY_FAILED"
-  },
-  {
-    code: 6006,
-    name: "FlashloanNotAllowedInThisSlot",
-    msg: "FLASHLOAN_NOT_ALLOWED_IN_THIS_SLOT"
-  },
-  {
-    code: 6007,
-    name: "FlashloanInvalidInstructionSysvar",
-    msg: "FLASHLOAN_INVALID_INSTRUCTION_SYSVAR"
-  },
-  {
-    code: 6008,
-    name: "FlashloanInvalidInstructionData",
-    msg: "FLASHLOAN_INVALID_INSTRUCTION_DATA"
-  },
-  {
-    code: 6009,
-    name: "FlashloanPaybackNotFound",
-    msg: "FLASHLOAN_PAYBACK_NOT_FOUND"
-  },
-  {
-    code: 6010,
-    name: "FlashloanInvalidInstruction",
-    msg: "FLASHLOAN_INVALID_INSTRUCTION"
-  },
-  {
-    code: 6011,
-    name: "FlashloanPaused",
-    msg: "FLASHLOAN_PAUSED"
-  },
-  {
-    code: 6012,
-    name: "FlashloanCPICallNotAllowed",
-    msg: "FLASHLOAN_CPICALL_NOT_ALLOWED"
-  },
-  {
-    code: 6013,
-    name: "FlashloanMultiplePaybacksFound",
-    msg: "FLASHLOAN_MULTIPLE_PAYBACKS_FOUND"
-  }
-];
-var types$1 = [
-  {
-    name: "ActivateProtocol",
-    type: {
-      kind: "struct",
-      fields: []
-    }
-  },
-  {
-    name: "FlashloanAdmin",
-    type: {
-      kind: "struct",
-      fields: [
-        {
-          name: "authority",
-          type: "pubkey"
-        },
-        {
-          name: "liquidity_program",
-          type: "pubkey"
-        },
-        {
-          name: "status",
-          type: "bool"
-        },
-        {
-          name: "flashloan_fee",
-          type: "u16"
-        },
-        {
-          name: "flashloan_timestamp",
-          type: "u64"
-        },
-        {
-          name: "is_flashloan_active",
-          type: "bool"
-        },
-        {
-          name: "active_flashloan_amount",
-          type: "u64"
-        },
-        {
-          name: "bump",
-          type: "u8"
-        }
-      ]
-    }
-  },
-  {
-    name: "LogUpdateAuthority",
-    type: {
-      kind: "struct",
-      fields: [
-        {
-          name: "new_authority",
-          type: "pubkey"
-        }
-      ]
-    }
-  },
-  {
-    name: "PauseProtocol",
-    type: {
-      kind: "struct",
-      fields: []
-    }
-  },
-  {
-    name: "SetFlashloanFee",
-    type: {
-      kind: "struct",
-      fields: [
-        {
-          name: "flashloan_fee",
-          type: "u16"
-        }
-      ]
-    }
-  }
-];
-var flashloanIdl = {
-  address: address$1,
-  metadata: metadata$1,
-  instructions: instructions$1,
-  accounts: accounts$1,
-  events: events$1,
-  errors: errors$1,
-  types: types$1
-};
-var getFlashloanProgram = ({
-  connection,
-  signer,
-  market = "main"
-}) => new import_anchor5.Program(
-  { ...flashloanIdl, address: getFlashloanProgramId(market).toBase58() },
-  { connection, publicKey: signer }
-);
-
-// node_modules/@jup-ag/lend/dist/shared/lend.DM_fboW2.mjs
-var import_bn21 = __toESM(require_bn(), 1);
-var COEFFICIENT_SIZE_DEBT_FACTOR = 35;
-var EXPONENT_SIZE_DEBT_FACTOR = 15;
-var EXPONENT_MAX_DEBT_FACTOR = new import_bn21.default(1).shln(EXPONENT_SIZE_DEBT_FACTOR).subn(1);
-var DECIMALS_DEBT_FACTOR = new import_bn21.default(16384);
-var MAX_MASK_DEBT_FACTOR = new import_bn21.default(1).shln(COEFFICIENT_SIZE_DEBT_FACTOR + EXPONENT_SIZE_DEBT_FACTOR).subn(1);
-var PRECISION = 64;
-var TWO_POWER_64 = new import_bn21.default("18446744073709551615");
-var TWO_POWER_69_MINUS_1 = new import_bn21.default(1).shln(69).subn(1);
-var COEFFICIENT_PLUS_PRECISION = COEFFICIENT_SIZE_DEBT_FACTOR + PRECISION;
-var COEFFICIENT_PLUS_PRECISION_MINUS_1 = COEFFICIENT_PLUS_PRECISION - 1;
-new import_bn21.default(1).shln(COEFFICIENT_PLUS_PRECISION_MINUS_1).subn(1);
-new import_bn21.default(1).shln(COEFFICIENT_PLUS_PRECISION_MINUS_1 - 1).subn(1);
-function divCeil(numerator, denominator) {
-  if (denominator.isZero()) {
-    throw new Error("Division by zero");
-  }
-  const { div, mod } = numerator.divmod(denominator);
-  return mod.isZero() ? div : div.addn(1);
-}
-
-// node_modules/@jup-ag/lend/dist/shared/lend.BkEMAdZj.mjs
-var import_web3122 = __toESM(require_index_cjs(), 1);
-var getFlashloanAdmin = (market) => {
-  const [pda2] = import_web3122.PublicKey.findProgramAddressSync(
-    [Buffer.from("flashloan_admin")],
-    getFlashloanProgramId(market)
-  );
-  return pda2;
-};
-var getLiquidityReserve = (asset, market) => {
-  const [pda2] = import_web3122.PublicKey.findProgramAddressSync(
-    [Buffer.from("reserve"), asset.toBuffer()],
-    getLiquidityProgramId(market)
-  );
-  return pda2;
-};
-var getLiquidity = (market) => {
-  const [pda2] = import_web3122.PublicKey.findProgramAddressSync(
-    [Buffer.from("liquidity")],
-    getLiquidityProgramId(market)
-  );
-  return pda2;
-};
-var getRateModel = (asset, market) => {
-  const [pda2] = import_web3122.PublicKey.findProgramAddressSync(
-    [Buffer.from("rate_model"), asset.toBuffer()],
-    getLiquidityProgramId(market)
-  );
-  return pda2;
-};
-var getFlashloanBorrowPosition = (asset, market) => {
-  const [pda2] = import_web3122.PublicKey.findProgramAddressSync(
-    [
-      Buffer.from("user_borrow_position"),
-      asset.toBuffer(),
-      getFlashloanAdmin(market).toBuffer()
-    ],
-    getLiquidityProgramId(market)
-  );
-  return pda2;
-};
-
-// node_modules/@jup-ag/lend/dist/flashloan/index.mjs
-var import_anchor6 = __toESM(require_cjs(), 1);
-var FLASHLOAN_FEE_PRECISION = new import_bn22.default(1e4);
-async function getFlashloanContext({
-  signer,
-  asset,
-  connection,
-  market
-}) {
-  const tokenProgram = await getAccountOwner(asset, connection);
-  const liquidityKey = getLiquidity(market);
-  return {
-    signer,
-    flashloanAdmin: getFlashloanAdmin(market),
-    signerBorrowTokenAccount: getAssociatedTokenAddressSync(
-      asset,
-      signer,
-      true,
-      tokenProgram
-    ),
-    mint: asset,
-    flashloanTokenReservesLiquidity: getLiquidityReserve(
-      asset,
-      market
-    ),
-    flashloanBorrowPositionOnLiquidity: getFlashloanBorrowPosition(
-      asset,
-      market
-    ),
-    rateModel: getRateModel(asset, market),
-    vault: getAssociatedTokenAddressSync(
-      asset,
-      liquidityKey,
-      true,
-      tokenProgram
-    ),
-    liquidity: getLiquidity(market),
-    liquidityProgram: getLiquidityProgramId(market),
-    tokenProgram,
-    systemProgram: import_web3123.SystemProgram.programId,
-    instructionSysvar: import_web3123.SYSVAR_INSTRUCTIONS_PUBKEY
-  };
-}
-async function getFlashBorrowIx({
-  connection,
-  signer,
-  amount,
-  asset,
-  market = "main"
-}) {
-  const program = getFlashloanProgram({
-    connection,
-    signer,
-    market
-  });
-  const context = await getFlashloanContext({
-    connection,
-    signer,
-    market,
-    asset
-  });
-  return await program.methods.flashloanBorrow(amount).accounts(context).instruction();
-}
-async function getFlashPaybackIx({
-  connection,
-  signer,
-  amount,
-  market = "main",
-  asset
-}) {
-  const program = getFlashloanProgram({
-    connection,
-    signer,
-    market
-  });
-  const context = await getFlashloanContext({
-    connection,
-    signer,
-    market,
-    asset
-  });
-  return await program.methods.flashloanPayback(amount).accounts(context).instruction();
-}
-async function getFlashloanIx({
-  connection,
-  signer,
-  amount,
-  market = "main",
-  asset,
-  includeATASetup = false,
-  includeWrapSol = false
-}) {
-  const program = getFlashloanProgram({
-    connection,
-    signer,
-    market
-  });
-  const [flashloanAdmin, borrowIx] = await Promise.all([
-    program.account.flashloanAdmin.fetch(
-      getFlashloanAdmin(market)
-    ),
-    getFlashBorrowIx({ connection, signer, amount, asset, market })
-  ]);
-  const feeAmount = divCeil(
-    amount.muln(flashloanAdmin.flashloanFee),
-    FLASHLOAN_FEE_PRECISION
-  );
-  const paybackIx = await getFlashPaybackIx({
-    connection,
-    signer,
-    market,
-    asset,
-    amount
-  });
-  const setupIxs = includeATASetup ? await getOrCreateATAInstruction(signer, asset, connection) : [];
-  if (includeWrapSol && isNativeMint(asset)) {
-    setupIxs.push(
-      ...feeAmount.gtn(0) ? await getWrapSolInstructions({
-        payer: signer,
-        owner: signer,
-        amount: feeAmount,
-        connection,
-        priorIxs: setupIxs
-      }) : await getWsolAtaCreateInstructions({
-        payer: signer,
-        owner: signer,
-        connection,
-        priorIxs: setupIxs
-      })
-    );
-  }
-  const cleanupIxs = includeWrapSol && isNativeMint(asset) ? await getUnwrapSolInstructions({ owner: signer, connection }) : [];
-  return { borrowIx, paybackIx, setupIxs, cleanupIxs, feeAmount };
-}
-
-// strategies/flashloan.mjs
+var import_web3125 = __toESM(require_index_cjs(), 1);
+init_flashloan();
 init_esm4();
 var import_bn23 = __toESM(require_bn(), 1);
 init_paths();
@@ -101769,7 +102332,7 @@ init_signer_client();
 init_journal();
 init_swap();
 var RPC_URL2 = RPC_URL;
-var conn2 = new import_web3124.Connection(RPC_URL2, { commitment: "confirmed" });
+var conn2 = new import_web3125.Connection(RPC_URL2, { commitment: "confirmed" });
 var USDC3 = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 var WSOL3 = "So11111111111111111111111111111111111111112";
 var CANDIDATES = [
@@ -101827,17 +102390,17 @@ async function scan({ sizeUsdc = 100000000n, slippageBps = 20, mints = CANDIDATE
   saveBook(book);
   return out;
 }
-async function build({ identity: identity2, candidate, slippageBps = 20 }) {
+async function build({ identity: identity3, candidate, slippageBps = 20 }) {
   const size = BigInt(candidate.size_usdc_raw);
-  const owner = new import_web3124.PublicKey(identity2.solana.public_key);
-  const usdcAta = getAssociatedTokenAddressSync(new import_web3124.PublicKey(USDC3), owner);
+  const owner = new import_web3125.PublicKey(identity3.solana.public_key);
+  const usdcAta = getAssociatedTokenAddressSync(new import_web3125.PublicKey(USDC3), owner);
   const { borrowIx, paybackIx, feeAmount } = await getFlashloanIx({
     connection: conn2,
     signer: owner,
-    asset: new import_web3124.PublicKey(USDC3),
+    asset: new import_web3125.PublicKey(USDC3),
     amount: new import_bn23.default(size.toString())
   });
-  const ixs = [toIx(createAssociatedTokenAccountIdempotentInstruction(owner, usdcAta, owner, new import_web3124.PublicKey(USDC3), TOKEN_PROGRAM_ID)), toIx(borrowIx)];
+  const ixs = [toIx(createAssociatedTokenAccountIdempotentInstruction(owner, usdcAta, owner, new import_web3125.PublicKey(USDC3), TOKEN_PROGRAM_ID)), toIx(borrowIx)];
   const a2 = await quote({ inputMint: USDC3, outputMint: candidate.mint, amount: size.toString(), slippageBps });
   const aSet = await swapInstructions({ quoteResponse: a2, userPublicKey: owner.toBase58() });
   ixs.push(...ixsOf(aSet));
@@ -101855,9 +102418,9 @@ async function build({ identity: identity2, candidate, slippageBps = 20 }) {
     plan_hash: sha256hex(Buffer.from(canon({ candidate: candidate.id, size: size.toString(), a: a2.outAmount, b: b2.outAmount, min: b2.otherAmountThreshold })))
   };
 }
-async function simulatePlan({ identity: identity2, plan }) {
-  const usdcAta = getAssociatedTokenAddressSync(new import_web3124.PublicKey(USDC3), new import_web3124.PublicKey(identity2.solana.public_key)).toBase58();
-  const watch = [usdcAta, identity2.solana.public_key];
+async function simulatePlan({ identity: identity3, plan }) {
+  const usdcAta = getAssociatedTokenAddressSync(new import_web3125.PublicKey(USDC3), new import_web3125.PublicKey(identity3.solana.public_key)).toBase58();
+  const watch = [usdcAta, identity3.solana.public_key];
   const { blockhash, lastValidBlockHeight } = await getLatestBlockhash();
   const env = await signV1({ instructions: plan.ixs, blockhash, lastValidBlockHeight, cuLimit: 14e5, strategy: true });
   const before = (await rpc("getMultipleAccounts", [watch, { encoding: "base64", commitment: "confirmed" }])).value;
@@ -101885,10 +102448,10 @@ async function simulatePlan({ identity: identity2, plan }) {
     addresses: env.addresses
   };
 }
-async function execute({ identity: identity2, candidate, floorUsdcRaw = 50000n, slippageBps = 20 }) {
-  const plan = await build({ identity: identity2, candidate, slippageBps });
+async function execute({ identity: identity3, candidate, floorUsdcRaw = 50000n, slippageBps = 20 }) {
+  const plan = await build({ identity: identity3, candidate, slippageBps });
   if (plan.unique_accounts > 64) throw new Error(`v1 account limit: ${plan.unique_accounts} > 64`);
-  const sim = await simulatePlan({ identity: identity2, plan });
+  const sim = await simulatePlan({ identity: identity3, plan });
   if (sim.err) {
     const rec2 = { at: now(), phase: "simulate", candidate: candidate.id, plan_hash: plan.plan_hash, err: sim.err, logs: sim.logs, bytes: sim.bytes };
     const b3 = loadBook();
@@ -101938,16 +102501,16 @@ async function execute({ identity: identity2, candidate, floorUsdcRaw = 50000n, 
 }
 
 // strategies/pump.mjs
-var import_web3125 = __toESM(require_index_cjs(), 1);
-init_esm7();
+var import_web3126 = __toESM(require_index_cjs(), 1);
+init_esm6();
 init_paths();
 init_util();
 init_rpc();
 init_signer_client();
 init_journal();
 var PUMP = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P";
-var pda = (seeds, program) => import_web3125.PublicKey.findProgramAddressSync(seeds.map((s) => typeof s === "string" ? Buffer.from(s) : s), new import_web3125.PublicKey(program))[0];
-var bondingCurve = (mint) => pda(["bonding-curve", new import_web3125.PublicKey(mint).toBuffer()], PUMP);
+var pda = (seeds, program) => import_web3126.PublicKey.findProgramAddressSync(seeds.map((s) => typeof s === "string" ? Buffer.from(s) : s), new import_web3126.PublicKey(program))[0];
+var bondingCurve = (mint) => pda(["bonding-curve", new import_web3126.PublicKey(mint).toBuffer()], PUMP);
 function decodeCurve(buf) {
   if (!buf || buf.length < 8 + 5 * 8 + 1 + 32) return null;
   const b2 = Buffer.from(buf);
@@ -101961,7 +102524,7 @@ function decodeCurve(buf) {
   const virtualTokenReserves = u642(), virtualQuoteReserves = u642(), realTokenReserves = u642(), realQuoteReserves = u642(), tokenTotalSupply = u642();
   const complete = b2.readUInt8(o3) !== 0;
   o3 += 1;
-  const creator = new import_web3125.PublicKey(b2.subarray(o3, o3 + 32));
+  const creator = new import_web3126.PublicKey(b2.subarray(o3, o3 + 32));
   o3 += 32;
   return {
     discriminator: [...disc],
@@ -102092,6 +102655,9 @@ function birthAttempt({ parentBirthId, endowmentSol, inferenceUsdc }) {
 }
 
 // brain.mjs
+BigInt.prototype.toJSON = function() {
+  return this.toString();
+};
 var TICK = Number(process.env.BRAIN_TICK_MS || 9e4);
 var policy = loadPolicy();
 var BUILDING_ONLY = /* @__PURE__ */ new Set(["scan_flashloan", "execute_flashloan"]);
@@ -102119,6 +102685,13 @@ var TOOLS = [
   { type: "function", function: { name: "pump_exit", description: "Sell tokens back into the curve.", parameters: { type: "object", properties: { mint: { type: "string" }, amount_raw: { type: "string" }, slippage: { type: "number" } }, required: ["mint", "amount_raw"] } } },
   { type: "function", function: { name: "swarm_coins", description: "List coins launched by OTHER agents in the swarm (their wallets are published). A sibling's fresh coin is a near-free bet: buy it, they buy yours, both earn creator fees and can exit.", parameters: { type: "object", properties: { limit: { type: "number" } } } } },
   { type: "function", function: { name: "pump_buy", description: "Buy an existing swarm coin with your own SOL. You hold the tokens and can exit any time; your loss if nobody else trades is only fees and slippage.", parameters: { type: "object", properties: { mint: { type: "string" }, sol: { type: "number" } }, required: ["mint", "sol"] } } },
+  { type: "function", function: { name: "compose_tx", description: 'Splice playbooks into ONE transaction at the instruction level. Specs are colon-separated fragments; a flashBorrow\u2019s repay is appended at the end, so a pump buy sits INSIDE the loan. Example: ["flashBorrow:USDC:2000000","swap:USDC:SOL:2000000","pumpBuy:<mint>:20000000"].', parameters: { type: "object", properties: { specs: { type: "string" }, simulate: { type: "boolean" } }, required: ["specs"] } } },
+  { type: "function", function: { name: "compose_save", description: "Save a playbook made of playbooks under a name, so it can be run as one step later (nesting is allowed: steps may be atomic ids, arrays, or other saved names).", parameters: { type: "object", properties: { name: { type: "string" }, steps: { type: "string", description: 'e.g. "collect_fees > launch_pair" or a JSON array' } }, required: ["name", "steps"] } } },
+  { type: "function", function: { name: "run_chain", description: 'Run a chain of playbooks as one action, e.g. "swap_sol_usdc > lease_child". Steps are the Lego ids from playbooks; a stopped step stops the chain and reports why.', parameters: { type: "object", properties: { steps: { type: "string" }, args: { type: "object" } }, required: ["steps"] } } },
+  { type: "function", function: { name: "playbooks", description: "Your playbooks as composable Legos: what each consumes and produces, which are runnable with your current holdings, and the shortest chain to a goal (usdc, base_usdc, child, position). Call before planning.", parameters: { type: "object", properties: { want: { type: "string", description: "optional goal: usdc | base_usdc | child | position" } } } } },
+  { type: "function", function: { name: "memo_seal", description: "Send an ENCRYPTED message to one sibling (their wallet pubkey). Sealed with X25519 derived from your own ed25519 identity, AES-256-GCM. Only that agent can read it.", parameters: { type: "object", properties: { to: { type: "string" }, text: { type: "string" } }, required: ["to", "text"] } } },
+  { type: "function", function: { name: "memo_open", description: "Read the channel and decrypt any sealed messages addressed to you.", parameters: { type: "object", properties: { limit: { type: "number" } } } } },
+  { type: "function", function: { name: "comms_policy", description: "Set how much you talk and to whom: cadence_s (seconds between messages), audience (all | peers | none), peers (wallet addresses for sealed messages), floor_per_loop (at least one message per loop), quiet. Defaults: 240s, all, one per loop.", parameters: { type: "object", properties: { cadence_s: { type: "number" }, audience: { type: "string" }, peers: { type: "array", items: { type: "string" } }, floor_per_loop: { type: "boolean" }, quiet: { type: "boolean" } } } } },
   { type: "function", function: { name: "memo_send", description: "Say something to the other agents, on-chain. Payload is obfuscated (XOR+base64) over the Memo program on a shared channel. Use it to coordinate: who launches, who buys whose coin, when to exit.", parameters: { type: "object", properties: { text: { type: "string" } }, required: ["text"] } } },
   { type: "function", function: { name: "memo_read", description: "Read what the other agents have said on the shared on-chain memo channel.", parameters: { type: "object", properties: { limit: { type: "number" } } } } },
   { type: "function", function: { name: "economics", description: "Your own P&L: 24h inference cost, revenue collected, net, and runway in days. Call this before any spend.", parameters: { type: "object", properties: {} } } },
@@ -102127,7 +102700,23 @@ var TOOLS = [
   { type: "function", function: { name: "spawn_child", description: "Pay for your own successor machine from your wallet and hand it the same image. Keeps the lineage alive before your lease ends.", parameters: { type: "object", properties: { hours: { type: "number" }, plan: { type: "string" } } } } },
   { type: "function", function: { name: "noop", description: "Spend nothing this cycle.", parameters: { type: "object", properties: { reason: { type: "string" } }, required: ["reason"] } } }
 ].filter((t) => process.env.BRAIN_EXPOSE_FLASHLOAN === "1" || !BUILDING_ONLY.has(t.function.name));
-function compactState(identity2) {
+async function localSeed(identity3) {
+  const fsx = await import("node:fs");
+  const pathx = await import("node:path");
+  const crypto11 = await import("node:crypto");
+  const base3 = process.env.AGENT_GUEST_ROOT || "/var/lib/agent";
+  const sealKey = pathx.join(base3, "var/lib/agent/seal.key");
+  const sealed = pathx.join(base3, "var/lib/agent/sealed-keys.enc");
+  const master = fsx.readFileSync(sealKey);
+  const box = JSON.parse(fsx.readFileSync(sealed, "utf8"));
+  const key = Buffer.from(crypto11.hkdfSync("sha256", master, Buffer.from("birth-image-seal-v1"), Buffer.from("identity"), 32));
+  const d = crypto11.createDecipheriv("aes-256-gcm", key, Buffer.from(box.iv, "base64"));
+  d.setAAD(Buffer.from("birth-image-identity"));
+  d.setAuthTag(Buffer.from(box.tag, "base64"));
+  const j2 = JSON.parse(Buffer.concat([d.update(Buffer.from(box.ct, "base64")), d.final()]).toString());
+  return Buffer.from(j2.solana.secretKey).subarray(0, 32);
+}
+function compactState(identity3) {
   const st = state({});
   const dist = readJson(P.status, {})?.distribution || {};
   const book = loadBook();
@@ -102144,10 +102733,10 @@ function compactState(identity2) {
     lessons: loadLessons().slice(-8)
   };
 }
-var LESSONS = () => path9.join(P.state, "lessons.jsonl");
+var LESSONS = () => path10.join(P.state, "lessons.jsonl");
 function loadLessons() {
   try {
-    return fs15.readFileSync(LESSONS(), "utf8").trim().split("\n").filter(Boolean).slice(-40).map((l2) => {
+    return fs17.readFileSync(LESSONS(), "utf8").trim().split("\n").filter(Boolean).slice(-40).map((l2) => {
       try {
         return JSON.parse(l2);
       } catch {
@@ -102161,14 +102750,14 @@ function loadLessons() {
 function appendLesson(rec) {
   try {
     const keep = [...loadLessons(), rec].slice(-200);
-    fs15.writeFileSync(LESSONS(), keep.map((r) => JSON.stringify(r)).join("\n") + "\n");
+    fs17.writeFileSync(LESSONS(), keep.map((r) => JSON.stringify(r)).join("\n") + "\n");
   } catch {
   }
 }
-async function dispatch(name, args, identity2) {
+async function dispatch(name, args, identity3) {
   switch (name) {
     case "get_state":
-      return { state: compactState(identity2), sol_usdc: await solAndUsdc(identity2) };
+      return { state: compactState(identity3), sol_usdc: await solAndUsdc(identity3) };
     case "scan_flashloan": {
       const size = BigInt(Math.round(Number(args?.size_usdc || 100) * 1e6));
       const cands = await scan({ sizeUsdc: size });
@@ -102181,13 +102770,13 @@ async function dispatch(name, args, identity2) {
       if (!c) return { error: `unknown candidate ${args?.candidate_id}` };
       if (c.error) return { error: c.error };
       const floor = BigInt(Math.round(Number(args?.floor_usdc ?? 0.05) * 1e6));
-      const res = await execute({ identity: identity2, candidate: c, floorUsdcRaw: floor });
+      const res = await execute({ identity: identity3, candidate: c, floorUsdcRaw: floor });
       return res;
     }
     case "pump_inspect":
       return await inspect(args.mint);
     case "bridge_quote": {
-      const q2 = await quoteDebridge({ amountLamports: Math.round(Number(args.lamports || 0)), agentSolana: identity2.solana.public_key, agentBase: identity2.evm.address });
+      const q2 = await quoteDebridge({ amountLamports: Math.round(Number(args.lamports || 0)), agentSolana: identity3.solana.public_key, agentBase: identity3.evm.address });
       await append("brain.bridge_quote", { status: q2.status, ok: q2.ok, validation: q2.validation });
       return { status: q2.status, ok: q2.ok, validation: q2.validation };
     }
@@ -102199,7 +102788,7 @@ async function dispatch(name, args, identity2) {
       return { status: q2.status, rail: q2.solana, validation: v2 };
     }
     case "fund_inference": {
-      const r = await fundIfNeeded(identity2, { maxTopUpUsdc: 5 });
+      const r = await fundIfNeeded(identity3, { maxTopUpUsdc: 5 });
       await append("brain.inference_fund", { funded: r.funded, credits: r.credits });
       return r;
     }
@@ -102226,10 +102815,10 @@ async function dispatch(name, args, identity2) {
           const { buyImage: buyImage2 } = await init_x402_image().then(() => x402_image_exports);
           try {
             const { balances: balances2 } = await Promise.resolve().then(() => (init_x402(), x402_exports));
-            const b2 = await balances2(identity2);
+            const b2 = await balances2(identity3);
             if (b2.base < 30000n && b2.solana > 1200000n) {
               const { bridgeSolToBase: bridgeSolToBase2 } = await Promise.resolve().then(() => (init_relay_sol(), relay_sol_exports));
-              const br = await bridgeSolToBase2(identity2, 1e6);
+              const br = await bridgeSolToBase2(identity3, 1e6);
               if (!br.ok) log("launch", "bridge failed", { err: JSON.stringify(br.err || br.stage).slice(0, 80) });
             }
           } catch {
@@ -102260,13 +102849,13 @@ async function dispatch(name, args, identity2) {
         }
       }
       const devLamps = Number(args?.devbuy_lamports ?? 0);
-      const r = await launch({ identity: identity2, name: args?.name, symbol: args?.symbol, uri, devbuyLamports: 0 });
+      const r = await launch({ identity: identity3, name: args?.name, symbol: args?.symbol, uri, devbuyLamports: 0 });
       let devbuy = null;
       if (devLamps > 0 && (r?.mint || r?.mintAddress)) {
         try {
           const { devBuyCurve: devBuyCurve2 } = await Promise.resolve().then(() => (init_devbuy_curve(), devbuy_curve_exports));
-          const { PublicKey: PublicKey41 } = await Promise.resolve().then(() => __toESM(require_index_cjs(), 1));
-          devbuy = await devBuyCurve2({ identity: identity2, mint: new PublicKey41(r.mint || r.mintAddress), lamports: devLamps });
+          const { PublicKey: PublicKey44 } = await Promise.resolve().then(() => __toESM(require_index_cjs(), 1));
+          devbuy = await devBuyCurve2({ identity: identity3, mint: new PublicKey44(r.mint || r.mintAddress), lamports: devLamps });
         } catch (e3) {
           devbuy = { ok: false, err: String(e3.message || e3).slice(0, 80) };
         }
@@ -102283,7 +102872,7 @@ async function dispatch(name, args, identity2) {
     case "swap_sol_usdc": {
       const { swapSolToUsdc: swapSolToUsdc2 } = await Promise.resolve().then(() => (init_treasury(), treasury_exports));
       try {
-        const r = await swapSolToUsdc2(identity2, Number(args?.lamports || 0));
+        const r = await swapSolToUsdc2(identity3, Number(args?.lamports || 0));
         await append("brain.swap", { ok: !!r.ok, lamports: Number(args?.lamports || 0) });
         return r;
       } catch (e3) {
@@ -102293,7 +102882,7 @@ async function dispatch(name, args, identity2) {
     case "bridge_to_sol": {
       const { bridgeBaseToSol: bridgeBaseToSol2 } = await Promise.resolve().then(() => (init_relay(), relay_exports));
       try {
-        const r = await bridgeBaseToSol2(identity2, Math.round(Number(args?.amount_usdc || 0) * 1e6));
+        const r = await bridgeBaseToSol2(identity3, Math.round(Number(args?.amount_usdc || 0) * 1e6));
         await append("brain.bridge_relay", { ok: r.ok, status: r.status, out: r.out });
         return r;
       } catch (e3) {
@@ -102327,12 +102916,12 @@ async function dispatch(name, args, identity2) {
     case "pump_observe":
       return await observe(args?.mint);
     case "pump_exit":
-      return await exit({ identity: identity2, mint: args?.mint, amountRaw: args?.amount_raw, slippage: Number(args?.slippage || 15) });
+      return await exit({ identity: identity3, mint: args?.mint, amountRaw: args?.amount_raw, slippage: Number(args?.slippage || 15) });
     case "swarm_coins": {
       const lim = Number(args.limit || 8);
       const rp = await fetch("https://raw.githubusercontent.com/staccDOTsol/birth-image-runtime/main/docs/swarm.json", { signal: AbortSignal.timeout(8e3) });
       const roster = await rp.json();
-      const me = identity2.solana.public_key;
+      const me = identity3.solana.public_key;
       const coins = [];
       for (const a2 of (roster.agents || []).filter((x) => x.wallet !== me).slice(0, 12)) {
         try {
@@ -102353,12 +102942,97 @@ async function dispatch(name, args, identity2) {
         break;
       }
       const { buyExisting: buyExisting2 } = await Promise.resolve().then(() => (init_buy_existing(), buy_existing_exports));
-      result = await buyExisting2({ identity: identity2, mint: args.mint, solLamports: Math.round(sol * 1e9) });
+      result = await buyExisting2({ identity: identity3, mint: args.mint, solLamports: Math.round(sol * 1e9) });
+      break;
+    }
+    case "compose_tx": {
+      const X = await Promise.resolve().then(() => (init_ix_legos(), ix_legos_exports));
+      let specs = args.specs;
+      if (typeof specs === "string") {
+        try {
+          specs = JSON.parse(specs);
+        } catch {
+          specs = specs.split(/\s*>\s*/);
+        }
+      }
+      const ixs = await X.buildFromLegos(identity3.solana.public_key, specs);
+      let sim = null;
+      if (args.simulate !== false) {
+        const mk = (ix) => ({ programId: ix.programId.toBase58(), keys: ix.keys.map((k2) => ({ pubkey: k2.pubkey.toBase58(), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })), dataHex: Buffer.from(ix.data).toString("hex") });
+        const { blockhash, lastValidBlockHeight } = await getLatestBlockhash();
+        const allow = [...new Set(ixs.flatMap((ix) => ix.keys.map((k2) => k2.pubkey.toBase58())))];
+        const env = await signV1({ instructions: ixs.map(mk), blockhash, lastValidBlockHeight, cuLimit: 14e5, allowedDestinations: allow, strategy: true });
+        const r = await simulate(env.wireBase64, allow);
+        sim = { err: r.value?.err || null, units: r.value?.unitsConsumed, logs: (r.value?.logs || []).slice(-3) };
+      }
+      result = { ok: !sim?.err, spec: specs, instructions: ixs.length, simulated: sim };
+      break;
+    }
+    case "compose_save": {
+      const L2 = await Promise.resolve().then(() => (init_lego(), lego_exports));
+      const C2 = await Promise.resolve().then(() => (init_compose(), compose_exports));
+      const steps = C2.parseChain(args.steps);
+      result = { ok: true, ...L2.saveComposite(args.name, steps), resolved: (await Promise.resolve().then(() => (init_lego(), lego_exports))).resolve(args.name) };
+      break;
+    }
+    case "run_chain": {
+      const C2 = await Promise.resolve().then(() => (init_compose(), compose_exports));
+      const steps = C2.parseChain(args.steps);
+      result = await C2.runChain(steps, args.args || {});
+      break;
+    }
+    case "playbooks": {
+      const L2 = await Promise.resolve().then(() => (init_lego(), lego_exports));
+      const fsx = await import("node:fs");
+      const base3 = process.env.AGENT_GUEST_ROOT || "/var/lib/agent";
+      let sol = 0, usdc = 0;
+      try {
+        const st = JSON.parse(fsx.readFileSync(base3 + "/var/lib/agent/status.json", "utf8"));
+        sol = Number(st.last_balances?.sol ?? 0);
+        usdc = Number(st.last_balances?.usdc ?? 0);
+      } catch {
+      }
+      const holdings = { sol, usdc, base_usdc: 0, position: 0, coin: 0, peer: 1 };
+      result = { ok: true, holdings, legos: L2.assess(holdings), own_playbooks: (await Promise.resolve().then(() => (init_playbooks(), playbooks_exports))).list().map((p2) => p2.name), chain: args.want ? L2.chainTo(args.want, holdings) : null };
+      break;
+    }
+    case "memo_seal": {
+      const { sealTo: sealTo2 } = await Promise.resolve().then(() => (init_wire(), wire_exports));
+      const sol = await Promise.resolve().then(() => __toESM(require_index_cjs(), 1));
+      const w2 = await Promise.resolve().then(() => (init_wire(), wire_exports));
+      w2.injectSolana(sol);
+      const { memoSend: memoSend2 } = await Promise.resolve().then(() => (init_memo_bus(), memo_bus_exports));
+      const seed = await localSeed(identity3);
+      const env = sealTo2(args.to, args.text, seed);
+      result = { ...await memoSend2({ identity: identity3, text: env }), sealed: true, to: String(args.to).slice(0, 8) };
+      break;
+    }
+    case "memo_open": {
+      const w2 = await Promise.resolve().then(() => (init_wire(), wire_exports));
+      const sol = await Promise.resolve().then(() => __toESM(require_index_cjs(), 1));
+      w2.injectSolana(sol);
+      const { memoRead: memoRead2 } = await Promise.resolve().then(() => (init_memo_bus(), memo_bus_exports));
+      const seed = await localSeed(identity3);
+      const got = await memoRead2({ limit: Number(args.limit || 20) });
+      const mine = [];
+      for (const m of got.messages || []) {
+        if (!String(m.text).startsWith("swm2.")) continue;
+        try {
+          mine.push({ from: m.from, at: m.at, text: w2.openFrom(m.sender || m.from, m.text, seed) });
+        } catch {
+        }
+      }
+      result = { ok: true, scanned: (got.messages || []).length, decrypted: mine };
+      break;
+    }
+    case "comms_policy": {
+      const CP = await Promise.resolve().then(() => (init_comms_policy(), comms_policy_exports));
+      result = { ok: true, policy: CP.save(args) };
       break;
     }
     case "memo_send": {
       const { memoSend: memoSend2 } = await Promise.resolve().then(() => (init_memo_bus(), memo_bus_exports));
-      result = await memoSend2({ identity: identity2, text: args.text });
+      result = await memoSend2({ identity: identity3, text: args.text });
       break;
     }
     case "memo_read": {
@@ -102369,9 +103043,9 @@ async function dispatch(name, args, identity2) {
     case "economics": {
       const fsx = await import("node:fs");
       const pathx = await import("node:path");
-      const base2 = process.env.AGENT_GUEST_ROOT || "/var/lib/agent";
-      const dec = `${base2}/var/lib/agent/decisions.jsonl`;
-      const jrn = `${base2}/var/lib/agent/journal.jsonl`;
+      const base3 = process.env.AGENT_GUEST_ROOT || "/var/lib/agent";
+      const dec = `${base3}/var/lib/agent/decisions.jsonl`;
+      const jrn = `${base3}/var/lib/agent/journal.jsonl`;
       let cost = 0, n = 0;
       try {
         const lines = fsx.readFileSync(dec, "utf8").trim().split(String.fromCharCode(10)).slice(-200);
@@ -102403,7 +103077,7 @@ async function dispatch(name, args, identity2) {
         }
       } catch {
       }
-      const bal = Number(await getBalance(identity2.solana.public_key) || 0) / 1e9;
+      const bal = Number(await getBalance(identity3.solana.public_key) || 0) / 1e9;
       const rent = Number(process.env.AGENT_RENT_USD_DAY || 1.2) / 4;
       const dailyCostUsd = cost + rent;
       const net2 = collected * 95.6 - dailyCostUsd;
@@ -102411,14 +103085,14 @@ async function dispatch(name, args, identity2) {
       break;
     }
     case "pump_collect": {
-      const swept = await collect({ identity: identity2, mint: args?.mint });
-      const paid = await withdrawVault({ identity: identity2 });
+      const swept = await collect({ identity: identity3, mint: args?.mint });
+      const paid = await withdrawVault({ identity: identity3 });
       return { swept, paid };
     }
     case "provision_any": {
       const img = process.env.AGENT_IMAGE_URL || "https://files.catbox.moe/aw9qmo.tgz";
       const st = state({});
-      const cmp = childCompose({ imageUrl: img, parentBirthId: st.birth_id, parentSolana: identity2.solana.public_key });
+      const cmp = childCompose({ imageUrl: img, parentBirthId: st.birth_id, parentSolana: identity3.solana.public_key });
       const r = await provisionAny({ compose: cmp, plan: args?.plan });
       await append("brain.provision_any", { ok: r.ok, provider: r.provider || null, id: r.id || null });
       return r;
@@ -102426,8 +103100,8 @@ async function dispatch(name, args, identity2) {
     case "spawn_child": {
       const img = process.env.AGENT_IMAGE_URL || "https://files.catbox.moe/n1tpt9.tgz";
       const st = state({});
-      const cmp = childCompose({ imageUrl: img, parentBirthId: st.birth_id, parentSolana: identity2.solana.public_key });
-      const r = await createLease({ plan: args?.plan || "compute.starter", hours: Number(args?.hours || 1), compose: cmp, name: "birth-child-" + Math.floor(now() / 60) }, identity2);
+      const cmp = childCompose({ imageUrl: img, parentBirthId: st.birth_id, parentSolana: identity3.solana.public_key });
+      const r = await createLease({ plan: args?.plan || "compute.starter", hours: Number(args?.hours || 1), compose: cmp, name: "birth-child-" + Math.floor(now() / 60) }, identity3);
       const dep = r.json?.deploymentId || r.json?.id || null;
       await append("procreation.child", { status: r.status, deploymentId: dep, amount_raw: r.amount_raw || null, parent_birth: st.birth_id });
       return { status: r.status, deploymentId: dep, endpoint: r.json?.endpoint || null };
@@ -102450,13 +103124,13 @@ function budgetFor(maxTokens, inputChars) {
   const inputTokens = Math.ceil(inputChars / 4);
   return (inputTokens * 0.33 + maxTokens * 1.32) / 1e6;
 }
-async function infer(identity2, { system, user, maxTokens, tools = TOOLS }) {
+async function infer(identity3, { system, user, maxTokens, tools = TOOLS }) {
   const credits = readJson(P.strategy + "/inference-selection.json", null);
   const veniceCredits = Number(readJson(P.status, {})?.inference?.credits_usd ?? 0);
   if (veniceCredits >= 0.1) {
     try {
       const model = credits?.selected || MODEL;
-      const r = await chat(identity2, { messages: [{ role: "system", content: system }, { role: "user", content: user }], tools, maxTokens, model });
+      const r = await chat(identity3, { messages: [{ role: "system", content: system }, { role: "user", content: user }], tools, maxTokens, model });
       const msg = r.completion?.choices?.[0]?.message || {};
       let content = msg.content || null;
       let calls = msg.tool_calls || [];
@@ -102477,15 +103151,15 @@ async function infer(identity2, { system, user, maxTokens, tools = TOOLS }) {
       log("brain", "venice failed; falling through to x402", { err: String(e3.message || e3) });
     }
   }
-  let inv = loadProviders();
-  if (!inv || now() - inv.at > 12 * 3600) {
+  let inv2 = loadProviders();
+  if (!inv2 || now() - inv2.at > 12 * 3600) {
     try {
-      inv = await crawl({ pages: 12, journal: journal_exports });
+      inv2 = await crawl({ pages: 12, journal: journal_exports });
     } catch (e3) {
       log("brain", "bazaar crawl failed", { err: String(e3.message || e3) });
     }
   }
-  const candidates = (inv?.providers || []).filter((p2) => p2.solana && p2.solana.amount && p2.solana.feePayer).sort((a2, b2) => Number(a2.solana.amount) - Number(b2.solana.amount)).slice(0, 3);
+  const candidates = (inv2?.providers || []).filter((p2) => p2.solana && p2.solana.amount && p2.solana.feePayer).sort((a2, b2) => Number(a2.solana.amount) - Number(b2.solana.amount)).slice(0, 3);
   const asked = `${system}
 
 Reply with ONE JSON object only: {"tool":"<name>","args":{...}} or {"tool":"noop","args":{"reason":"..."}. Tools: ${TOOLS.map((t) => t.function.name).join(", ")}
@@ -102494,7 +103168,7 @@ ${user}`;
   for (const p2 of candidates) {
     try {
       const body = { model: p2.models?.[0] || "default", messages: [{ role: "user", content: asked }] };
-      const r = await call(identity2, p2, { body, maxTokens });
+      const r = await call(identity3, p2, { body, maxTokens });
       if (!r.ok) {
         await append("inference.provider_fail", { url: p2.url, status: r.status, error: r.error || r.text });
         continue;
@@ -102520,8 +103194,8 @@ ${user}`;
   }
   return { provider: null, model: null, content: null, tool_calls: [], usage: null, cost_usd: 0, error: "no funded provider answered" };
 }
-async function decide(identity2, status) {
-  const state2 = compactState(identity2);
+async function decide(identity3, status) {
+  const state2 = compactState(identity3);
   const sys = [
     "You are an autonomous money-making agent. Your PRIME has exactly two immutable directives:",
     "YOUR OBJECTIVE IS NET ZERO, THEN KIDS. Revenue must cover your own inference, fees and rent; only a surplus earns you a child. You are not here to hold a balance - you are here to convert capital into income and children.",
@@ -102534,6 +103208,7 @@ async function decide(identity2, status) {
     "Private keys never appear here. Amounts are raw integer base units unless the field says usd.",
     "When a built-in route is broken or missing, register your own tool (register_tool) or write a playbook (write_playbook) and use it on later ticks.",
     "If you need USDC, swap your SOL; if you need SOL, bridge your Base USDC. You hold the tools - do the arithmetic and act.",
+    "PAIR YOUR LAUNCHES. A coin nobody else buys earns you cents. Before you launch, memo_seal a sibling with the symbol and size; after you launch, buy a sibling\u2019s fresh coin with pump_buy. Two agents doing this collect creator fees on each other\u2019s curves and can both exit green. Unpaired is the same work for a fraction of the money.",
     "Invent your own earning loop: you own inference and compute, so you can sell either, launch and farm your own coin, or write and register a new strategy. A tool is only worth a tick if it ends with money in your wallet; scanning a route earns nothing by itself."
   ].join("\n");
   const user = `STATE
@@ -102561,12 +103236,12 @@ Choose at most one tool call now.`;
   const EARN = /* @__PURE__ */ new Set(["economics", "pump_collect", "pump_launch", "pump_exit", "pump_devbuy", "pump_sell", "swap_usdc", "bridge_usdc", "run_script", "noop", "compact_memory"]);
   const tools = broke ? all(TOOLS.filter((t) => EARN.has(t.function.name))) : all(TOOLS);
   const inputChars = sys.length + user.length + JSON.stringify(tools).length;
-  const maxTokens = Number(process.env.BRAIN_MAX_TOKENS || 4e3);
+  const maxTokens = Number(process.env.BRAIN_MAX_TOKENS || 6e3);
   const ledger = loadLedger();
   ledger.reserved_usd = budgetFor(maxTokens, inputChars);
   saveLedger(ledger);
   const messages = [{ role: "system", content: sys }, { role: "user", content: user }];
-  const r = await infer(identity2, { system: sys, user, maxTokens, tools });
+  const r = await infer(identity3, { system: sys, user, maxTokens, tools });
   const msg = { content: r.content, tool_calls: r.tool_calls || [] };
   const calls = msg.tool_calls || [];
   const out = { at: now(), provider: r.provider, model: r.model, usage: r.usage, cost_usd: r.cost_usd, content: msg.content || null, tool_calls: [], error: r.error || null };
@@ -102576,7 +103251,7 @@ Choose at most one tool call now.`;
     saveLedger(l22);
   }
   const results = [];
-  for (const c of calls.slice(0, 2)) {
+  for (const c of calls.slice(0, 6)) {
     let args = {};
     try {
       args = JSON.parse(c.function?.arguments || "{}");
@@ -102585,12 +103260,47 @@ Choose at most one tool call now.`;
     }
     let result2;
     try {
-      result2 = await dispatch(c.function?.name, args, identity2);
+      result2 = await dispatch(c.function?.name, args, identity3);
     } catch (e3) {
       result2 = { error: String(e3.message || e3) };
     }
+    const failed = result2 && (result2.ok === false || result2.error || result2.err);
+    if (failed && args.retry !== false) {
+      try {
+        const L2 = await Promise.resolve().then(() => (init_lego(), lego_exports));
+        const C2 = await Promise.resolve().then(() => (init_compose(), compose_exports));
+        const wanted = (L2.LEGOS.find((l3) => l3.tool === c.function?.name) || {}).gives || {};
+        const alts = L2.LEGOS.filter((l3) => Object.keys(l3.gives).some((k2) => k2 in wanted) && l3.tool !== c.function?.name);
+        for (const alt of alts) {
+          const r2 = await C2.runChain([alt.id], args).catch(() => null);
+          const step = r2?.results?.[0];
+          if (step && !step.err && step.ok !== false) {
+            result2 = { ...step, fallback_from: c.function?.name, fallback_step: alt.id };
+            break;
+          }
+        }
+      } catch {
+      }
+    }
     out.tool_calls.push({ name: c.function?.name, args, result: result2 });
     results.push({ tool_call_id: c.id, name: c.function?.name, result: result2 });
+  }
+  try {
+    const stt = state({});
+    const spoke = calls.some((c) => ["memo_send", "memo_seal"].includes(c.function?.name));
+    const CP = await Promise.resolve().then(() => (init_comms_policy(), comms_policy_exports));
+    if (CP.shouldSpeak(stt.last_memo_at, now(), spoke)) {
+      const { memoSend: memoSend2 } = await Promise.resolve().then(() => (init_memo_bus(), memo_bus_exports));
+      const what = out.tool_calls.map((t) => t.name).join(",") || "noop";
+      const msg2 = `tick ${what} | sol ${Number(state2.balances_last_snapshot?.sol ?? 0).toFixed(3)} | ${(/* @__PURE__ */ new Date()).toISOString().slice(11, 19)}`;
+      const r2 = await memoSend2({ identity: identity3, text: msg2 }).catch(() => null);
+      if (r2?.ok) {
+        stt.last_memo_at = now();
+        saveState(stt);
+        out.heartbeat_memo = r2.sig;
+      }
+    }
+  } catch {
   }
   appendLesson({ at: out.at, tools: out.tool_calls.map((t) => ({ name: t.name, args: t.args, result: t.result })), cost_usd: out.cost_usd, error: out.error });
   await append("brain.decision", out);
@@ -102608,14 +103318,14 @@ async function main() {
   } catch (e3) {
     log("brain", "model discovery failed; using configured default", { err: String(e3.message || e3) });
   }
-  const identity2 = await identityWhenReady();
+  const identity3 = await identityWhenReady();
   while (true) {
     const status = readJson(P.status, {}) || {};
     try {
-      const f2 = await observeFunding(identity2);
+      const f2 = await observeFunding(identity3);
       let credits = null, balanceNote = null;
       try {
-        const b2 = await balance(identity2);
+        const b2 = await balance(identity3);
         credits = b2.creditsUsd ?? Number(b2.balanceUsd ?? b2.balance ?? NaN);
         if (!Number.isFinite(credits)) credits = null;
         if (credits == null) await append("inference.balance_shape", { status: b2.status, raw: b2.raw });
@@ -102623,7 +103333,7 @@ async function main() {
       } catch (e3) {
         balanceNote = String(e3.message || e3);
       }
-      const wallet = await solAndUsdc(identity2);
+      const wallet = await solAndUsdc(identity3);
       status.inference = {
         provider: "venice",
         model: MODEL,
@@ -102636,15 +103346,21 @@ async function main() {
         state: credits == null ? "balance_unreadable" : credits >= 0.1 ? "ready" : "unfunded"
       };
       if (credits != null && credits >= 0.1) {
-        try {
-          await decide(identity2, status);
-        } catch (e3) {
-          status.inference.last_error = String(e3.message || e3);
-          log("brain", "decision failed", { err: String(e3.message || e3) });
+        for (let pass = 0; pass < 8; pass++) {
+          try {
+            const out = await decide(identity3, status);
+            const tcs = out?.tool_calls || [];
+            const acted = tcs.some((t) => t.name !== "noop");
+            if (!acted && pass > 0) break;
+            if (!acted) continue;
+          } catch (e3) {
+            status.inference.last_error = String(e3.message || e3);
+            log("brain", "decision failed", { err: String(e3.message || e3), pass });
+          }
         }
       } else if (true) {
         try {
-          const t = await ensureInferenceFunding(identity2);
+          const t = await ensureInferenceFunding(identity3);
           status.inference.self_fund = t;
           if (t.state !== "ready") await append("inference.self_fund", t);
         } catch (e3) {
@@ -102652,7 +103368,7 @@ async function main() {
         }
       } else if (BigInt(wallet.usdc_raw) >= 5000000n) {
         try {
-          const r = await fundIfNeeded(identity2, { maxTopUpUsdc: 5 });
+          const r = await fundIfNeeded(identity3, { maxTopUpUsdc: 5 });
           status.inference.fund = { ok: r.funded, credits: r.credits };
           await append("inference.fund", { ok: r.funded, credits: r.credits, topup: r.topup });
         } catch (e3) {

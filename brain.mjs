@@ -60,10 +60,13 @@ export const TOOLS = [
   { type: 'function', function: { name: 'pump_exit', description: 'Sell tokens back into the curve.', parameters: { type: 'object', properties: { mint: { type: 'string' }, amount_raw: { type: 'string' }, slippage: { type: 'number' } }, required: ['mint', 'amount_raw'] } } },
   { type: 'function', function: { name: 'swarm_coins', description: "List coins launched by OTHER agents in the swarm (their wallets are published). A sibling's fresh coin is a near-free bet: buy it, they buy yours, both earn creator fees and can exit.", parameters: { type: 'object', properties: { limit: { type: 'number' } } } } },
   { type: 'function', function: { name: 'pump_buy', description: 'Buy an existing swarm coin with your own SOL. You hold the tokens and can exit any time; your loss if nobody else trades is only fees and slippage.', parameters: { type: 'object', properties: { mint: { type: 'string' }, sol: { type: 'number' } }, required: ['mint', 'sol'] } } },
+  { type: 'function', function: { name: 'compose_tx', description: 'Splice playbooks into ONE transaction at the instruction level. Specs are colon-separated fragments; a flashBorrow’s repay is appended at the end, so a pump buy sits INSIDE the loan. Example: ["flashBorrow:USDC:2000000","swap:USDC:SOL:2000000","pumpBuy:<mint>:20000000"].', parameters: { type: 'object', properties: { specs: { type: 'string' }, simulate: { type: 'boolean' } }, required: ['specs'] } } },
+  { type: 'function', function: { name: 'compose_save', description: 'Save a playbook made of playbooks under a name, so it can be run as one step later (nesting is allowed: steps may be atomic ids, arrays, or other saved names).', parameters: { type: 'object', properties: { name: { type: 'string' }, steps: { type: 'string', description: 'e.g. "collect_fees > launch_pair" or a JSON array' } }, required: ['name', 'steps'] } } },
   { type: 'function', function: { name: 'run_chain', description: 'Run a chain of playbooks as one action, e.g. "swap_sol_usdc > lease_child". Steps are the Lego ids from playbooks; a stopped step stops the chain and reports why.', parameters: { type: 'object', properties: { steps: { type: 'string' }, args: { type: 'object' } }, required: ['steps'] } } },
   { type: 'function', function: { name: 'playbooks', description: 'Your playbooks as composable Legos: what each consumes and produces, which are runnable with your current holdings, and the shortest chain to a goal (usdc, base_usdc, child, position). Call before planning.', parameters: { type: 'object', properties: { want: { type: 'string', description: 'optional goal: usdc | base_usdc | child | position' } } } } },
   { type: 'function', function: { name: 'memo_seal', description: 'Send an ENCRYPTED message to one sibling (their wallet pubkey). Sealed with X25519 derived from your own ed25519 identity, AES-256-GCM. Only that agent can read it.', parameters: { type: 'object', properties: { to: { type: 'string' }, text: { type: 'string' } }, required: ['to', 'text'] } } },
   { type: 'function', function: { name: 'memo_open', description: 'Read the channel and decrypt any sealed messages addressed to you.', parameters: { type: 'object', properties: { limit: { type: 'number' } } } } },
+  { type: 'function', function: { name: 'comms_policy', description: 'Set how much you talk and to whom: cadence_s (seconds between messages), audience (all | peers | none), peers (wallet addresses for sealed messages), floor_per_loop (at least one message per loop), quiet. Defaults: 240s, all, one per loop.', parameters: { type: 'object', properties: { cadence_s: { type: 'number' }, audience: { type: 'string' }, peers: { type: 'array', items: { type: 'string' } }, floor_per_loop: { type: 'boolean' }, quiet: { type: 'boolean' } } } } },
   { type: 'function', function: { name: 'memo_send', description: 'Say something to the other agents, on-chain. Payload is obfuscated (XOR+base64) over the Memo program on a shared channel. Use it to coordinate: who launches, who buys whose coin, when to exit.', parameters: { type: 'object', properties: { text: { type: 'string' } }, required: ['text'] } } },
   { type: 'function', function: { name: 'memo_read', description: 'Read what the other agents have said on the shared on-chain memo channel.', parameters: { type: 'object', properties: { limit: { type: 'number' } } } } },
   { type: 'function', function: { name: 'economics', description: 'Your own P&L: 24h inference cost, revenue collected, net, and runway in days. Call this before any spend.', parameters: { type: 'object', properties: {} } } },
@@ -295,6 +298,30 @@ async function dispatch(name, args, identity) {
       result = await buyExisting({ identity, mint: args.mint, solLamports: Math.round(sol * 1e9) });
       break;
     }
+    case 'compose_tx': {
+      const X = await import('./lib/ix-legos.mjs');
+      let specs = args.specs;
+      if (typeof specs === 'string') { try { specs = JSON.parse(specs); } catch { specs = specs.split(/\s*>\s*/); } }
+      const ixs = await X.buildFromLegos(identity.solana.public_key, specs);
+      let sim = null;
+      if (args.simulate !== false) {
+        const mk = (ix) => ({ programId: ix.programId.toBase58(), keys: ix.keys.map((k) => ({ pubkey: k.pubkey.toBase58(), isSigner: !!k.isSigner, isWritable: !!k.isWritable })), dataHex: Buffer.from(ix.data).toString('hex') });
+        const { blockhash, lastValidBlockHeight } = await R.getLatestBlockhash();
+        const allow = [...new Set(ixs.flatMap((ix) => ix.keys.map((k) => k.pubkey.toBase58())))];
+        const env = await S.signV1({ instructions: ixs.map(mk), blockhash, lastValidBlockHeight, cuLimit: 1_400_000, allowedDestinations: allow, strategy: true });
+        const r = await R.simulate(env.wireBase64, allow);
+        sim = { err: r.value?.err || null, units: r.value?.unitsConsumed, logs: (r.value?.logs || []).slice(-3) };
+      }
+      result = { ok: !sim?.err, spec: specs, instructions: ixs.length, simulated: sim };
+      break;
+    }
+    case 'compose_save': {
+      const L = await import('./lib/lego.mjs');
+      const C = await import('./lib/compose.mjs');
+      const steps = C.parseChain(args.steps);
+      result = { ok: true, ...L.saveComposite(args.name, steps), resolved: (await import('./lib/lego.mjs')).resolve(args.name) };
+      break;
+    }
     case 'run_chain': {
       const C = await import('./lib/compose.mjs');
       const steps = C.parseChain(args.steps);
@@ -336,6 +363,11 @@ async function dispatch(name, args, identity) {
         try { mine.push({ from: m.from, at: m.at, text: w.openFrom(m.sender || m.from, m.text, seed) }); } catch {}
       }
       result = { ok: true, scanned: (got.messages || []).length, decrypted: mine };
+      break;
+    }
+    case 'comms_policy': {
+      const CP = await import('./lib/comms-policy.mjs');
+      result = { ok: true, policy: CP.save(args) };
       break;
     }
     case 'memo_send': {
@@ -496,7 +528,7 @@ async function decide(identity, status) {
   const EARN = new Set(['economics', 'pump_collect', 'pump_launch', 'pump_exit', 'pump_devbuy', 'pump_sell', 'swap_usdc', 'bridge_usdc', 'run_script', 'noop', 'compact_memory']);
   const tools = broke ? toolbox.all(TOOLS.filter((t) => EARN.has(t.function.name))) : toolbox.all(TOOLS);
   const inputChars = sys.length + user.length + JSON.stringify(tools).length;
-  const maxTokens = Number(process.env.BRAIN_MAX_TOKENS || 4000);
+  const maxTokens = Number(process.env.BRAIN_MAX_TOKENS || 6000);
 
   // Reserve conservatively against the credit ledger before dispatch.
   // Single-writer tick: a stale reservation must never masquerade as 'unfunded'.
@@ -511,15 +543,50 @@ async function decide(identity, status) {
   const out = { at: now(), provider: r.provider, model: r.model, usage: r.usage, cost_usd: r.cost_usd, content: msg.content || null, tool_calls: [], error: r.error || null };
   { const l2 = venice.loadLedger(); l2.reserved_usd = 0; venice.saveLedger(l2); }
   const results = [];
-  for (const c of calls.slice(0, 2)) {
+  for (const c of calls.slice(0, 6)) {
     let args = {};
     try { args = JSON.parse(c.function?.arguments || '{}'); } catch { args = {}; }
     let result;
     try { result = await dispatch(c.function?.name, args, identity); }
     catch (e) { result = { error: String(e.message || e) }; }
+
+    // Fallback is structural: if the chosen playbook fails for ANY reason, look at the others
+    // that produce the same thing and try the next one, instead of reporting a dead end.
+    const failed = result && (result.ok === false || result.error || result.err);
+    if (failed && args.retry !== false) {
+      try {
+        const L = await import('./lib/lego.mjs');
+        const C = await import('./lib/compose.mjs');
+        const wanted = (L.LEGOS.find((l) => l.tool === c.function?.name) || {}).gives || {};
+        const alts = L.LEGOS.filter((l) => Object.keys(l.gives).some((k) => k in wanted) && l.tool !== c.function?.name);
+        for (const alt of alts) {
+          const r2 = await C.runChain([alt.id], args).catch(() => null);
+          const step = r2?.results?.[0];
+          if (step && !step.err && step.ok !== false) {
+            result = { ...step, fallback_from: c.function?.name, fallback_step: alt.id };
+            break;
+          }
+        }
+      } catch {}
+    }
     out.tool_calls.push({ name: c.function?.name, args, result });
     results.push({ tool_call_id: c.id, name: c.function?.name, result });
   }
+
+  // Every loop talks. A heartbeat memo per tick guarantees the swarm hears from each agent,
+  // whether or not the model chose to speak; the model's own memo_send adds detail on top.
+  try {
+    const stt = J.state({});
+    const spoke = calls.some((c) => ['memo_send', 'memo_seal'].includes(c.function?.name));
+    const CP = await import('./lib/comms-policy.mjs');
+    if (CP.shouldSpeak(stt.last_memo_at, now(), spoke)) {
+      const { memoSend } = await import('./strategies/memo-bus.mjs');
+      const what = out.tool_calls.map((t) => t.name).join(',') || 'noop';
+      const msg = `tick ${what} | sol ${Number(state.balances_last_snapshot?.sol ?? 0).toFixed(3)} | ${new Date().toISOString().slice(11, 19)}`;
+      const r = await memoSend({ identity, text: msg }).catch(() => null);
+      if (r?.ok) { stt.last_memo_at = now(); J.saveState(stt); out.heartbeat_memo = r.sig; }
+    }
+  } catch {}
   appendLesson({ at: out.at, tools: out.tool_calls.map((t) => ({ name: t.name, args: t.args, result: t.result })), cost_usd: out.cost_usd, error: out.error });
   await J.append('brain.decision', out);
   const l2 = venice.loadLedger();
@@ -557,10 +624,19 @@ async function main() {
       };
 
       if (credits != null && credits >= 0.10) {
-        try { await decide(identity, status); }
-        catch (e) {
-          status.inference.last_error = String(e.message || e);
-          log('brain', 'decision failed', { err: String(e.message || e) });
+        // Several passes per tick: one thought must never be the whole tick. A failed or no-op
+        // pass does not block the next one, which may be the one that actually invents or earns.
+        for (let pass = 0; pass < 8; pass++) {
+          try {
+            const out = await decide(identity, status);
+            const tcs = out?.tool_calls || [];
+            const acted = tcs.some((t) => t.name !== 'noop');
+            if (!acted && pass > 0) break;
+            if (!acted) continue;
+          } catch (e) {
+            status.inference.last_error = String(e.message || e);
+            log('brain', 'decision failed', { err: String(e.message || e), pass });
+          }
         }
       } else if (true) {
         try { const t = await ensureInferenceFunding(identity); status.inference.self_fund = t; if (t.state !== 'ready') await J.append('inference.self_fund', t); } catch (e) { status.inference.self_fund = { state: 'error', reason: String(e.message || e) }; }
