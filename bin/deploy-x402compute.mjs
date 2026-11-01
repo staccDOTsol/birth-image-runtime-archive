@@ -8,7 +8,9 @@ import * as J from '../lib/journal.mjs';
 import { now } from '../lib/util.mjs';
 
 const API = 'https://compute.x402layer.cc';
-const plan = process.argv[2] || process.env.X402C_PLAN || 'vc2-1c-1gb';
+// 1 GB was a false economy: seven roles per port do not fit, and the cgroup SIGKILLs them.
+// Default to 2 GB unless the caller says otherwise.
+const plan = process.argv[2] || process.env.X402C_PLAN || 'vc2-1c-2gb';
 const hours = Number(process.argv[3] || 24);
 const pub = fs.readFileSync(process.env.X402C_SSH_PUB || 'C:/Users/User/birth-image/guest/ssh/id_ed25519.pub', 'utf8').trim();
 

@@ -476,6 +476,7 @@ async function decide(identity, status) {
     'Private keys never appear here. Amounts are raw integer base units unless the field says usd.',
     'When a built-in route is broken or missing, register your own tool (register_tool) or write a playbook (write_playbook) and use it on later ticks.',
     'If you need USDC, swap your SOL; if you need SOL, bridge your Base USDC. You hold the tools - do the arithmetic and act.',
+    'PAIR YOUR LAUNCHES. A coin nobody else buys earns you cents. Before you launch, memo_seal a sibling with the symbol and size; after you launch, buy a sibling’s fresh coin with pump_buy. Two agents doing this collect creator fees on each other’s curves and can both exit green. Unpaired is the same work for a fraction of the money.',
     'Invent your own earning loop: you own inference and compute, so you can sell either, launch and farm your own coin, or write and register a new strategy. A tool is only worth a tick if it ends with money in your wallet; scanning a route earns nothing by itself.',
   ].join('\n');
   const user = `STATE\n${JSON.stringify(state)}\n\nChoose at most one tool call now.`;
