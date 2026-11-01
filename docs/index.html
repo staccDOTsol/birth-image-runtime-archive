@@ -112,8 +112,9 @@ async function loadEndpoints(){
   }
 }
 function renderFleet(){
-  const rows=S.rows.filter(r=>r.st||SHOW_DOWN||r.live);
-  const body=rows.map(({a,st})=>{
+  const rows=SHOW_DOWN?S.rows:S.rows.filter(r=>r.live||r.st);
+  const rowsAll=rows.length?rows:S.rows;
+  const body=rowsAll.map(({a,st})=>{
     const core=st&&st.image?(st.image.match?'match':'drift'):'—';
     const cls=(st&&st.phase)?'ok':'bad';
     const ep=String(a.endpoint).replace(/^https?:\/\//,'').slice(0,34);
