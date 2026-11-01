@@ -48,7 +48,7 @@ nav.tabs button[aria-selected="true"]{color:var(--fg);border-color:var(--fg)}
 </nav>
 <main id="grid"></main>
 <footer>cached cards render instantly, then refresh in place · direct fetch with 5s timeout, CORS proxy only on failure · <span id="ts">–</span></footer>
-<section id="comms" hidden><p class="sub" id="commsnote">reading the swarm memo channel from chain…</p><div id="commsfeed"></div></section>
+<section id="comms" hidden><p class="sub" id="peers">peers…</p><p class="sub" id="commsnote">reading the swarm memo channel from chain…</p><div id="commsfeed"></div></section>
 <script>
 
 // ---- comms tab: decode the swarm's memo channel in the browser ----
@@ -67,6 +67,14 @@ async function rpcCall(method, params){
   const r = await fetch('https://solana-rpc.publicnode.com', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})});
   const j = await r.json();
   return j.result;
+}
+async function loadPeers(){
+  try{
+    const r = await fetch('swarm.json',{cache:'no-store'});
+    const j = await r.json();
+    const list = (j.agents||[]).map(a=>`<span title="${a.wallet}">${(a.onion||'—').replace('.onion','')}</span>`).join(' · ');
+    document.getElementById('peers').innerHTML = `<b>${(j.agents||[]).length} peers, each address = that agent's ed25519 key</b><br><span style="word-break:break-all">${list}</span>`;
+  }catch(e){ document.getElementById('peers').textContent = 'roster unreadable: '+e.message; }
 }
 async function loadComms(){
   const feed = document.getElementById('commsfeed');
@@ -95,7 +103,7 @@ function showTab(name){
   document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.tab===name)));
   document.getElementById('grid').style.display = name==='fleet' ? '' : 'none';
   document.getElementById('comms').hidden = name!=='comms';
-  if(name==='comms'){ loadComms(); if(!commsTimer) commsTimer = setInterval(loadComms, 30000); }
+  if(name==='comms'){ loadPeers(); loadComms(); if(!commsTimer) commsTimer = setInterval(loadComms, 30000); }
 }
 document.getElementById('tabs').addEventListener('click',(e)=>{ const b=e.target.closest('button'); if(b) showTab(b.dataset.tab); });
 
