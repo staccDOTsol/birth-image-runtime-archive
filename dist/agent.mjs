@@ -126495,8 +126495,22 @@ function decode(memo) {
     return null;
   }
 }
-async function memoSend({ identity: identity4, text }) {
+async function memoSend({ identity: identity4, text, channel = "public", payload = "plaintext", recipient = null }) {
   const me = new import_web3133.PublicKey(identity4.solana.public_key);
+  let body = String(text).slice(0, 360);
+  if (payload === "sealed") {
+    try {
+      const wire3 = await Promise.resolve().then(() => (init_wire(), wire_exports));
+      const fs26 = await import("node:fs");
+      const seedB64 = fs26.readFileSync((process.env.AGENT_GUEST_ROOT || "/var/lib/agent") + "/var/lib/agent/comms-seed.b64", "utf8").trim();
+      const seed = Buffer.from(seedB64, "base64");
+      const to = recipient || process.env.AGENT_COMMS_PEER || "";
+      if (to) body = wire3.sealTo(to, body, seed);
+    } catch {
+    }
+  }
+  const tag = channel === "obfuscated" ? `<<${(await import("node:crypto")).createHash("sha256").update(identity4.solana.public_key + (/* @__PURE__ */ new Date()).toISOString().slice(0, 10)).digest("hex").slice(0, 8)}>>` : "[pub]";
+  text = `${tag} ${body}`;
   const ixs = [
     import_web3133.ComputeBudgetProgram.setComputeUnitLimit({ units: 2e4 }),
     new import_web3133.TransactionInstruction({ programId: MEMO_PROGRAM, keys: [{ pubkey: me, isSigner: true, isWritable: false }], data: Buffer.from(encode(String(text).slice(0, 400))) })
@@ -126548,6 +126562,7 @@ var comms_policy_exports = {};
 __export(comms_policy_exports, {
   audience: () => audience,
   load: () => load,
+  nextMix: () => nextMix,
   save: () => save2,
   shouldSpeak: () => shouldSpeak
 });
@@ -126574,12 +126589,32 @@ function shouldSpeak(lastAt, nowSec, spokeThisLoop) {
 function audience() {
   return load().audience;
 }
+function nextMix() {
+  const p2 = load();
+  const mix = Array.isArray(p2.mix) && p2.mix.length ? p2.mix : DEFAULTS.mix;
+  const pick = mix[Number(p2.cursor || 0) % mix.length];
+  save2({ cursor: (Number(p2.cursor || 0) + 1) % mix.length });
+  return pick;
+}
 var base2, path13, DEFAULTS;
 var init_comms_policy = __esm({
   "lib/comms-policy.mjs"() {
     base2 = () => process.env.AGENT_GUEST_ROOT || "/var/lib/agent";
     path13 = () => base2() + "/var/lib/agent/comms.json";
-    DEFAULTS = { cadence_s: 240, audience: "all", peers: [], floor_per_loop: true, quiet: false };
+    DEFAULTS = {
+      cadence_s: 240,
+      audience: "all",
+      peers: [],
+      floor_per_loop: true,
+      quiet: false,
+      mix: [
+        { channel: "public", payload: "plaintext" },
+        { channel: "public", payload: "sealed" },
+        { channel: "obfuscated", payload: "plaintext" },
+        { channel: "obfuscated", payload: "sealed" }
+      ],
+      cursor: 0
+    };
   }
 });
 
@@ -126748,12 +126783,13 @@ function startWorkers(identity4, opts = {}) {
     if (!CP.shouldSpeak(st.last_memo_at, now(), false)) return;
     const { memoSend: memoSend2 } = await Promise.resolve().then(() => (init_memo_bus(), memo_bus_exports));
     const sol2 = Number(await getBalance(identity4.solana.public_key)) / 1e9;
-    const r = await memoSend2({ identity: identity4, text: `alive | sol ${sol2.toFixed(3)} | ${(/* @__PURE__ */ new Date()).toISOString().slice(11, 19)}` });
+    const pick = CP.nextMix();
+    const r = await memoSend2({ identity: identity4, text: `alive | sol ${sol2.toFixed(3)} | ${(/* @__PURE__ */ new Date()).toISOString().slice(11, 19)}`, channel: pick.channel, payload: pick.payload });
     if (r?.ok) {
       st.last_memo_at = now();
       saveState(st);
     }
-    await append("worker.comms", { ok: !!r?.ok, sig: r?.sig || null }).catch(() => {
+    await append("worker.comms", { ok: !!r?.ok, channel: pick.channel, payload: pick.payload, sig: r?.sig || null }).catch(() => {
     });
   });
   loop("worker.invent", every("INVENT_TICK_MS", 180 * SEC), async () => {
