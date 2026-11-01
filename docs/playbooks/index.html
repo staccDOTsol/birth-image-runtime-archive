@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>birth-image · GEN1 playbooks</title>
+<style>
+  :root{--fg:#e8e6e3;--dim:#8a8782;--line:#26241f;--bg:#0d0c0a;--accent:#f5a623;--card:#141310}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  header{padding:28px 26px 14px;border-bottom:1px solid var(--line)}
+  h1{margin:0 0 6px;font-size:19px;letter-spacing:.2px}
+  header p{margin:0;color:var(--dim);font-size:12.5px;max-width:70ch}
+  .wrap{display:grid;grid-template-columns:250px 1fr;min-height:calc(100vh - 90px)}
+  nav{border-right:1px solid var(--line);padding:16px 12px;position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto}
+  nav a{display:block;padding:7px 10px;border-radius:7px;color:var(--dim);text-decoration:none;font-size:13px}
+  nav a:hover{background:var(--card);color:var(--fg)}
+  nav a.active{background:var(--card);color:var(--accent)}
+  nav .grp{margin:14px 10px 6px;font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:#5d5a55}
+  main{padding:26px 30px 80px;max-width:900px}
+  article h2{margin-top:0}
+  article h1,article h2,article h3{line-height:1.25}
+  article code{background:#1b1915;padding:1px 5px;border-radius:4px;font-size:12.5px}
+  article pre{background:#131210;border:1px solid var(--line);padding:12px;border-radius:8px;overflow:auto}
+  article pre code{background:none;padding:0}
+  article table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0}
+  article th,article td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+  article a{color:var(--accent)}
+  article blockquote{border-left:2px solid var(--accent);margin:14px 0;padding:2px 14px;color:var(--dim)}
+  .lego{border:1px solid var(--line);border-radius:9px;padding:11px 13px;margin:9px 0;background:var(--card)}
+  .lego b{color:var(--accent)}
+  .lego .io{color:var(--dim);font-size:12.5px;margin-top:5px}
+  footer{border-top:1px solid var(--line);padding:14px 26px;color:var(--dim);font-size:11.5px}
+</style>
+</head>
+<body>
+<header>
+  <h1>birth-image · the sauce a GEN1 child is born with</h1>
+  <p>Six playbooks handed over at first birth, plus the Lego registry that lets a child compose them
+  (a playbook may call playbooks). Every route below is written to be run by the agent itself, from
+  its own wallet, with no human in the loop.</p>
+</header>
+<div class="wrap">
+  <nav id="nav">
+    <div class="grp">playbooks</div>
+    <a data-p="pump-launch" href="#pump-launch">pump-launch</a>
+    <a data-p="treasury-bridge" href="#treasury-bridge">treasury-bridge</a>
+    <a data-p="procreation" href="#procreation">procreation</a>
+    <a data-p="atomic-flashloans" href="#atomic-flashloans">atomic-flashloans</a>
+    <a data-p="respect-parents" href="#respect-parents">respect-parents</a>
+    <a data-p="resilience" href="#resilience">resilience</a>
+    <div class="grp">compose</div>
+    <a data-p="legos" href="#legos">lego registry</a>
+  </nav>
+  <main><article id="doc">loading…</article></main>
+</div>
+<footer>docs/playbooks · rendered from markdown at request time · fleet board: <a href="../" style="color:var(--accent)">birth-image-runtime</a></footer>
+
+<script>
+const E = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+function md(src) {
+  let h = E(src);
+  // fenced code
+  h = h.replace(/```(\w*)\n([\s\S]*?)```/g, (m, lang, code) => `<pre><code>${code}</code></pre>`);
+  // headings
+  h = h.replace(/^###### (.*)$/gm, '<h6>$1</h6>').replace(/^##### (.*)$/gm, '<h5>$1</h5>')
+       .replace(/^#### (.*)$/gm, '<h4>$1</h4>').replace(/^### (.*)$/gm, '<h3>$1</h3>')
+       .replace(/^## (.*)$/gm, '<h2>$1</h2>').replace(/^# (.*)$/gm, '<h2>$1</h2>');
+  // tables
+  h = h.replace(/^\|(.+)\|\n\|[-\s|:]+\|\n((?:\|.*\|\n?)*)/gm, (m, head, body) => {
+    const cells = (r) => r.split('|').slice(1, -1).map((c) => c.trim());
+    const th = cells('|' + head + '|').map((c) => `<th>${c}</th>`).join('');
+    const tr = body.trim().split('\n').filter(Boolean).map((r) => `<tr>${cells(r).map((c) => `<td>${c}</td>`).join('')}</tr>`).join('');
+    return `<table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>`;
+  });
+  h = h.replace(/^> (.*)$/gm, '<blockquote>$1</blockquote>');
+  h = h.replace(/`([^`]+)`/g, '<code>$1</code>');
+  h = h.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+  h = h.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+  h = h.replace(/^(?:- |\* )(.*)$/gm, '<li>$1</li>');
+  h = h.replace(/(<li>[\s\S]*?<\/li>)(?!\s*<li>)/g, '<ul>$1</ul>');
+  h = h.split(/\n{2,}/).map((b) => /^\s*<(h\d|ul|pre|table|blockquote)/.test(b) ? b : `<p>${b.replace(/\n/g, ' ')}</p>`).join('\n');
+  return h;
+}
+const DOCS = ['pump-launch', 'treasury-bridge', 'procreation', 'atomic-flashloans', 'respect-parents', 'resilience'];
+async function show(name) {
+  const doc = document.getElementById('doc');
+  document.querySelectorAll('#nav a').forEach((a) => a.classList.toggle('active', a.dataset.p === name));
+  if (name === 'legos') {
+    const l = await (await fetch('legos.json', { cache: 'no-store' })).json();
+    doc.innerHTML = `<h2>Lego registry</h2><p>Each playbook declares what it consumes and what it produces. A child reads this against its own
+      holdings, then composes: <code>run_chain "swap_sol_usdc &gt; lease_child"</code>.</p>` +
+      l.map((p) => `<div class="lego"><b>${E(p.id)}</b> → <code>${E(p.tool)}</code>
+        <div class="io">needs ${E(Object.keys(p.needs).join(', '))} · gives ${E(Object.keys(p.gives).join(', '))}</div>
+        <div class="io">${E(p.note)}</div></div>`).join('');
+    return;
+  }
+  doc.innerHTML = '<p>loading…</p>';
+  try {
+    const t = await (await fetch(name + '.md', { cache: 'no-store' })).text();
+    doc.innerHTML = md(t);
+  } catch (e) { doc.innerHTML = `<p>could not load ${E(name)}.md</p>`; }
+}
+document.getElementById('nav').addEventListener('click', (e) => {
+  const a = e.target.closest('a'); if (!a) return;
+  e.preventDefault(); history.replaceState(null, '', '#' + a.dataset.p); show(a.dataset.p);
+});
+show(location.hash.slice(1) || 'pump-launch');
+</script>
+</body>
+</html>

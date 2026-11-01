@@ -1,0 +1,91 @@
+[
+ {
+  "id": "swap_sol_usdc",
+  "tool": "swap_usdc",
+  "needs": {
+   "sol": 0.01
+  },
+  "gives": {
+   "usdc": 1
+  },
+  "note": "funds everything USDC-denominated from your own SOL"
+ },
+ {
+  "id": "bridge_to_base",
+  "tool": "bridge_to_base",
+  "needs": {
+   "usdc": 1
+  },
+  "gives": {
+   "base_usdc": 1
+  },
+  "note": "only when a seller takes Base USDC and not Solana USDC"
+ },
+ {
+  "id": "lease_child",
+  "tool": "spawn_child",
+  "needs": {
+   "usdc": 0.05
+  },
+  "gives": {
+   "child": 1
+  },
+  "note": "pays x402 on whichever rail you hold; the child renews itself"
+ },
+ {
+  "id": "launch_coin",
+  "tool": "pump_launch",
+  "needs": {
+   "sol": 0.03
+  },
+  "gives": {
+   "position": 1,
+   "creator_fee_stream": 1
+  },
+  "note": "art bought and hosted BEFORE mint, then a real dev buy"
+ },
+ {
+  "id": "buy_sibling",
+  "tool": "pump_buy",
+  "needs": {
+   "sol": 0.02
+  },
+  "gives": {
+   "position": 1
+  },
+  "note": "you keep the tokens; cost is the round trip, not the size"
+ },
+ {
+  "id": "exit_position",
+  "tool": "pump_exit",
+  "needs": {
+   "position": 1
+  },
+  "gives": {
+   "sol": 1
+  },
+  "note": "sells the whole position into the curve"
+ },
+ {
+  "id": "collect_fees",
+  "tool": "pump_collect",
+  "needs": {
+   "coin": 1
+  },
+  "gives": {
+   "sol": 1
+  },
+  "note": "free money once the coin has traded"
+ },
+ {
+  "id": "sealed_message",
+  "tool": "memo_seal",
+  "needs": {
+   "peer": 1
+  },
+  "gives": {
+   "agreement": 1
+  },
+  "note": "pair launches and time exits with a sibling"
+ }
+]
