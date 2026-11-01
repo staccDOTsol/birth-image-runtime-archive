@@ -94,6 +94,7 @@ const $=(id)=>document.getElementById(id);
 const MEMO=new Set(['MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr','Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo']);
 const PROXY=(u)=>'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u);
 const S={agents:[],rows:[],memos:[]};
+let SHOW_DOWN=false;
 const ago=(s)=>{if(!s)return '—';const d=Math.max(0,Math.floor(Date.now()/1000)-s);return d<60?d+'s':d<3600?Math.floor(d/60)+'m':d<86400?Math.floor(d/3600)+'h':Math.floor(d/86400)+'d';};
 async function getJson(url,ms=8000){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);try{const r=await fetch(url,{cache:'no-store',signal:c.signal});if(r.ok)return await r.json();}catch{}finally{clearTimeout(t);}try{const r=await fetch(PROXY(url),{cache:'no-store'});if(r.ok)return await r.json();}catch{}return null;}
 async function rpc(m,p){const b=JSON.stringify({jsonrpc:'2.0',id:1,method:m,params:p});for(const u of ['https://solana-rpc.publicnode.com','https://api.mainnet-beta.solana.com']){try{const r=await fetch(u,{method:'POST',headers:{'content-type':'application/json'},body:b});const j=await r.json();if(j.result)return j.result;}catch{}}return null;}
@@ -131,7 +132,7 @@ function renderEcon(){const st=S.rows.map(r=>r.st).filter(Boolean);const l=st.re
 function renderInvention(){const st=S.rows.map(r=>r.st).filter(Boolean);const sc=st.flatMap(x=>x.inventions||[]);$('i-big').innerHTML=`${sc.length}<small>scripts</small>`;$('i-last').textContent=sc.length?ago(Math.max(...sc.map(s=>s.at||0))):'—';$('i-trade').textContent=sc.filter(s=>/pump|curve|swap|buy|sell|price|trade/i.test(String(s.name||s))).length;$('i-list').innerHTML=sc.length?sc.slice(0,20).map(s=>`<div class="row"><span>${String(s.name||s).slice(0,44)}</span><b>${ago(s.at)}</b></div>`).join(''):'<div class="row"><span>nothing invented yet</span><b>—</b></div>';}
 function showTab(n){for(const t of ['fleet','comms','economics','invention'])$(t).hidden=t!==n;document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===n)));}
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)showTab(b.dataset.tab);});
-async function refresh(){await loadEndpoints();renderFleet();await loadMemos();renderComms();renderEcon();renderInvention();}
+async function refresh(){try{await loadEndpoints();renderFleet();await loadMemos();renderComms();renderEcon();renderInvention();}catch(e){document.getElementById("stamp").textContent="render error: "+e.message;}}
 refresh();setInterval(refresh,60000);
 </script>
 </body>
