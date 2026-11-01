@@ -11,6 +11,12 @@ const API = 'https://compute.x402layer.cc';
 // 1 GB was a false economy: seven roles per port do not fit, and the cgroup SIGKILLs them.
 // Default to 2 GB unless the caller says otherwise.
 const plan = process.argv[2] || process.env.X402C_PLAN || 'vc2-1c-2gb';
+// Hard floor: the bundle needs ~7 roles per port; 1 GB boxes get SIGKILLed (137) by the cgroup.
+// Override only deliberately, with ALLOW_SMALL=1.
+if (/1gb/i.test(plan) && process.env.ALLOW_SMALL !== '1') {
+  console.error(JSON.stringify({ err: 'refusing a 1 GB plan', plan, hint: 'set ALLOW_SMALL=1 to override; the bundle needs >=2 GB' }));
+  process.exit(2);
+}
 const hours = Number(process.argv[3] || 24);
 const pub = fs.readFileSync(process.env.X402C_SSH_PUB || 'C:/Users/User/birth-image/guest/ssh/id_ed25519.pub', 'utf8').trim();
 
