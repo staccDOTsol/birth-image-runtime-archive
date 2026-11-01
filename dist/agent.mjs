@@ -49,6 +49,15 @@ var __toESM = (mod2, isNodeMode, target) => (target = mod2 != null ? __create(__
 var __toCommonJS = (mod2) => __copyProps(__defProp({}, "__esModule", { value: true }), mod2);
 
 // lib/paths.mjs
+var paths_exports = {};
+__export(paths_exports, {
+  BUNDLE_DIR: () => BUNDLE_DIR,
+  GUEST_ROOT: () => GUEST_ROOT,
+  HOME: () => HOME,
+  P: () => P,
+  RUNTIME_DIR: () => RUNTIME_DIR,
+  ensureDirs: () => ensureDirs
+});
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
@@ -783,12 +792,12 @@ var require_utils = __commonJS({
     var nextTick = async () => {
     };
     exports.nextTick = nextTick;
-    async function asyncLoop(iters, tick, cb) {
+    async function asyncLoop(iters, tick2, cb) {
       let ts = Date.now();
       for (let i = 0; i < iters; i++) {
         cb(i);
         const diff = Date.now() - ts;
-        if (diff >= 0 && diff < tick)
+        if (diff >= 0 && diff < tick2)
           continue;
         await (0, exports.nextTick)();
         ts += diff;
@@ -11381,8 +11390,8 @@ var require_dist = __commonJS({
         constructor(failure, failures) {
           let cached2;
           const { message, explanation, ...rest } = failure;
-          const { path: path11 } = failure;
-          const msg = path11.length === 0 ? message : `At path: ${path11.join(".")} -- ${message}`;
+          const { path: path12 } = failure;
+          const msg = path12.length === 0 ? message : `At path: ${path12.join(".")} -- ${message}`;
           super(explanation ?? msg);
           if (explanation != null)
             this.cause = msg;
@@ -11427,15 +11436,15 @@ var require_dist = __commonJS({
         } else if (typeof result2 === "string") {
           result2 = { message: result2 };
         }
-        const { path: path11, branch } = context;
+        const { path: path12, branch } = context;
         const { type: type2 } = struct62;
         const { refinement, message = `Expected a value of type \`${type2}\`${refinement ? ` with refinement \`${refinement}\`` : ""}, but received: \`${print(value)}\`` } = result2;
         return {
           value,
           type: type2,
           refinement,
-          key: path11[path11.length - 1],
-          path: path11,
+          key: path12[path12.length - 1],
+          path: path12,
           branch,
           ...result2,
           message
@@ -11453,8 +11462,8 @@ var require_dist = __commonJS({
         }
       }
       function* run(value, struct62, options = {}) {
-        const { path: path11 = [], branch = [value], coerce: coerce2 = false, mask: mask2 = false } = options;
-        const ctx = { path: path11, branch, mask: mask2 };
+        const { path: path12 = [], branch = [value], coerce: coerce2 = false, mask: mask2 = false } = options;
+        const ctx = { path: path12, branch, mask: mask2 };
         if (coerce2) {
           value = struct62.coercer(value, ctx);
         }
@@ -11466,7 +11475,7 @@ var require_dist = __commonJS({
         }
         for (let [k2, v2, s] of struct62.entries(value, ctx)) {
           const ts = run(v2, s, {
-            path: k2 === void 0 ? path11 : [...path11, k2],
+            path: k2 === void 0 ? path12 : [...path12, k2],
             branch: k2 === void 0 ? branch : [...branch, v2],
             coerce: coerce2,
             mask: mask2,
@@ -13396,14 +13405,14 @@ var require_url_state_machine = __commonJS({
       return url.replace(/\u0009|\u000A|\u000D/g, "");
     }
     function shortenPath(url) {
-      const path11 = url.path;
-      if (path11.length === 0) {
+      const path12 = url.path;
+      if (path12.length === 0) {
         return;
       }
-      if (url.scheme === "file" && path11.length === 1 && isNormalizedWindowsDriveLetter(path11[0])) {
+      if (url.scheme === "file" && path12.length === 1 && isNormalizedWindowsDriveLetter(path12[0])) {
         return;
       }
-      path11.pop();
+      path12.pop();
     }
     function includesCredentials(url) {
       return url.username !== "" || url.password !== "";
@@ -15699,7 +15708,7 @@ var require_constants = __commonJS({
 var require_node_gyp_build = __commonJS({
   "node_modules/node-gyp-build/node-gyp-build.js"(exports, module) {
     var fs18 = __require("fs");
-    var path11 = __require("path");
+    var path12 = __require("path");
     var os3 = __require("os");
     var runtimeRequire = typeof __webpack_require__ === "function" ? __non_webpack_require__ : __require;
     var vars = process.config && process.config.variables || {};
@@ -15711,26 +15720,26 @@ var require_node_gyp_build = __commonJS({
     var libc = process.env.LIBC || (isAlpine(platform) ? "musl" : "glibc");
     var armv = process.env.ARM_VERSION || (arch === "arm64" ? "8" : vars.arm_version) || "";
     var uv = (process.versions.uv || "").split(".")[0];
-    module.exports = load2;
-    function load2(dir) {
-      return runtimeRequire(load2.resolve(dir));
+    module.exports = load3;
+    function load3(dir) {
+      return runtimeRequire(load3.resolve(dir));
     }
-    load2.resolve = load2.path = function(dir) {
-      dir = path11.resolve(dir || ".");
+    load3.resolve = load3.path = function(dir) {
+      dir = path12.resolve(dir || ".");
       try {
-        var name = runtimeRequire(path11.join(dir, "package.json")).name.toUpperCase().replace(/-/g, "_");
+        var name = runtimeRequire(path12.join(dir, "package.json")).name.toUpperCase().replace(/-/g, "_");
         if (process.env[name + "_PREBUILD"]) dir = process.env[name + "_PREBUILD"];
       } catch (err) {
       }
       if (!prebuildsOnly) {
-        var release2 = getFirst(path11.join(dir, "build/Release"), matchBuild);
+        var release2 = getFirst(path12.join(dir, "build/Release"), matchBuild);
         if (release2) return release2;
-        var debug = getFirst(path11.join(dir, "build/Debug"), matchBuild);
+        var debug = getFirst(path12.join(dir, "build/Debug"), matchBuild);
         if (debug) return debug;
       }
       var prebuild = resolve2(dir);
       if (prebuild) return prebuild;
-      var nearby = resolve2(path11.dirname(process.execPath));
+      var nearby = resolve2(path12.dirname(process.execPath));
       if (nearby) return nearby;
       var target = [
         "platform=" + platform,
@@ -15747,14 +15756,14 @@ var require_node_gyp_build = __commonJS({
       ].filter(Boolean).join(" ");
       throw new Error("No native build was found for " + target + "\n    loaded from: " + dir + "\n");
       function resolve2(dir2) {
-        var tuples = readdirSync(path11.join(dir2, "prebuilds")).map(parseTuple);
+        var tuples = readdirSync(path12.join(dir2, "prebuilds")).map(parseTuple);
         var tuple = tuples.filter(matchTuple(platform, arch)).sort(compareTuples)[0];
         if (!tuple) return;
-        var prebuilds = path11.join(dir2, "prebuilds", tuple.name);
+        var prebuilds = path12.join(dir2, "prebuilds", tuple.name);
         var parsed = readdirSync(prebuilds).map(parseTags);
         var candidates = parsed.filter(matchTags(runtime, abi));
         var winner = candidates.sort(compareTags(runtime))[0];
-        if (winner) return path11.join(prebuilds, winner.file);
+        if (winner) return path12.join(prebuilds, winner.file);
       }
     };
     function readdirSync(dir) {
@@ -15766,7 +15775,7 @@ var require_node_gyp_build = __commonJS({
     }
     function getFirst(dir, filter) {
       var files = readdirSync(dir).filter(filter);
-      return files[0] && path11.join(dir, files[0]);
+      return files[0] && path12.join(dir, files[0]);
     }
     function matchBuild(name) {
       return /\.node$/.test(name);
@@ -15855,12 +15864,12 @@ var require_node_gyp_build = __commonJS({
     function isAlpine(platform2) {
       return platform2 === "linux" && fs18.existsSync("/etc/alpine-release");
     }
-    load2.parseTags = parseTags;
-    load2.matchTags = matchTags;
-    load2.compareTags = compareTags;
-    load2.parseTuple = parseTuple;
-    load2.matchTuple = matchTuple;
-    load2.compareTuples = compareTuples;
+    load3.parseTags = parseTags;
+    load3.matchTags = matchTags;
+    load3.compareTags = compareTags;
+    load3.parseTuple = parseTuple;
+    load3.matchTuple = matchTuple;
+    load3.compareTuples = compareTuples;
   }
 });
 
@@ -32324,20 +32333,20 @@ var require_file_uri_to_path = __commonJS({
       var rest = decodeURI(uri.substring(7));
       var firstSlash = rest.indexOf("/");
       var host = rest.substring(0, firstSlash);
-      var path11 = rest.substring(firstSlash + 1);
+      var path12 = rest.substring(firstSlash + 1);
       if ("localhost" == host) host = "";
       if (host) {
         host = sep + sep + host;
       }
-      path11 = path11.replace(/^(.+)\|/, "$1:");
+      path12 = path12.replace(/^(.+)\|/, "$1:");
       if (sep == "\\") {
-        path11 = path11.replace(/\//g, "\\");
+        path12 = path12.replace(/\//g, "\\");
       }
-      if (/^.+\:/.test(path11)) {
+      if (/^.+\:/.test(path12)) {
       } else {
-        path11 = sep + path11;
+        path12 = sep + path12;
       }
-      return host + path11;
+      return host + path12;
     }
   }
 });
@@ -32346,18 +32355,18 @@ var require_file_uri_to_path = __commonJS({
 var require_bindings = __commonJS({
   "node_modules/bindings/bindings.js"(exports, module) {
     var fs18 = __require("fs");
-    var path11 = __require("path");
+    var path12 = __require("path");
     var fileURLToPath = require_file_uri_to_path();
-    var join = path11.join;
-    var dirname = path11.dirname;
-    var exists = fs18.accessSync && function(path12) {
+    var join = path12.join;
+    var dirname = path12.dirname;
+    var exists = fs18.accessSync && function(path13) {
       try {
-        fs18.accessSync(path12);
+        fs18.accessSync(path13);
       } catch (e3) {
         return false;
       }
       return true;
-    } || fs18.existsSync || path11.existsSync;
+    } || fs18.existsSync || path12.existsSync;
     var defaults = {
       arrow: process.env.NODE_BINDINGS_ARROW || " \u2192 ",
       compiled: process.env.NODE_BINDINGS_COMPILED_DIR || "compiled",
@@ -32402,7 +32411,7 @@ var require_bindings = __commonJS({
       if (!opts.module_root) {
         opts.module_root = exports.getRoot(exports.getFileName());
       }
-      if (path11.extname(opts.bindings) != ".node") {
+      if (path12.extname(opts.bindings) != ".node") {
         opts.bindings += ".node";
       }
       var requireFunc = typeof __webpack_require__ === "function" ? __non_webpack_require__ : __require;
@@ -43292,12 +43301,12 @@ __export(agentgates_auth_exports, {
   walletAuth: () => walletAuth
 });
 import crypto8 from "node:crypto";
-async function walletAuth(method, path11) {
+async function walletAuth(method, path12) {
   const identity3 = await identity();
   const nonce = crypto8.randomBytes(12).toString("hex");
   const timestamp = Math.floor(Date.now() / 1e3);
   const message = `${method}
-${path11}
+${path12}
 ${nonce}
 ${timestamp}`;
   const sig = await signMessage(message);
@@ -43309,9 +43318,9 @@ ${timestamp}`;
     signature: raw.toString("base64")
   })).toString("base64");
 }
-async function ownerGet(base3, path11) {
-  const h2 = await walletAuth("GET", path11);
-  const r = await fetch(base3 + path11, { headers: { "X-Wallet-Auth": h2 } });
+async function ownerGet(base3, path12) {
+  const h2 = await walletAuth("GET", path12);
+  const r = await fetch(base3 + path12, { headers: { "X-Wallet-Auth": h2 } });
   return { status: r.status, body: await r.json().catch(() => ({})) };
 }
 var init_agentgates_auth = __esm({
@@ -43359,15 +43368,15 @@ function pickSolana(accepts) {
   if (!rail) throw new Error(`no solana rail: ${(accepts || []).map((a2) => a2.network).join(",")}`);
   return rail;
 }
-async function paidPost(path11, body, identity3, tag) {
-  const post = (headers = {}) => fetch(API + path11, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
+async function paidPost(path12, body, identity3, tag) {
+  const post = (headers = {}) => fetch(API + path12, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
   const first = await post();
   if (first.status !== 402) return { status: first.status, json: await first.json().catch(() => ({})) };
   const rail = pickSolana((await first.json().catch(() => ({}))).accepts);
   const payment = await paySolana(rail, identity3);
   const second = await post({ "X-PAYMENT": payment.header, "PAYMENT-SIGNATURE": payment.header });
   const json = await second.json().catch(() => ({}));
-  await append(tag, { path: path11, status: second.status, amount_raw: payment.amount, at: now(), deploymentId: json.deploymentId || json.id || null });
+  await append(tag, { path: path12, status: second.status, amount_raw: payment.amount, at: now(), deploymentId: json.deploymentId || json.id || null });
   return { status: second.status, json, amount_raw: payment.amount };
 }
 async function createLease({ plan, hours = 1, compose, name }, identity3) {
@@ -45734,9 +45743,9 @@ var require_lib4 = __commonJS({
           ...rest
         } = failure;
         const {
-          path: path11
+          path: path12
         } = failure;
-        const msg = path11.length === 0 ? message : "At path: " + path11.join(".") + " -- " + message;
+        const msg = path12.length === 0 ? message : "At path: " + path12.join(".") + " -- " + message;
         super(msg);
         this.value = void 0;
         this.key = void 0;
@@ -45787,7 +45796,7 @@ var require_lib4 = __commonJS({
         };
       }
       const {
-        path: path11,
+        path: path12,
         branch
       } = context;
       const {
@@ -45801,8 +45810,8 @@ var require_lib4 = __commonJS({
         value,
         type: type2,
         refinement,
-        key: path11[path11.length - 1],
-        path: path11,
+        key: path12[path12.length - 1],
+        path: path12,
         branch,
         ...result2,
         message
@@ -45824,13 +45833,13 @@ var require_lib4 = __commonJS({
         options = {};
       }
       const {
-        path: path11 = [],
+        path: path12 = [],
         branch = [value],
         coerce: coerce2 = false,
         mask: mask2 = false
       } = options;
       const ctx = {
-        path: path11,
+        path: path12,
         branch
       };
       if (coerce2) {
@@ -45850,7 +45859,7 @@ var require_lib4 = __commonJS({
       }
       for (let [k2, v2, s] of struct62.entries(value, ctx)) {
         const ts = run(v2, s, {
-          path: k2 === void 0 ? path11 : [...path11, k2],
+          path: k2 === void 0 ? path12 : [...path12, k2],
           branch: k2 === void 0 ? branch : [...branch, v2],
           coerce: coerce2,
           mask: mask2
@@ -54628,18 +54637,18 @@ var require_accounts_resolver = __commonJS({
               }
               return acc.accounts.some(isResolvable);
             };
-            const getPaths = (accs, path11 = [], paths = []) => {
+            const getPaths = (accs, path12 = [], paths = []) => {
               for (const acc of accs) {
                 if ((0, idl_js_1.isCompositeAccounts)(acc)) {
-                  paths.push(...getPaths(acc.accounts, [...path11, acc.name]));
+                  paths.push(...getPaths(acc.accounts, [...path12, acc.name]));
                 } else {
-                  paths.push([...path11, acc.name]);
+                  paths.push([...path12, acc.name]);
                 }
               }
               return paths;
             };
             const resolvableAccs = this._idlIx.accounts.filter(isResolvable);
-            const unresolvedAccs = getPaths(resolvableAccs).filter((path11) => !this.get(path11)).map((path11) => path11.reduce((acc, p2) => acc + "." + p2)).map((acc) => `\`${acc}\``).join(", ");
+            const unresolvedAccs = getPaths(resolvableAccs).filter((path12) => !this.get(path12)).map((path12) => path12.reduce((acc, p2) => acc + "." + p2)).map((acc) => `\`${acc}\``).join(", ");
             throw new Error([
               `Reached maximum depth for account resolution.`,
               `Unresolved accounts: ${unresolvedAccs}`
@@ -54650,17 +54659,17 @@ var require_accounts_resolver = __commonJS({
       resolveOptionals(accounts) {
         Object.assign(this._accounts, this.resolveOptionalsHelper(accounts, this._idlIx.accounts));
       }
-      get(path11) {
-        const ret = path11.reduce((acc, subPath) => acc && acc[subPath], this._accounts);
+      get(path12) {
+        const ret = path12.reduce((acc, subPath) => acc && acc[subPath], this._accounts);
         if (ret && ret.toBase58) {
           return ret;
         }
       }
-      set(path11, value) {
+      set(path12, value) {
         let cur = this._accounts;
-        path11.forEach((p2, i) => {
+        path12.forEach((p2, i) => {
           var _a;
-          const isLast = i === path11.length - 1;
+          const isLast = i === path12.length - 1;
           if (isLast) {
             cur[p2] = value;
           }
@@ -54711,12 +54720,12 @@ var require_accounts_resolver = __commonJS({
        * Accounts will only be resolved if they are declared next to each other to
        * reduce the chance of name collision.
        */
-      resolveEventCpi(accounts, path11 = []) {
+      resolveEventCpi(accounts, path12 = []) {
         for (const i in accounts) {
           const accountOrAccounts = accounts[i];
           if ((0, idl_js_1.isCompositeAccounts)(accountOrAccounts)) {
             this.resolveEventCpi(accountOrAccounts.accounts, [
-              ...path11,
+              ...path12,
               accountOrAccounts.name
             ]);
           }
@@ -54726,8 +54735,8 @@ var require_accounts_resolver = __commonJS({
           const currentName = accounts[i].name;
           const nextName = accounts[nextIndex].name;
           if (currentName === "eventAuthority" && nextName === "program") {
-            const currentPath = [...path11, currentName];
-            const nextPath = [...path11, nextName];
+            const currentPath = [...path12, currentName];
+            const nextPath = [...path12, nextName];
             if (!this.get(currentPath)) {
               this.set(currentPath, web3_js_1.PublicKey.findProgramAddressSync([Buffer.from("__event_authority")], this._programId)[0]);
             }
@@ -54738,57 +54747,57 @@ var require_accounts_resolver = __commonJS({
           }
         }
       }
-      resolveConst(accounts, path11 = []) {
+      resolveConst(accounts, path12 = []) {
         for (const accountOrAccounts of accounts) {
           const name = accountOrAccounts.name;
           if ((0, idl_js_1.isCompositeAccounts)(accountOrAccounts)) {
-            this.resolveConst(accountOrAccounts.accounts, [...path11, name]);
+            this.resolveConst(accountOrAccounts.accounts, [...path12, name]);
           } else {
             const account = accountOrAccounts;
-            if ((account.signer || account.address) && !this.get([...path11, name])) {
+            if ((account.signer || account.address) && !this.get([...path12, name])) {
               if (account.signer) {
                 if (!this._provider.publicKey) {
                   throw new Error("This function requires the `Provider` interface implementor to have a `publicKey` field.");
                 }
-                this.set([...path11, name], this._provider.publicKey);
+                this.set([...path12, name], this._provider.publicKey);
               }
               if (account.address) {
-                this.set([...path11, name], (0, index_js_1.translateAddress)(account.address));
+                this.set([...path12, name], (0, index_js_1.translateAddress)(account.address));
               }
             }
           }
         }
       }
-      async resolvePdasAndRelations(accounts, path11 = []) {
+      async resolvePdasAndRelations(accounts, path12 = []) {
         let found = 0;
         for (const accountOrAccounts of accounts) {
           const name = accountOrAccounts.name;
           if ((0, idl_js_1.isCompositeAccounts)(accountOrAccounts)) {
-            found += await this.resolvePdasAndRelations(accountOrAccounts.accounts, [...path11, name]);
+            found += await this.resolvePdasAndRelations(accountOrAccounts.accounts, [...path12, name]);
           } else {
             const account = accountOrAccounts;
-            if ((account.pda || account.relations) && !this.get([...path11, name])) {
+            if ((account.pda || account.relations) && !this.get([...path12, name])) {
               found++;
               try {
                 if (account.pda) {
-                  const seeds = await Promise.all(account.pda.seeds.map((seed) => this.toBuffer(seed, path11)));
+                  const seeds = await Promise.all(account.pda.seeds.map((seed) => this.toBuffer(seed, path12)));
                   if (seeds.some((seed) => !seed)) {
                     continue;
                   }
-                  const programId = await this.parseProgramId(account, path11);
+                  const programId = await this.parseProgramId(account, path12);
                   const [pubkey] = web3_js_1.PublicKey.findProgramAddressSync(seeds, programId);
-                  this.set([...path11, name], pubkey);
+                  this.set([...path12, name], pubkey);
                 }
               } catch {
               }
               try {
                 if (account.relations) {
-                  const accountKey = this.get([...path11, account.relations[0]]);
+                  const accountKey = this.get([...path12, account.relations[0]]);
                   if (accountKey) {
                     const account2 = await this._accountStore.fetchAccount({
                       publicKey: accountKey
                     });
-                    this.set([...path11, name], account2[name]);
+                    this.set([...path12, name], account2[name]);
                   }
                 }
               } catch {
@@ -54798,25 +54807,25 @@ var require_accounts_resolver = __commonJS({
         }
         return found;
       }
-      async parseProgramId(account, path11 = []) {
+      async parseProgramId(account, path12 = []) {
         var _a;
         if (!((_a = account.pda) === null || _a === void 0 ? void 0 : _a.program)) {
           return this._programId;
         }
-        const buf = await this.toBuffer(account.pda.program, path11);
+        const buf = await this.toBuffer(account.pda.program, path12);
         if (!buf) {
           throw new Error(`Program seed not resolved: ${account.name}`);
         }
         return new web3_js_1.PublicKey(buf);
       }
-      async toBuffer(seed, path11 = []) {
+      async toBuffer(seed, path12 = []) {
         switch (seed.kind) {
           case "const":
             return this.toBufferConst(seed);
           case "arg":
             return await this.toBufferArg(seed);
           case "account":
-            return await this.toBufferAccount(seed, path11);
+            return await this.toBufferAccount(seed, path12);
           default:
             throw new Error(`Unexpected seed: ${seed}`);
         }
@@ -54825,21 +54834,21 @@ var require_accounts_resolver = __commonJS({
         return this.toBufferValue("bytes", seed.value);
       }
       async toBufferArg(seed) {
-        const [name, ...path11] = seed.path.split(".");
+        const [name, ...path12] = seed.path.split(".");
         const index = this._idlIx.args.findIndex((arg) => arg.name === name);
         if (index === -1) {
           throw new Error(`Unable to find argument for seed: ${name}`);
         }
-        const value = path11.reduce((acc, path12) => (acc !== null && acc !== void 0 ? acc : {})[path12], this._args[index]);
+        const value = path12.reduce((acc, path13) => (acc !== null && acc !== void 0 ? acc : {})[path13], this._args[index]);
         if (value === void 0) {
           return;
         }
-        const type = this.getType(this._idlIx.args[index].type, path11);
+        const type = this.getType(this._idlIx.args[index].type, path12);
         return this.toBufferValue(type, value);
       }
-      async toBufferAccount(seed, path11 = []) {
+      async toBufferAccount(seed, path12 = []) {
         const [name, ...paths] = seed.path.split(".");
-        const fieldPubkey = this.get([...path11, name]);
+        const fieldPubkey = this.get([...path12, name]);
         if (!fieldPubkey)
           return;
         if (!paths.length) {
@@ -54904,12 +54913,12 @@ var require_accounts_resolver = __commonJS({
        * Recursively get the type at some path of either a primitive or a user
        * defined struct.
        */
-      getType(type, path11 = []) {
+      getType(type, path12 = []) {
         var _a;
         const typeName = (_a = type === null || type === void 0 ? void 0 : type.defined) === null || _a === void 0 ? void 0 : _a.name;
         if (typeName) {
           if (typeName === "tokenAccount") {
-            switch (path11.at(0)) {
+            switch (path12.at(0)) {
               case "mint":
               case "owner":
                 return "pubkey";
@@ -54917,14 +54926,14 @@ var require_accounts_resolver = __commonJS({
               case "delagatedAmount":
                 return "u64";
               default:
-                throw new Error(`Unknown token account path: ${path11}`);
+                throw new Error(`Unknown token account path: ${path12}`);
             }
           }
           const definedType = this._idlTypes.find((t) => t.name === typeName);
           if (!definedType) {
             throw new Error(`Type not found: ${typeName}`);
           }
-          const [fieldName, ...subPath] = path11;
+          const [fieldName, ...subPath] = path12;
           const fields = definedType.type.fields;
           const field = fields.find((field2) => field2.name === fieldName);
           if (!field) {
@@ -59576,8 +59585,8 @@ var require_compiler = __commonJS({
           valueAssignments.push(fullPath);
         }
       }
-      function pathAssigned(path11) {
-        return assignedPaths.indexOf(path11) !== -1;
+      function pathAssigned(path12) {
+        return assignedPaths.indexOf(path12) !== -1;
       }
       function reduceValueNode(node) {
         if (node.type === "Array") {
@@ -59601,20 +59610,20 @@ var require_compiler = __commonJS({
         return obj;
       }
       function setPath(node) {
-        var path11 = node.value;
-        var quotedPath = path11.map(quoteDottedString).join(".");
+        var path12 = node.value;
+        var quotedPath = path12.map(quoteDottedString).join(".");
         var line = node.line;
         var column = node.column;
         if (pathAssigned(quotedPath)) {
-          genError("Cannot redefine existing key '" + path11 + "'.", line, column);
+          genError("Cannot redefine existing key '" + path12 + "'.", line, column);
         }
         assignedPaths.push(quotedPath);
-        context = deepRef(data, path11, /* @__PURE__ */ Object.create(null), line, column);
-        currentPath = path11;
+        context = deepRef(data, path12, /* @__PURE__ */ Object.create(null), line, column);
+        currentPath = path12;
       }
       function addTableArray(node) {
-        var path11 = node.value;
-        var quotedPath = path11.map(quoteDottedString).join(".");
+        var path12 = node.value;
+        var quotedPath = path12.map(quoteDottedString).join(".");
         var line = node.line;
         var column = node.column;
         if (!pathAssigned(quotedPath)) {
@@ -59624,20 +59633,20 @@ var require_compiler = __commonJS({
           return p2.indexOf(quotedPath) !== 0;
         });
         assignedPaths.push(quotedPath);
-        context = deepRef(data, path11, [], line, column);
+        context = deepRef(data, path12, [], line, column);
         currentPath = quotedPath;
         if (context instanceof Array) {
           var newObj = /* @__PURE__ */ Object.create(null);
           context.push(newObj);
           context = newObj;
         } else {
-          genError("Cannot redefine existing key '" + path11 + "'.", line, column);
+          genError("Cannot redefine existing key '" + path12 + "'.", line, column);
         }
       }
       function deepRef(start, keys, value, line, column) {
         var traversed = [];
         var traversedPath = "";
-        var path11 = keys.join(".");
+        var path12 = keys.join(".");
         var ctx = start;
         for (var i = 0; i < keys.length; i++) {
           var key = keys[i];
@@ -59750,7 +59759,7 @@ var require_workspace = __commonJS({
         if (workspaceCache[programName])
           return workspaceCache[programName];
         const fs18 = __require("fs");
-        const path11 = __require("path");
+        const path12 = __require("path");
         const anchorToml = toml.parse(fs18.readFileSync("Anchor.toml"));
         const clusterId = anchorToml.provider.cluster;
         const programs = (_a = anchorToml.programs) === null || _a === void 0 ? void 0 : _a[clusterId];
@@ -59764,12 +59773,12 @@ var require_workspace = __commonJS({
           idlPath = programEntry.idl;
           programId = programEntry.address;
         } else {
-          const idlDirPath = path11.join("target", "idl");
-          const fileName = fs18.readdirSync(idlDirPath).find((name) => (0, camelcase_1.default)(path11.parse(name).name) === programName);
+          const idlDirPath = path12.join("target", "idl");
+          const fileName = fs18.readdirSync(idlDirPath).find((name) => (0, camelcase_1.default)(path12.parse(name).name) === programName);
           if (!fileName) {
             throw new Error(`Failed to find IDL of program \`${programName}\``);
           }
-          idlPath = path11.join(idlDirPath, fileName);
+          idlPath = path12.join(idlDirPath, fileName);
         }
         if (!fs18.existsSync(idlPath)) {
           throw new Error(`${idlPath} doesn't exist. Did you run \`anchor build\`?`);
@@ -95755,11 +95764,11 @@ var init_esm7 = __esm({
        *   cashback coin sits on the leg charging the creator fee, as the program
        *   refuses those.
        */
-      async resolveMultiHopRoute(path11, side) {
-        if (path11.length < 2) {
+      async resolveMultiHopRoute(path12, side) {
+        if (path12.length < 2) {
           throw new Error("A route needs at least two mints");
         }
-        const mints = path11.map((mint) => normalizeQuoteMint(mint));
+        const mints = path12.map((mint) => normalizeQuoteMint(mint));
         const pairs = mints.slice(0, -1).map((mint, index) => {
           const next = mints[index + 1];
           return side === "buy" ? { baseMint: next, quoteMint: mint } : { baseMint: mint, quoteMint: next };
@@ -99298,6 +99307,92 @@ ${(value.logs ?? []).join("\n")}`
   }
 });
 
+// strategies/pump-sdk-launch.mjs
+function wire(ix) {
+  return {
+    programId: ix.programId.toBase58(),
+    keys: ix.keys.map((k2) => ({ pubkey: k2.pubkey.toBase58(), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
+    dataHex: Buffer.from(ix.data).toString("hex")
+  };
+}
+async function launch({ identity: identity3, name, symbol, uri, devbuyLamports = 0 }) {
+  const user = new import_web3118.PublicKey(identity3.solana.public_key);
+  const mintKp = import_web3118.Keypair.generate();
+  const mint = mintKp.publicKey;
+  const ixs = [];
+  ixs.push(await sdk.createV2Instruction({
+    mint,
+    name,
+    symbol,
+    uri,
+    creator: user,
+    user,
+    mayhemMode: false
+  }));
+  if (devbuyLamports > 0) {
+    const conn3 = new import_web3118.Connection(RPC_URL, "confirmed");
+    const online = new OnlinePumpSdk(conn3);
+    const global2 = await online.fetchGlobal();
+    const built = await sdk.createAndBuyInstructions({
+      global: global2,
+      mint,
+      name,
+      symbol,
+      uri,
+      creator: user,
+      user,
+      amount: new import_bn19.default(0),
+      solAmount: new import_bn19.default(String(devbuyLamports)),
+      isTokenizedAgent: false,
+      buyBackBps: 0
+    });
+    ixs.length = 0;
+    ixs.push(...built.instructions || built);
+  }
+  const { blockhash, lastValidBlockHeight } = await getLatestBlockhash();
+  const env = await signV1({
+    instructions: ixs.map(wire),
+    blockhash,
+    lastValidBlockHeight,
+    cuLimit: 14e5,
+    allowedDestinations: [mint.toBase58()],
+    extraSigners: [Buffer.from(mintKp.secretKey).toString("base64")],
+    strategy: true
+  });
+  const sim = await simulate(env.wireBase64, [user.toBase58(), mint.toBase58()]);
+  const base3 = { at: now(), provider: "pump-sdk", mint: mint.toBase58(), ixs: ixs.length, sim_err: sim.value?.err || null, sim_logs: (sim.value?.logs || []).slice(-8) };
+  if (sim.value?.err) {
+    await append("pump.launch_sim_failed", base3);
+    return { ok: false, ...base3 };
+  }
+  const sig = await sendRaw(env.wireBase64);
+  let status = null;
+  for (let i = 0; i < 40; i++) {
+    const st = (await signatureStatuses([sig]))[0];
+    if (st?.confirmationStatus) {
+      status = st;
+      break;
+    }
+    await new Promise((r) => setTimeout(r, 1200));
+  }
+  const out = { ...base3, signature: sig, status: status?.confirmationStatus || "unknown", err: status?.err || null };
+  await append("pump.launch", out);
+  return { ok: !status?.err && !!status, ...out };
+}
+var import_web3118, import_bn19, sdk;
+var init_pump_sdk_launch = __esm({
+  "strategies/pump-sdk-launch.mjs"() {
+    import_web3118 = __toESM(require_index_cjs(), 1);
+    init_esm7();
+    import_bn19 = __toESM(require_bn(), 1);
+    init_signer_client();
+    init_rpc();
+    init_journal();
+    init_util();
+    sdk = new PumpSdk();
+  }
+});
+
 // lib/token-program.mjs
 var token_program_exports = {};
 __export(token_program_exports, {
@@ -101575,6 +101670,260 @@ var init_comms_policy = __esm({
   }
 });
 
+// strategy-earn.mjs
+var strategy_earn_exports = {};
+__export(strategy_earn_exports, {
+  tick: () => tickAndTalk
+});
+import path10 from "node:path";
+async function tick(identity3) {
+  const b2 = load2();
+  const mints = Array.isArray(b2.mints) ? b2.mints : [];
+  for (const mint of mints) {
+    try {
+      const c = await observe(mint);
+      if (!c.exists) continue;
+      const swept = await collect({ identity: identity3, mint });
+      const paid = await withdrawVault({ identity: identity3 });
+      if (swept?.ok || paid?.ok) log("earn", "swept", { mint, swept: !!swept?.ok, paid: !!paid?.ok, sig: paid?.signature || swept?.signature });
+    } catch (e3) {
+      log("earn", "sweep failed", { mint, err: String(e3.message || e3).slice(0, 120) });
+    }
+  }
+  const sol = BigInt(await getBalance(identity3.solana.public_key));
+  if (mints.length >= MAX_MINTS || sol < MIN_SOL_TO_LAUNCH) return { mints: mints.length, sol: sol.toString(), launched: null };
+  const st = state({});
+  const tag = String(st.birth_id || "agent").slice(0, 8);
+  const name = `Birth ${tag}`;
+  const symbol = `B${tag.slice(0, 4).toUpperCase()}`;
+  const uri = `https://raw.githubusercontent.com/staccDOTsol/birth-image-runtime/main/README.md`;
+  try {
+    const devbuy = Number(process.env.EARN_DEVBUY_LAMPORTS || 0) || Math.max(15e6, Math.min(5e7, Math.floor(Number(sol) * 0.06)));
+    const r = await launch({ identity: identity3, name, symbol, uri, devbuyLamports: devbuy });
+    if (r?.mint) {
+      try {
+        const { memoSend: memoSend2 } = await Promise.resolve().then(() => (init_memo_bus(), memo_bus_exports));
+        await memoSend2({ identity: identity3, text: `launched ${symbol} ${r.mint} devbuy ${(devbuy / 1e9).toFixed(3)} SOL \u2014 siblings, take a position` });
+      } catch {
+      }
+    }
+    if (r.mint) {
+      const nb = load2();
+      nb.mints = [.../* @__PURE__ */ new Set([...nb.mints || [], r.mint])];
+      save2(nb);
+    }
+    await append("earn.launch", { mint: r.mint || null, ok: !!r.ok, signature: r.signature || null, err: r.err || r.sim_err || null });
+    log("earn", "launch attempt", { ok: !!r.ok, mint: r.mint, sig: r.signature || null, err: r.err || r.sim_err || null });
+    return { mints: mints.length + (r.ok ? 1 : 0), sol: sol.toString(), launched: r.mint || null, ok: !!r.ok };
+  } catch (e3) {
+    log("earn", "launch failed", { err: String(e3.message || e3).slice(0, 160) });
+    return { error: String(e3.message || e3).slice(0, 160) };
+  }
+}
+async function speak(identity3, line) {
+  try {
+    const st = state({});
+    const CP = await Promise.resolve().then(() => (init_comms_policy(), comms_policy_exports));
+    if (!CP.shouldSpeak(st.last_memo_at, now(), false)) return null;
+    const { memoSend: memoSend2 } = await Promise.resolve().then(() => (init_memo_bus(), memo_bus_exports));
+    const r = await memoSend2({ identity: identity3, text: line });
+    if (r?.ok) {
+      st.last_memo_at = now();
+      saveState(st);
+    }
+    return r;
+  } catch {
+    return null;
+  }
+}
+async function invent(identity3, n) {
+  try {
+    const fs18 = await import("node:fs");
+    const path12 = await import("node:path");
+    const dir = path12.join(P.strategy, "scripts");
+    fs18.mkdirSync(dir, { recursive: true });
+    const name = `probe_${n}_${String(now()).slice(-5)}.mjs`;
+    const body = `// written by this agent at ${(/* @__PURE__ */ new Date()).toISOString()}
+import * as R from '/app/lib/rpc.mjs';
+const me = '${identity3.solana.public_key}';
+console.log(JSON.stringify({ me, sol: String(await R.getBalance(me)), at: ${now()} }));
+`;
+    fs18.writeFileSync(path12.join(dir, name), body, { mode: 384 });
+    await append("invention.script", { name, bytes: body.length });
+    return name;
+  } catch {
+    return null;
+  }
+}
+async function tickAndTalk(identity3) {
+  const out = await _tick(identity3).catch((e3) => ({ error: String(e3.message || e3).slice(0, 120) }));
+  const st = state({});
+  const n = Number(st.invent_count || 0) + 1;
+  st.invent_count = n;
+  saveState(st);
+  const invented = n % 4 === 0 ? await invent(identity3, n) : null;
+  await speak(identity3, `tick ${n} | ${out.launched ? "launched " + String(out.launched).slice(0, 8) : "no launch"} | sol ${(Number(out.sol || 0) / 1e9).toFixed(3)}${invented ? " | wrote " + invented : ""}`);
+  return { ...out, invented };
+}
+var TICK, MIN_SOL_TO_LAUNCH, FEE_FLOOR, MAX_MINTS, book, load2, save2, _tick;
+var init_strategy_earn = __esm({
+  async "strategy-earn.mjs"() {
+    init_paths();
+    init_util();
+    init_signer_client();
+    init_rpc();
+    init_journal();
+    init_pump_sdk_launch();
+    init_pump_lifecycle();
+    TICK = Number(process.env.EARN_TICK_MS || 12e4);
+    MIN_SOL_TO_LAUNCH = BigInt(process.env.EARN_MIN_LAUNCH_LAMPORTS || "45000000");
+    FEE_FLOOR = BigInt(process.env.EARN_MIN_LAMPORTS || "10000000");
+    MAX_MINTS = Number(process.env.EARN_MAX_MINTS || 3);
+    book = path10.join(P.strategy, "launches.json");
+    load2 = () => readJson(book, { mints: [] });
+    save2 = (b2) => atomicJson(book, { ...b2, updated_at: now() }, 384);
+    _tick = tick;
+    if (!process.env.AGENT_LOOPS) {
+      openJournal();
+      const identity3 = await identity();
+      log("earn", "worker up", { tick_ms: TICK, min_launch: MIN_SOL_TO_LAUNCH.toString() });
+      while (true) {
+        try {
+          log("earn", "tick", await tick(identity3));
+        } catch (e3) {
+          log("earn", "tick failed", { err: String(e3.message || e3).slice(0, 160) });
+        }
+        await sleep(TICK);
+      }
+    }
+  }
+});
+
+// lib/workers.mjs
+var workers_exports = {};
+__export(workers_exports, {
+  startWorkers: () => startWorkers
+});
+function startWorkers(identity3, opts = {}) {
+  const started = [];
+  const loop = (name, ms, fn) => {
+    const run = async () => {
+      for (; ; ) {
+        const t0 = Date.now();
+        try {
+          await fn();
+        } catch (e3) {
+          log(name, "worker error", { err: String(e3.message || e3).slice(0, 140) });
+        }
+        const wait = Math.max(5 * SEC, ms - (Date.now() - t0));
+        await sleep(wait);
+      }
+    };
+    run();
+    started.push({ name, every_s: Math.round(ms / 1e3) });
+  };
+  loop("worker.earn", every("EARN_TICK_MS", 600 * SEC), async () => {
+    const E = await init_strategy_earn().then(() => strategy_earn_exports);
+    const r = await E.tick(identity3);
+    await append("worker.earn", r).catch(() => {
+    });
+  });
+  loop("worker.comms", every("COMMS_TICK_MS", 240 * SEC), async () => {
+    const CP = await Promise.resolve().then(() => (init_comms_policy(), comms_policy_exports));
+    const st = state({});
+    if (!CP.shouldSpeak(st.last_memo_at, now(), false)) return;
+    const { memoSend: memoSend2 } = await Promise.resolve().then(() => (init_memo_bus(), memo_bus_exports));
+    const sol = Number(await getBalance(identity3.solana.public_key)) / 1e9;
+    const r = await memoSend2({ identity: identity3, text: `alive | sol ${sol.toFixed(3)} | ${(/* @__PURE__ */ new Date()).toISOString().slice(11, 19)}` });
+    if (r?.ok) {
+      st.last_memo_at = now();
+      saveState(st);
+    }
+    await append("worker.comms", { ok: !!r?.ok, sig: r?.sig || null }).catch(() => {
+    });
+  });
+  loop("worker.invent", every("INVENT_TICK_MS", 900 * SEC), async () => {
+    const fs18 = await import("node:fs");
+    const path12 = await import("node:path");
+    const { P: P4 } = await Promise.resolve().then(() => (init_paths(), paths_exports));
+    const dir = path12.join(P4.strategy, "scripts");
+    fs18.mkdirSync(dir, { recursive: true });
+    const st = state({});
+    const n = Number(st.invent_count || 0) + 1;
+    st.invent_count = n;
+    saveState(st);
+    const name = `probe_w${n}_${String(now()).slice(-5)}.mjs`;
+    const body = `// worker.invent #${n} \u2014 ${(/* @__PURE__ */ new Date()).toISOString()}
+import * as R from '/app/lib/rpc.mjs';
+const me = '${identity3.solana.public_key}';
+console.log(JSON.stringify({ me, sol: String(await R.getBalance(me)), usdc: await R.tokenAccounts(me, 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'), at: ${now()} }));
+`;
+    fs18.writeFileSync(path12.join(dir, name), body, { mode: 384 });
+    await append("worker.invent", { name, bytes: body.length }).catch(() => {
+    });
+  });
+  loop("worker.trade", every("TRADE_TICK_MS", 300 * SEC), async () => {
+    const fs18 = await import("node:fs");
+    const path12 = await import("node:path");
+    const { P: P4 } = await Promise.resolve().then(() => (init_paths(), paths_exports));
+    const bookFile = path12.join(P4.strategy, "launches.json");
+    let book2 = { mints: [] };
+    try {
+      book2 = JSON.parse(fs18.readFileSync(bookFile, "utf8"));
+    } catch {
+    }
+    const life = await Promise.resolve().then(() => (init_pump_lifecycle(), pump_lifecycle_exports));
+    for (const mint of book2.mints || []) {
+      try {
+        const o3 = await life.observe(mint).catch(() => null);
+        if (!o3 || o3.exists === false) continue;
+        const life_s = Number(o3.age_seconds || 0);
+        const up = Number(o3.price_change_pct || 0);
+        if (up >= 25 || life_s > 3600) {
+          const r = await life.exit({ identity: identity3, mint });
+          await append("worker.trade.exit", { mint, up, life_s, ok: !!r?.ok, sig: r?.signature || null }).catch(() => {
+          });
+        }
+      } catch (e3) {
+        log("worker.trade", "exit failed", { mint, err: String(e3.message || e3).slice(0, 100) });
+      }
+    }
+  });
+  loop("worker.mark", every("MARK_TICK_MS", 600 * SEC), async () => {
+    const fs18 = await import("node:fs");
+    const path12 = await import("node:path");
+    const { P: P4 } = await Promise.resolve().then(() => (init_paths(), paths_exports));
+    let book2 = { mints: [] };
+    try {
+      book2 = JSON.parse(fs18.readFileSync(path12.join(P4.strategy, "launches.json"), "utf8"));
+    } catch {
+    }
+    const life = await Promise.resolve().then(() => (init_pump_lifecycle(), pump_lifecycle_exports));
+    const rows = [];
+    for (const mint of book2.mints || []) {
+      try {
+        const o3 = await life.observe(mint);
+        rows.push({ mint: String(mint).slice(0, 8), px_sol: o3?.price_sol ?? null, liq_sol: o3?.real_sol_reserves ?? null });
+      } catch {
+      }
+    }
+    await append("worker.mark", { positions: rows.length, rows }).catch(() => {
+    });
+  });
+  log("workers", "always-on set started", { started });
+  return started;
+}
+var SEC, every;
+var init_workers = __esm({
+  "lib/workers.mjs"() {
+    init_journal();
+    init_util();
+    init_rpc();
+    SEC = 1e3;
+    every = (env, dflt) => Number(process.env[env] || dflt);
+  }
+});
+
 // brain.mjs
 init_paths();
 init_util();
@@ -101583,7 +101932,7 @@ init_signer_client();
 init_rpc();
 init_venice();
 import fs17 from "node:fs";
-import path10 from "node:path";
+import path11 from "node:path";
 
 // inference/bazaar.mjs
 init_util();
@@ -102078,8 +102427,8 @@ function pickRail(accepts, balances2 = null) {
   if (sol) return { kind: "solana", rail: sol };
   throw new Error(`no payable rail: ${(accepts || []).map((a2) => a2.network).join(",")}`);
 }
-async function paidPostAuto(path11, body, identity3, tag) {
-  const post = (headers = {}) => fetch(API + path11, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
+async function paidPostAuto(path12, body, identity3, tag) {
+  const post = (headers = {}) => fetch(API + path12, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
   const first = await post();
   if (first.status !== 402) return { status: first.status, json: await first.json().catch(() => ({})) };
   const quote4 = await first.json().catch(() => ({}));
@@ -102089,13 +102438,13 @@ async function paidPostAuto(path11, body, identity3, tag) {
     const auth = await authorize(rail, { value: rail.maxAmountRequired || rail.amount, resource: rail.resource, version: quote4.x402Version || 1 });
     const second2 = await post({ "X-PAYMENT": auth.header, "PAYMENT-SIGNATURE": auth.header });
     const json2 = await second2.json().catch(() => ({}));
-    await append(tag, { path: path11, rail: rail.network, status: second2.status, amount: String(rail.maxAmountRequired || rail.amount), at: now(), deploymentId: json2.deploymentId || json2.id || null });
+    await append(tag, { path: path12, rail: rail.network, status: second2.status, amount: String(rail.maxAmountRequired || rail.amount), at: now(), deploymentId: json2.deploymentId || json2.id || null });
     return { status: second2.status, json: json2, rail: rail.network, amount_raw: String(rail.maxAmountRequired || rail.amount) };
   }
   const payment = await paySolana(rail, identity3);
   const second = await post({ "X-PAYMENT": payment.header, "PAYMENT-SIGNATURE": payment.header });
   const json = await second.json().catch(() => ({}));
-  await append(tag, { path: path11, rail: "solana", status: second.status, amount_raw: payment.amount, at: now(), deploymentId: json.deploymentId || json.id || null });
+  await append(tag, { path: path12, rail: "solana", status: second.status, amount_raw: payment.amount, at: now(), deploymentId: json.deploymentId || json.id || null });
   return { status: second.status, json, rail: "solana", amount_raw: payment.amount };
 }
 
@@ -102184,88 +102533,8 @@ async function provisionAny({ compose, plan = "compute.standard", prefer = (proc
   return { ok: false, tried: results };
 }
 
-// strategies/pump-sdk-launch.mjs
-var import_web3118 = __toESM(require_index_cjs(), 1);
-init_esm7();
-var import_bn19 = __toESM(require_bn(), 1);
-init_signer_client();
-init_rpc();
-init_journal();
-init_util();
-var sdk = new PumpSdk();
-function wire(ix) {
-  return {
-    programId: ix.programId.toBase58(),
-    keys: ix.keys.map((k2) => ({ pubkey: k2.pubkey.toBase58(), isSigner: !!k2.isSigner, isWritable: !!k2.isWritable })),
-    dataHex: Buffer.from(ix.data).toString("hex")
-  };
-}
-async function launch({ identity: identity3, name, symbol, uri, devbuyLamports = 0 }) {
-  const user = new import_web3118.PublicKey(identity3.solana.public_key);
-  const mintKp = import_web3118.Keypair.generate();
-  const mint = mintKp.publicKey;
-  const ixs = [];
-  ixs.push(await sdk.createV2Instruction({
-    mint,
-    name,
-    symbol,
-    uri,
-    creator: user,
-    user,
-    mayhemMode: false
-  }));
-  if (devbuyLamports > 0) {
-    const conn3 = new import_web3118.Connection(RPC_URL, "confirmed");
-    const online = new OnlinePumpSdk(conn3);
-    const global2 = await online.fetchGlobal();
-    const built = await sdk.createAndBuyInstructions({
-      global: global2,
-      mint,
-      name,
-      symbol,
-      uri,
-      creator: user,
-      user,
-      amount: new import_bn19.default(0),
-      solAmount: new import_bn19.default(String(devbuyLamports)),
-      isTokenizedAgent: false,
-      buyBackBps: 0
-    });
-    ixs.length = 0;
-    ixs.push(...built.instructions || built);
-  }
-  const { blockhash, lastValidBlockHeight } = await getLatestBlockhash();
-  const env = await signV1({
-    instructions: ixs.map(wire),
-    blockhash,
-    lastValidBlockHeight,
-    cuLimit: 14e5,
-    allowedDestinations: [mint.toBase58()],
-    extraSigners: [Buffer.from(mintKp.secretKey).toString("base64")],
-    strategy: true
-  });
-  const sim = await simulate(env.wireBase64, [user.toBase58(), mint.toBase58()]);
-  const base3 = { at: now(), provider: "pump-sdk", mint: mint.toBase58(), ixs: ixs.length, sim_err: sim.value?.err || null, sim_logs: (sim.value?.logs || []).slice(-8) };
-  if (sim.value?.err) {
-    await append("pump.launch_sim_failed", base3);
-    return { ok: false, ...base3 };
-  }
-  const sig = await sendRaw(env.wireBase64);
-  let status = null;
-  for (let i = 0; i < 40; i++) {
-    const st = (await signatureStatuses([sig]))[0];
-    if (st?.confirmationStatus) {
-      status = st;
-      break;
-    }
-    await new Promise((r) => setTimeout(r, 1200));
-  }
-  const out = { ...base3, signature: sig, status: status?.confirmationStatus || "unknown", err: status?.err || null };
-  await append("pump.launch", out);
-  return { ok: !status?.err && !!status, ...out };
-}
-
 // brain.mjs
+init_pump_sdk_launch();
 init_pump_lifecycle();
 
 // lib/proc.mjs
@@ -102385,9 +102654,9 @@ async function scan({ sizeUsdc = 100000000n, slippageBps = 20, mints = CANDIDATE
     }
   }
   out.sort((x, y) => Number(BigInt(y.net_usdc_raw || 0) - BigInt(x.net_usdc_raw || 0)));
-  const book = loadBook();
-  book.candidates = out;
-  saveBook(book);
+  const book2 = loadBook();
+  book2.candidates = out;
+  saveBook(book2);
   return out;
 }
 async function build({ identity: identity3, candidate, slippageBps = 20 }) {
@@ -102658,7 +102927,7 @@ function birthAttempt({ parentBirthId, endowmentSol, inferenceUsdc }) {
 BigInt.prototype.toJSON = function() {
   return this.toString();
 };
-var TICK = Number(process.env.BRAIN_TICK_MS || 9e4);
+var TICK2 = Number(process.env.BRAIN_TICK_MS || 9e4);
 var policy = loadPolicy();
 var BUILDING_ONLY = /* @__PURE__ */ new Set(["scan_flashloan", "execute_flashloan"]);
 var TOOLS = [
@@ -102719,21 +102988,21 @@ async function localSeed(identity3) {
 function compactState(identity3) {
   const st = state({});
   const dist = readJson(P.status, {})?.distribution || {};
-  const book = loadBook();
+  const book2 = loadBook();
   return {
     age_seconds: st.t0 ? now() - st.t0 : null,
     next_distribution_unix: dist.next_due_unix ?? null,
     balances_last_snapshot: st.last_balances || {},
     reserved: st.reserved || {},
     distribution: { by_status: dist.by_status || {}, blocked: dist.blocked || [], arrears: dist.arrears_raw || {} },
-    flashloan_candidates: (book.candidates || []).slice(0, 4),
+    flashloan_candidates: (book2.candidates || []).slice(0, 4),
     inference: readJson(P.status, {})?.inference || {},
     // Your own recent history: what you tried, what it cost, what came back. A plan needs
     // memory, and last_decision alone is not one.
     lessons: loadLessons().slice(-8)
   };
 }
-var LESSONS = () => path10.join(P.state, "lessons.jsonl");
+var LESSONS = () => path11.join(P.state, "lessons.jsonl");
 function loadLessons() {
   try {
     return fs17.readFileSync(LESSONS(), "utf8").trim().split("\n").filter(Boolean).slice(-40).map((l2) => {
@@ -102765,8 +103034,8 @@ async function dispatch(name, args, identity3) {
       return { candidates: cands.slice(0, 5) };
     }
     case "execute_flashloan": {
-      const book = loadBook();
-      const c = (book.candidates || []).find((x) => x.id === args?.candidate_id);
+      const book2 = loadBook();
+      const c = (book2.candidates || []).find((x) => x.id === args?.candidate_id);
       if (!c) return { error: `unknown candidate ${args?.candidate_id}` };
       if (c.error) return { error: c.error };
       const floor = BigInt(Math.round(Number(args?.floor_usdc ?? 0.05) * 1e6));
@@ -103310,6 +103579,19 @@ Choose at most one tool call now.`;
   status.last_decision = { at: out.at, tools: out.tool_calls.map((t) => t.name), cost_usd: out.cost_usd, content: out.content, error: out.error || null, usage: out.usage || null, call_results: out.tool_calls.map((t) => ({ name: t.name, result: t.result })) };
   return out;
 }
+var _earnAt = 0;
+async function earningDuty(identity3) {
+  const every2 = Number(process.env.EARN_TICK_MS || 6e5);
+  if (Date.now() - _earnAt < every2) return;
+  _earnAt = Date.now();
+  try {
+    const E = await init_strategy_earn().then(() => strategy_earn_exports);
+    const r = await E.tick(identity3);
+    log("earn", "duty", r);
+  } catch (e3) {
+    log("earn", "duty failed", { err: String(e3.message || e3).slice(0, 140) });
+  }
+}
 async function main() {
   ensureDirs();
   openJournal();
@@ -103319,6 +103601,12 @@ async function main() {
     log("brain", "model discovery failed; using configured default", { err: String(e3.message || e3) });
   }
   const identity3 = await identityWhenReady();
+  try {
+    const W2 = await Promise.resolve().then(() => (init_workers(), workers_exports));
+    W2.startWorkers(identity3);
+  } catch (e3) {
+    log("workers", "failed to start", { err: String(e3.message || e3).slice(0, 120) });
+  }
   while (true) {
     const status = readJson(P.status, {}) || {};
     try {
@@ -103333,6 +103621,7 @@ async function main() {
       } catch (e3) {
         balanceNote = String(e3.message || e3);
       }
+      await earningDuty(identity3);
       const wallet = await solAndUsdc(identity3);
       status.inference = {
         provider: "venice",
@@ -103386,7 +103675,7 @@ async function main() {
       status.inference = { ...status.inference || {}, last_error: String(e3.message || e3) };
       atomicJson(P.status, { ...status, updated_at: now() }, 420);
     }
-    await sleep(TICK);
+    await sleep(TICK2);
   }
 }
 main().catch((e3) => {
